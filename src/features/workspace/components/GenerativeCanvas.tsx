@@ -17,8 +17,8 @@ interface StatusContent {
 const statusContent: Record<WorkspaceStatus, StatusContent> = {
   empty: {
     label: "Listo para comenzar",
-    title: "Entiende qué cambia en tu dinero",
-    detail: "Consulta tus cuentas, compara periodos y descubre qué movimientos explican tus gastos.",
+    title: "Convierte una pregunta en una vista clara",
+    detail: "Explora participación, territorio e indicadores públicos sin navegar entre reportes rígidos.",
   },
   submitting: {
     label: "Analizando",
@@ -47,12 +47,12 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
   },
   awaiting_confirmation: {
     label: "Requiere confirmación",
-    title: "Revisa y confirma la operación",
-    detail: "No se ejecutará ningún pago sin tu confirmación explícita.",
+    title: "Revisa y confirma la acción",
+    detail: "No se aplicará ningún cambio sin tu confirmación explícita.",
   },
   executing_action: {
-    label: "Procesando operación",
-    title: "Ejecutando la operación confirmada",
+    label: "Procesando acción",
+    title: "Aplicando la acción confirmada",
     detail: "Conservaremos la interfaz visible mientras termina el proceso.",
   },
   partial: {
@@ -73,9 +73,9 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
 };
 
 const suggestedPrompts = [
-  "¿Por qué ahorré menos este mes aunque gané lo mismo?",
-  "Compara mis gastos de julio y agosto",
-  "Muéstrame los movimientos que más cambiaron mis gastos",
+  "¿Cómo ha cambiado la participación electoral en mi estado?",
+  "Compara municipios con niveles de participación similares",
+  "Muéstrame los patrones territoriales que merecen atención",
 ] as const;
 
 const processSteps = ["Comprendiendo", "Consultando", "Construyendo"] as const;
@@ -168,8 +168,8 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     <section className="canvas" aria-labelledby="canvas-title" data-has-result={Boolean(generatedInterface && !guidanceOnly)} data-guidance-only={guidanceOnly || undefined}>
       <header className="canvas__header">
         <div>
-          <p className="canvas__eyebrow">Área de trabajo</p>
-          <h1 id="canvas-title">Banca personal</h1>
+          <p className="canvas__eyebrow">Laboratorio de datos públicos</p>
+          <h1 id="canvas-title">Explorador ciudadano</h1>
         </div>
         <span className="canvas__status" data-status={status}>
           <span aria-hidden="true" />
@@ -187,8 +187,8 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
         {guidanceOnly ? (
           <div className="canvas-guidance">
             <p className="canvas-result__overline">Respuesta en la conversación</p>
-            <h2>Construyamos una vista con tus datos</h2>
-            <p>Esta petición no produjo un análisis visual. Puedes pedir saldos, movimientos, comparaciones o un cambio concreto en una interfaz existente.</p>
+            <h2>Construyamos una vista con evidencia pública</h2>
+            <p>Esta petición no produjo un análisis visual. Puedes pedir una comparación, una distribución territorial o un cambio concreto en una interfaz existente.</p>
             <div className="canvas-guidance__actions">
               {suggestedPrompts.slice(0, 2).map((prompt) => (
                 <button key={prompt} type="button" onClick={() => { setDraft(prompt); onShowChat?.(); }}>{prompt}</button>
@@ -200,7 +200,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             <header className="canvas-result__header">
               <div>
                 <p className="canvas-result__overline">Análisis activo</p>
-                <h2>{isHistoricalView ? "Revisión anterior" : isPreviousResult ? "Última vista válida disponible" : "Tu análisis financiero"}</h2>
+                <h2>{isHistoricalView ? "Revisión anterior" : isPreviousResult ? "Última vista válida disponible" : "Tu exploración de datos"}</h2>
                 {(activePrompt ?? sessionTitle) && !isHistoricalView ? (
                   <details className="canvas-result__query">
                     <summary>Ver petición original</summary>
@@ -267,7 +267,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 <summary>Cómo se obtuvo este resultado</summary>
                 <ul className="canvas-performance__evidence">
                   <li>Solicitud interpretada por el agente</li>
-                  {hasFinancialData ? <li>Datos financieros consultados mediante MCP</li> : null}
+                  {hasFinancialData ? <li>Datos públicos consultados mediante herramientas MCP</li> : null}
                   <li>{generatedInterface.specification
                     ? "Vista renderizada validada; consulta el estado de la generación actual"
                     : "UI solicitada no disponible; se muestran datos de respaldo"}</li>
@@ -367,7 +367,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           <div className="canvas-state" data-settled={status !== "empty"}>
             <div className="canvas-state__copy">
               <div className="canvas-state__label">
-                Análisis adaptable
+                Interfaz generativa
               </div>
               {activePrompt ? <p className="canvas-state__prompt">{activePrompt}</p> : null}
               <h2>{failure?.title ?? content.title}</h2>

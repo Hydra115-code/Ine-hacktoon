@@ -151,15 +151,15 @@ export function PromptComposer() {
         </div>
       ) : null}
       <form className="composer" onSubmit={handleSubmit}>
-        <label className="sr-only" htmlFor="financial-prompt">
-          Pregunta sobre tus finanzas
+        <label className="sr-only" htmlFor="civic-prompt">
+          Pregunta sobre datos públicos
         </label>
         <textarea
-          id="financial-prompt"
+          id="civic-prompt"
           name="prompt"
           rows={2}
           maxLength={MAX_PROMPT_LENGTH}
-          placeholder="Escribe tu consulta…"
+          placeholder="Pregunta sobre participación, territorio o indicadores…"
           value={draft}
           disabled={isBusy}
           onChange={(event) => {
@@ -202,9 +202,9 @@ export function PromptComposer() {
       </form>
       <p className="composer-region__hint" data-voice-phase={voicePhase}>
         <span aria-live="polite">
-          {voiceMessage || (isConnecting ? "Conectando micrófono…" : isListening ? "Escuchando…" : voicePhase === "ready" ? "Dictado listo: revisa importes y fechas antes de enviar" : "Enter para enviar · Shift + Enter para una nueva línea")}
+          {voiceMessage || (isConnecting ? "Conectando micrófono…" : isListening ? "Escuchando…" : voicePhase === "ready" ? "Dictado listo: revisa nombres, lugares y fechas antes de enviar" : "Enter para enviar · Shift + Enter para una nueva línea")}
         </span>
-        <span>Verifica la información antes de tomar una decisión financiera.</span>
+        <span>Contrasta los resultados con su fuente y contexto.</span>
       </p>
     </footer>
   );

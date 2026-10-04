@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Banorte | Espacio financiero",
-  description: "Espacio de interfaces financieras generadas en tiempo real.",
+  title: "INE | Explorador ciudadano",
+  description: "Explora datos públicos del INE mediante interfaces generativas, claras y adaptables.",
 };
 
 interface RootLayoutProps {

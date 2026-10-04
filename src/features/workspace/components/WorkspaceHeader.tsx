@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useWorkspaceStore } from "../state/workspace-store";
 import { ThemeToggle } from "@/shared/design-system/components/ThemeToggle";
 import { useAgentSession } from "../../agent/components/AgentSessionProvider";
+import { CivicBrand } from "./CivicBrand";
 
 export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void> }) {
   const status = useWorkspaceStore((state) => state.experience.status);
@@ -14,17 +14,16 @@ export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void>
   return (
     <header className="workspace-header">
       <div className="workspace-header__identity">
-        <span className="brand-logo workspace-header__brand">
-          <Image alt="Banorte" className="brand-logo__image" src="/banorte-logo.png" width={1920} height={236} priority />
-        </span>
+        <CivicBrand />
         <span className="workspace-header__divider" aria-hidden="true" />
-        <span className="workspace-header__product">Banca personal</span>
+        <span className="workspace-header__product">Explorador ciudadano</span>
+        <span className="workspace-header__edition">Prototipo Hackathon 2026</span>
       </div>
 
       <div className="workspace-header__session">
         <span className="session-status">
           <span className="session-status__dot" aria-hidden="true" />
-          Sesión protegida
+          Sesión segura
         </span>
         <ThemeToggle />
         {hasStarted ? (

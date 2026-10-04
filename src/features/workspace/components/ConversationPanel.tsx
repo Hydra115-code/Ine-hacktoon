@@ -31,15 +31,16 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
     <section className="conversation" aria-labelledby="conversation-title">
       <header className="conversation__header">
         <div>
-          <p>Conversación</p>
-          <h2 id="conversation-title">Pide, ajusta y explora</h2>
+          <p>Consulta ciudadana</p>
+          <h2 id="conversation-title">Pregunta, compara y descubre</h2>
         </div>
         <span>{conversationTurns.length} mensajes</span>
       </header>
       <div className="conversation__scroll">
         {conversationTurns.length === 0 ? (
           <div className="conversation__empty">
-            <p>Cuéntame qué quieres entender de tus finanzas. La vista se construirá a partir de tu petición y podrás modificarla aquí mismo.</p>
+            <span className="conversation__empty-mark" aria-hidden="true">?</span>
+            <p>Cuéntame qué quieres entender de los datos públicos. Construiré una vista a partir de tu pregunta y podrás ajustarla aquí mismo.</p>
           </div>
         ) : (
           <ol ref={listRef} className="conversation__turns" aria-label="Mensajes de esta consulta">
@@ -47,7 +48,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
               const summary = turn.role === "assistant" ? summarizeAnswer(turn.text) : "";
               const fullAnswer = turn.role === "assistant" ? cleanAnswerText(turn.text) : "";
               return <li className="conversation__turn" data-role={turn.role} key={turn.id}>
-                <span className="conversation__speaker">{turn.role === "user" ? "Tú" : "Banorte"}</span>
+                <span className="conversation__speaker">{turn.role === "user" ? "Tú" : "Asistente cívico"}</span>
                 {turn.role === "user" ? <p>{turn.text}</p> : (
                   <>
                     {summary ? <p className="conversation__summary">{summary}</p> : null}
@@ -72,7 +73,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
                 ) : null}
                 {turn.role === "assistant" && ((turn.sources?.length ?? 0) + (turn.controls?.length ?? 0) + (turn.changes?.length ?? 0) > 0) ? (
                   <details className="conversation__evidence">
-                    <summary>Cómo se preparó esta vista</summary>
+                    <summary>Cómo se construyó esta vista</summary>
                     {turn.sources?.length ? <p>Datos solicitados: {turn.sources.join(", ")}</p> : null}
                     {turn.controls?.length ? <p>Controles: {turn.controls.join(", ")}</p> : null}
                     {turn.changes?.length ? <ul>{turn.changes.map((change) => <li key={change}>{change}</li>)}</ul> : null}
@@ -91,7 +92,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
         {isHistoricalView ? (
           <p className="conversation__historical-note">Estás viendo una revisión anterior. Las acciones de esa vista están desactivadas; escribe una nueva petición para continuar con la más reciente.</p>
         ) : displayedInterface && conversationTurns.length > 0 ? (
-          <p className="conversation__hint">Puedes pedir cambios como “deja sólo la tabla” o usar los controles de la interfaz.</p>
+          <p className="conversation__hint">Puedes pedir cambios como “compáralo por estado” o usar los controles de la interfaz.</p>
         ) : null}
       </div>
       <PromptComposer />

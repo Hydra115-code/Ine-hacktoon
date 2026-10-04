@@ -1,14 +1,16 @@
 :root,
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-brand-primary: #d90046;
-  --color-brand-hover: #bd003d;
-  --color-brand-soft: rgb(245 0 79 / 7%);
-  --color-brand-border: rgb(245 0 79 / 20%);
+  --color-brand-primary: #a70c5f;
+  --color-brand-hover: #85094c;
+  --color-brand-soft: rgb(167 12 95 / 8%);
+  --color-brand-border: rgb(167 12 95 / 22%);
+  --color-civic-accent: #246b78;
+  --color-civic-accent-soft: rgb(36 107 120 / 9%);
   --color-text-on-brand: #ffffff;
-  --color-surface-page: #f3f4f6;
+  --color-surface-page: #f5f4f7;
   --color-surface-primary: #ffffff;
-  --color-surface-secondary: #f8f8fa;
+  --color-surface-secondary: #f8f7fa;
   --color-surface-elevated: #ffffff;
   --color-text-primary: #17171a;
   --color-text-secondary: #62626d;
@@ -23,7 +25,7 @@
   --color-financial-negative: #b93836;
   --color-financial-neutral: #62626d;
   --color-financial-warning: #a46200;
-  --color-focus-ring: rgb(245 0 79 / 24%);
+  --color-focus-ring: rgb(167 12 95 / 25%);
   --color-canvas-dot: rgb(98 98 109 / 23%);
   --color-canvas-glow: rgb(255 255 255 / 24%);
   --color-success-ring: rgb(20 125 69 / 10%);
@@ -33,10 +35,12 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-brand-primary: #ff3b74;
-  --color-brand-hover: #ff5b89;
-  --color-brand-soft: rgb(255 59 116 / 12%);
-  --color-brand-border: rgb(255 59 116 / 30%);
+  --color-brand-primary: #ff6db4;
+  --color-brand-hover: #ff91c7;
+  --color-brand-soft: rgb(255 109 180 / 12%);
+  --color-brand-border: rgb(255 109 180 / 30%);
+  --color-civic-accent: #72cfdd;
+  --color-civic-accent-soft: rgb(114 207 221 / 12%);
   --color-text-on-brand: #101014;
   --color-surface-page: #101014;
   --color-surface-primary: #18181e;
@@ -55,7 +59,7 @@
   --color-financial-negative: #f0716d;
   --color-financial-neutral: #b9b9c2;
   --color-financial-warning: #e7a33b;
-  --color-focus-ring: rgb(255 59 116 / 32%);
+  --color-focus-ring: rgb(255 109 180 / 32%);
   --color-canvas-dot: rgb(185 185 194 / 18%);
   --color-canvas-glow: rgb(37 37 45 / 34%);
   --color-success-ring: rgb(67 191 120 / 13%);

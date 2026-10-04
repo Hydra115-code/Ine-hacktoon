@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { clearSessionArchive } from "@/features/agent/session/session-snapshot-storage";
 import { resetWorkspaceStore, useWorkspaceStore } from "@/features/workspace/state/workspace-store";
+import { CivicBrand } from "@/features/workspace/components/CivicBrand";
 
 type AccessState =
   | { kind: "checking" }
@@ -141,12 +141,10 @@ export function SessionAccessGate({ children }: {
   return (
     <main className="access-gate" aria-busy={state.kind === "checking"}>
       <section className="access-gate__card" aria-labelledby="access-title">
-        <span className="brand-logo brand-logo--gate access-gate__brand">
-          <Image alt="Banorte" className="brand-logo__image" src="/banorte-logo.png" width={1920} height={236} priority />
-        </span>
-        <p className="canvas__eyebrow">Banca personal</p>
-        <h1 id="access-title">{state.kind === "checking" ? "Comprobando tu sesión" : "Tu espacio financiero"}</h1>
-        <p>Consulta tus cuentas y entiende qué cambió en tus gastos con información protegida.</p>
+        <CivicBrand context="access" />
+        <p className="canvas__eyebrow">Explorador ciudadano · Prototipo</p>
+        <h1 id="access-title">{state.kind === "checking" ? "Preparando tu acceso" : "Los datos públicos, más cerca"}</h1>
+        <p>Pregunta, compara y descubre patrones en información pública mediante una experiencia que se adapta a cada consulta.</p>
         {state.kind === "sign-in" ? (
           <>
             {demoAvailable ? (

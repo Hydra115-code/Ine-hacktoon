@@ -26,9 +26,9 @@ export class WorkspaceErrorBoundary extends Component<WorkspaceErrorBoundaryProp
       return (
         <main className="workspace-failure">
           <div className="workspace-failure__mark" aria-hidden="true">!</div>
-          <p className="canvas__eyebrow">Espacio protegido</p>
+          <p className="canvas__eyebrow">Explorador ciudadano</p>
           <h1>La interfaz encontró un problema inesperado</h1>
-          <p>Tu información no fue modificada. Puedes intentar restaurar el espacio de trabajo.</p>
+          <p>Tu consulta permanece intacta. Puedes intentar restaurar el espacio de trabajo.</p>
           <button type="button" onClick={this.retry}>Restaurar interfaz</button>
         </main>
       );

@@ -1,6 +1,8 @@
-# Banorte GenUI — Frontend
+# INE GenUI — Frontend
 
-Frontend de la demostración de **banca personal con interfaz generativa**. El usuario expresa una necesidad financiera en lenguaje natural y el sistema construye una vista útil con componentes propios —métricas, tablas, gráficas, filtros y controles— que después puede modificar mediante conversación o interacción directa.
+Frontend en migración para una experiencia de **exploración ciudadana con interfaz generativa**. El usuario formula una pregunta sobre datos públicos y el sistema construye una vista útil con componentes propios —métricas, tablas, gráficas, filtros y controles— que después puede modificar mediante conversación o interacción directa.
+
+> Estado actual: `FRONT-01` completado. El shell, la identidad y el lenguaje visible ya corresponden al proyecto INE. Los contratos y fixtures financieros heredados permanecen temporalmente como baseline técnico y se neutralizarán en `FRONT-02`.
 
 Este repositorio no contiene pantallas prearmadas para cada pregunta. Renderiza una especificación declarativa y segura producida por el agente; las rutas `/dev/*` son únicamente harnesses de validación y no forman parte de la experiencia productiva.
 
@@ -11,7 +13,7 @@ Este repositorio no contiene pantallas prearmadas para cada pregunta. Renderiza 
 - La interfaz puede cambiar por instrucciones como “deja sólo la tabla” o por eventos de sus controles.
 - Cada evento conserva `sessionId`, revisión de UI y revisión de datos para mantener continuidad.
 - El navegador nunca recibe las claves de Gemini ni ElevenLabs.
-- El alcance de la demo está concentrado en banca personal: cuentas, saldos, movimientos, flujo de efectivo, comparaciones y patrones de gasto.
+- La migración mantiene el renderer seguro, el streaming y la edición conversacional mientras sustituye el dominio financiero por datos públicos del INE.
 
 ## Arquitectura del frontend
 
@@ -75,13 +77,13 @@ sequenceDiagram
 - Git.
 - Node.js **22 LTS** recomendado (el mínimo técnico del frontend es 20.9, pero el backend exige 22).
 - Corepack habilitado.
-- Backend `BanorteBackend` configurado y conectado al mismo proyecto de Supabase.
+- Backend compatible con los contratos compartidos del motor GenUI; la integración INE se realizará en una fase posterior.
 
 ## Instalación desde cero
 
 ```bash
-git clone git@github.com:Hydra115-code/banorte-gen-ui.git
-cd banorte-gen-ui
+git clone --branch front-end git@github.com:Hydra115-code/Ine-hacktoon.git
+cd Ine-hacktoon
 corepack enable
 corepack prepare pnpm@11.25.0 --activate
 pnpm install --frozen-lockfile
@@ -208,7 +210,7 @@ Los harnesses bajo `/dev/*` sólo se incluyen en desarrollo para inspeccionar co
 - **Streaming frente a respuesta única:** muestra progreso y reduce la espera percibida, a cambio de revisiones, patches y recuperación más complejos.
 - **BFF de Next frente a llamadas directas:** añade un salto de red, pero protege tokens y normaliza autenticación y stream.
 - **Componentes propios frente a pantallas por intención:** requiere un catálogo sólido, pero permite variación real sin esconder plantillas fijas.
-- **Banca personal enfocada:** sacrifica amplitud de giros para entregar una experiencia demostrable, coherente y pulida.
+- **Migración incremental:** conserva el motor GenUI validado mientras reemplaza dominio, datos y componentes en fases verificables.
 
 ## Estructura relevante
 
