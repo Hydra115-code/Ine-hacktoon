@@ -7,6 +7,8 @@ import { useAgentSession } from "../../agent/components/AgentSessionProvider";
 import { UIRenderer } from "../../generative-ui/renderer/UIRenderer";
 import { UIEventProvider } from "../../generative-ui/interactions/events/UIEventProvider";
 import { isGuidanceOnly } from "../presentation/is-guidance-only";
+import { ElectoralExplorationStart } from "../../electoral-exploration/components/ElectoralExplorationStart";
+import { electoralExplorationIntents } from "../../electoral-exploration/electoral-exploration-intents";
 
 interface StatusContent {
   detail: string;
@@ -72,12 +74,6 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
   },
 };
 
-const suggestedPrompts = [
-  "¿Cómo ha cambiado la participación electoral en mi estado?",
-  "Compara municipios con niveles de participación similares",
-  "Muéstrame los patrones territoriales que merecen atención",
-] as const;
-
 const processSteps = ["Comprendiendo", "Consultando", "Construyendo"] as const;
 
 function getActiveProcessStep(status: WorkspaceStatus) {
@@ -136,9 +132,9 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   const isProcessing = !isSettled;
   const isPreviousResult = isProcessing || status === "error" || status === "cancelled" || status === "partial";
   const activeProcessStep = getActiveProcessStep(status);
-  const hasFinancialData = Object.keys(generatedInterface?.data ?? {}).length > 0;
+  const hasBoundData = Object.keys(generatedInterface?.data ?? {}).length > 0;
   const guidanceOnly = status === "ready" && !failure && !errorMessage
-    && isGuidanceOnly(generatedInterface?.specification, hasFinancialData);
+    && isGuidanceOnly(generatedInterface?.specification, hasBoundData);
 
   useEffect(() => {
     if (!failure) return;
@@ -190,8 +186,8 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             <h2>Construyamos una vista con evidencia pública</h2>
             <p>Esta petición no produjo un análisis visual. Puedes pedir una comparación, una distribución territorial o un cambio concreto en una interfaz existente.</p>
             <div className="canvas-guidance__actions">
-              {suggestedPrompts.slice(0, 2).map((prompt) => (
-                <button key={prompt} type="button" onClick={() => { setDraft(prompt); onShowChat?.(); }}>{prompt}</button>
+              {electoralExplorationIntents.slice(0, 2).map(({ id, prompt }) => (
+                <button key={id} type="button" onClick={() => { setDraft(prompt); onShowChat?.(); }}>{prompt}</button>
               ))}
             </div>
           </div>
@@ -210,7 +206,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
               </div>
               <div className="canvas-result__metadata" aria-label="Estado del resultado">
                 <span>Actualizado {formatUpdatedAt(generatedInterface.updatedAt)}</span>
-                {hasFinancialData ? <span>{isHistoricalView ? "Solo lectura" : isPreviousResult ? "Datos de la vista conservada" : "Datos actualizados"}</span> : null}
+                {hasBoundData ? <span>{isHistoricalView ? "Solo lectura" : isPreviousResult ? "Datos de la vista conservada" : "Datos actualizados"}</span> : null}
               </div>
             </header>
             {isProcessing ? (
@@ -267,7 +263,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 <summary>Cómo se obtuvo este resultado</summary>
                 <ul className="canvas-performance__evidence">
                   <li>Solicitud interpretada por el agente</li>
-                  {hasFinancialData ? <li>Datos públicos consultados mediante herramientas MCP</li> : null}
+                  {hasBoundData ? <li>Datos públicos consultados mediante herramientas MCP</li> : null}
                   <li>{generatedInterface.specification
                     ? "Vista renderizada validada; consulta el estado de la generación actual"
                     : "UI solicitada no disponible; se muestran datos de respaldo"}</li>
@@ -365,30 +361,21 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           </div>
         ) : (
           <div className="canvas-state" data-settled={status !== "empty"}>
-            <div className="canvas-state__copy">
-              <div className="canvas-state__label">
-                Interfaz generativa
-              </div>
-              {activePrompt ? <p className="canvas-state__prompt">{activePrompt}</p> : null}
-              <h2>{failure?.title ?? content.title}</h2>
-              <p>{failure?.message ?? errorMessage ?? content.detail}</p>
-              {(failure?.canRetry ?? canRetry) && status !== "empty" ? (
-                <button className="canvas-state__retry" type="button" onClick={retryLastRequest}>Reintentar</button>
-              ) : null}
-
-              {status === "empty" ? (
-                <div className="canvas-state__suggestions" aria-label="Ideas de consulta">
-                  {suggestedPrompts.map((prompt) => (
-                    <button key={prompt} type="button" onClick={() => setDraft(prompt)}>
-                      <span>{prompt}</span>
-                      <svg viewBox="0 0 20 20" aria-hidden="true">
-                        <path d="M4 10h11M11 6l4 4-4 4" />
-                      </svg>
-                    </button>
-                  ))}
+            {status === "empty" ? (
+              <ElectoralExplorationStart onSelect={(prompt) => { setDraft(prompt); onShowChat?.(); }} />
+            ) : (
+              <div className="canvas-state__copy">
+                <div className="canvas-state__label">
+                  Interfaz generativa
                 </div>
-              ) : null}
-            </div>
+                {activePrompt ? <p className="canvas-state__prompt">{activePrompt}</p> : null}
+                <h2>{failure?.title ?? content.title}</h2>
+                <p>{failure?.message ?? errorMessage ?? content.detail}</p>
+                {(failure?.canRetry ?? canRetry) ? (
+                  <button className="canvas-state__retry" type="button" onClick={retryLastRequest}>Reintentar</button>
+                ) : null}
+              </div>
+            )}
           </div>
         )}
       </div>

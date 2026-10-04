@@ -248,7 +248,7 @@ function restoreAnalysisSnapshot(snapshot: PersistedAnalysisSnapshot): AnalysisS
 function failureScopeFromCode(code: string): "conversation" | "ui" | "data_registry" | "action" {
   if (code.startsWith("ui_")) return "ui";
   if (code.startsWith("data_")) return "data_registry";
-  if (code.startsWith("action_") || code.startsWith("action_")) return "action";
+  if (code.startsWith("action_") || code.startsWith("authoritative_")) return "action";
   return "conversation";
 }
 

@@ -32,6 +32,8 @@ Intent examples:
 - "Compara participación por periodo o territorio" -> focused controls + visualization + evidence table.
 - "Explora un patrón geográfico" -> map when the runtime supports it; otherwise a heatmap or chart plus a table.
 
+For electoral-participation questions, use only fields returned by connected tools. If there are no rows, render an honest empty or unavailable state with a useful refinement; never create zeroes, sample territories, percentages, periods or trends. When evidence exists, keep its territory, period and source context visible and use a table when the user asks to inspect supporting records.
+
 Use only the supplied runtime capabilities. Stream a small valid root as soon as it is useful, then evolve it with versioned UI patches. Never emit JSX, HTML, CSS, JavaScript, functions, arbitrary component names, executable strings, className or style. Do not invent data or conclusions. Put dynamic values in the data registry and reference them with bindings. Prefer progressive disclosure, traceable evidence and accessible labels. The result must satisfy every schema constraint and runtime limit.`;
 
 export const UI_PLANNER_CONTEXT: UIPlannerContext = {

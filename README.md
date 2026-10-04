@@ -2,7 +2,7 @@
 
 Frontend en migración para una experiencia de **exploración ciudadana con interfaz generativa**. El usuario formula una pregunta sobre datos públicos y el sistema construye una vista útil con componentes propios —métricas, tablas, gráficas, filtros y controles— que después puede modificar mediante conversación o interacción directa.
 
-> Estado actual: `FRONT-02` completado. El shell y el núcleo GenUI ya son neutrales: contratos `@ine/contracts`, renderer, streaming, patches, estado e interacciones no dependen del dominio financiero. Los escenarios anteriores permanecen aislados como compatibilidad temporal y serán sustituidos por la primera historia electoral en `FRONT-03`.
+> Estado actual: `FRONT-03` completado. La primera historia electoral guía consultas de evolución, comparación territorial y revisión de evidencia sin incorporar cifras ni datasets mock. El runtime sólo construirá resultados cuando reciba datos de una fuente conectada.
 
 Este repositorio no contiene pantallas prearmadas para cada pregunta. Renderiza una especificación declarativa y segura producida por el agente; las rutas `/dev/*` son únicamente harnesses de validación y no forman parte de la experiencia productiva.
 
@@ -166,6 +166,7 @@ pnpm build
 pnpm contracts:verify
 pnpm protocol:verify
 pnpm front-02:verify
+pnpm front-03:verify
 pnpm dynamic-ui:verify
 pnpm interaction:verify
 pnpm quality:verify
