@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { type UISpecification } from "@banorte/contracts";
+import { type UISpecification } from "@ine/contracts";
 import { collectFormValues } from "../src/features/agent/interactions/form-submission.ts";
 
 const spec: UISpecification = { version: "1", root: { type: "stack", id: "capture", children: [

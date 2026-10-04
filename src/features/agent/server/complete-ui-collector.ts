@@ -1,4 +1,4 @@
-import type { UINode, UISpecification } from "@banorte/contracts";
+import type { UINode, UISpecification } from "@ine/contracts";
 import type { DataRegistryValue } from "../../generative-ui/data-binding/schemas/data-registry-schema.ts";
 import {
   applyDataRegistryPatch,

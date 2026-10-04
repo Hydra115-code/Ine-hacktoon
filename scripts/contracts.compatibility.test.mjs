@@ -6,7 +6,7 @@ import {
   textAgentStreamEventSchema,
   uiPatchSchema,
   uiSpecificationSchema,
-} from "@banorte/contracts";
+} from "@ine/contracts";
 
 const sessionId = "11111111-1111-4111-8111-111111111111";
 const correlationId = "22222222-2222-4222-8222-222222222222";
@@ -15,13 +15,13 @@ const specification = {
   version: "1",
   root: {
     type: "section",
-    id: "financial-summary",
-    ariaLabel: "Resumen financiero",
+    id: "public-summary",
+    ariaLabel: "Resumen de resultados",
     children: [
       {
         type: "heading",
         id: "summary-heading",
-        content: "Tu resumen",
+        content: "Resumen de la consulta",
         level: 2,
       },
     ],
@@ -35,7 +35,7 @@ test("el entrypoint raíz expone y valida una solicitud del agente", () => {
     correlationId,
     provider: "google",
     responseMode: "complete-ui",
-    query: "¿Cómo voy este mes?",
+    query: "Compara los resultados por periodo",
   });
 
   assert.equal(result.success, true);
@@ -65,8 +65,8 @@ test("los patches de datos y UI exigen revisiones consecutivas", () => {
     baseRevision: 0,
     revision: 1,
     op: "add",
-    key: "financialSummary",
-    value: { totalIncome: "10000.00", currency: "MXN" },
+    key: "publicSummary",
+    value: { total: 10000, unit: "personas" },
   }).success, true);
 
   assert.equal(uiPatchSchema.safeParse({
@@ -83,6 +83,6 @@ test("los patches de datos y UI exigen revisiones consecutivas", () => {
     baseRevision: 0,
     revision: 2,
     op: "remove",
-    key: "financialSummary",
+    key: "publicSummary",
   }).success, false);
 });

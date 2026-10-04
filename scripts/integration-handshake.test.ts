@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { CONTRACT_FINGERPRINT } from "@banorte/contracts";
+import { CONTRACT_FINGERPRINT } from "@ine/contracts";
 import {
   requestSystemStatus,
   SystemStatusRequestError,

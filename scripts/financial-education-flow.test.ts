@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dataPatchSchema, dataRegistrySchema, uiPatchSchema, uiSpecificationSchema, type UINode } from "@banorte/contracts";
+import { dataPatchSchema, dataRegistrySchema, uiPatchSchema, uiSpecificationSchema, type UINode } from "@ine/contracts";
 import { classifyInteractionEvent } from "../src/features/agent/interactions/interaction-policy.ts";
 import {
   educationFlowPrompts,

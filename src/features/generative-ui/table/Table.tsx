@@ -10,15 +10,14 @@ import { useInteractionEvent } from "../interactions/events/UIEventProvider";
 import { localizeDisplayValue } from "../data-binding/formatting/format-data-value";
 
 const localizedColumnLabels: Readonly<Record<string, string>> = {
-  accounttype: "Tipo de cuenta",
-  accountid: "Cuenta",
-  accountnumber: "Cuenta",
-  currentbalance: "Saldo actual",
-  availablebalance: "Saldo disponible",
+  recordtype: "Tipo de registro",
+  indicator: "Indicador",
+  municipality: "Municipio",
+  state: "Entidad",
   description: "Descripción",
   category: "Categoría",
-  amount: "Importe",
-  currency: "Moneda",
+  value: "Valor",
+  count: "Cantidad",
   date: "Fecha",
   status: "Estado",
 };

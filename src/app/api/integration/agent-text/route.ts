@@ -5,7 +5,7 @@ import {
 } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { errorPayloadSchema } from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
 import {
   agentDataPartSchemas,
   agentPromptSchema,

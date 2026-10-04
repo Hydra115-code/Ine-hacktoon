@@ -1,4 +1,4 @@
-import type { UIPatch, UISpecification } from "@banorte/contracts";
+import type { UIPatch, UISpecification } from "@ine/contracts";
 
 export function buildPerformanceSpecification(groupCount = 20): UISpecification {
   return {

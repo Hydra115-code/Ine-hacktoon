@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { UIEvent } from "@banorte/contracts";
+import type { UIEvent } from "@ine/contracts";
 import { classifyInteractionEvent } from "@/features/agent/interactions/interaction-policy";
 import { InteractionRequestRegistry } from "@/features/agent/interactions/interaction-request-registry";
 import type { LocalUIEvent } from "@/features/generative-ui/interactions/events/local-ui-event";

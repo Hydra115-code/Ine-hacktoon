@@ -1,4 +1,4 @@
-import { dataRegistrySchema, sessionReferenceSchema, uiSpecificationSchema } from "@banorte/contracts";
+import { dataRegistrySchema, sessionReferenceSchema, uiSpecificationSchema } from "@ine/contracts";
 import { z } from "zod";
 import { createUIPatchState } from "../../generative-ui/patches/ui-patch-engine.ts";
 import { createDataRegistryPatchState } from "../../generative-ui/data-binding/registry/data-registry-patch-engine.ts";

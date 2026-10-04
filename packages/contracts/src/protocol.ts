@@ -10,7 +10,6 @@ export const CONTRACT_VERSION = UI_DSL_VERSION;
 const versionField = { version: z.literal(CONTRACT_VERSION) };
 const revisionSchema = z.number().int().min(0).max(1_000_000);
 const identifierSchema = z.string().uuid();
-const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 export const dataRegistryContractSchema = z.object({
   ...versionField,
@@ -109,20 +108,6 @@ export const systemStatusSchema = z.object({
   checkedAt: z.string().datetime(),
 }).strict();
 
-export const financialSummaryRequestSchema = z.object({
-  ...versionField,
-  correlationId: identifierSchema,
-  startDate: isoDateSchema,
-  endDate: isoDateSchema,
-  currency: z.string().regex(/^[A-Z]{3}$/).optional(),
-}).strict();
-
-export const financialSummaryResponseSchema = z.object({
-  ...versionField,
-  correlationId: identifierSchema,
-  dataRegistry: dataRegistryContractSchema,
-}).strict();
-
 const textAgentRequestBase = {
   ...versionField,
   sessionId: identifierSchema,
@@ -201,7 +186,5 @@ export type AgentStatus = z.infer<typeof agentStatusSchema>;
 export type ErrorPayload = z.infer<typeof errorPayloadSchema>;
 export type StreamEvent = z.infer<typeof streamEventSchema>;
 export type SystemStatus = z.infer<typeof systemStatusSchema>;
-export type FinancialSummaryRequest = z.infer<typeof financialSummaryRequestSchema>;
-export type FinancialSummaryResponse = z.infer<typeof financialSummaryResponseSchema>;
 export type TextAgentRequest = z.infer<typeof textAgentRequestSchema>;
 export type TextAgentStreamEvent = z.infer<typeof textAgentStreamEventSchema>;

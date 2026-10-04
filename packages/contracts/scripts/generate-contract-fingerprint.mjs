@@ -19,7 +19,14 @@ async function listContractSources(directory) {
   return nestedFiles.flat();
 }
 
-const sourcePaths = (await listContractSources(sourceDirectory)).sort();
+const sourcePaths = (await listContractSources(sourceDirectory))
+  .filter((sourcePath) => {
+    const sourceRelativePath = relative(sourceDirectory, sourcePath).split(sep).join("/");
+    return !sourceRelativePath.startsWith("legacy/")
+      && sourceRelativePath !== "financial-domain.ts"
+      && sourceRelativePath !== "fixtures.ts";
+  })
+  .sort();
 const hash = createHash("sha256");
 
 for (const sourcePath of sourcePaths) {

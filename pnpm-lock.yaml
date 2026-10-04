@@ -11,7 +11,7 @@ importers:
       '@ai-sdk/react':
         specifier: 4.0.96
         version: 4.0.96(react@19.2.8)(zod@3.25.76)
-      '@banorte/contracts':
+      '@ine/contracts':
         specifier: workspace:*
         version: link:packages/contracts
       '@elevenlabs/client':

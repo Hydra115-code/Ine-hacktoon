@@ -5,7 +5,7 @@ import { dataValueSchema } from "../../generative-ui/data-binding/schemas/data-r
 import { uiPatchSchema } from "../../generative-ui/patches/ui-patch-schema";
 import { uiSpecificationSchema } from "../../generative-ui/schemas/ui-specification";
 import { interactionIdSchema } from "../../generative-ui/schemas/interaction-node";
-import { dataPatchSchema } from "@banorte/contracts";
+import { dataPatchSchema } from "@ine/contracts";
 
 export const agentPromptSchema = z.string().trim().min(1).max(2_000);
 

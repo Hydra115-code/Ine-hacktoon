@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const semanticColorTokens = [
-  "financial.positive",
-  "financial.negative",
-  "financial.neutral",
-  "financial.warning",
+  "data.positive",
+  "data.negative",
+  "data.neutral",
+  "data.warning",
   "surface.primary",
   "surface.secondary",
   "surface.elevated",

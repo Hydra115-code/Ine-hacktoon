@@ -6,7 +6,7 @@ Estado: completo en frontend; listo para validación antes de I2.
 
 - Backend: `/home/erk/Documentos/Moc-back/packages/contracts`.
 - Backend baseline: `4093084b356a92559e9085d604078688077aef68`.
-- Package: `@banorte/contracts@1.0.0`.
+- Package: `@ine/contracts@1.0.0`.
 - Fingerprint: `d4a19c245e388c759fbcba6c9647090fc370bd668f6f8cf3ae9269cf7de0e792`.
 
 El paquete contractual del frontend coincide byte por byte con el backend en fuentes, manifiesto, generador de fingerprint y pruebas públicas.

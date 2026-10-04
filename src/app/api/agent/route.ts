@@ -6,7 +6,7 @@ import {
 } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { errorPayloadSchema, sessionReferenceSchema, type SessionReference } from "@banorte/contracts";
+import { errorPayloadSchema, sessionReferenceSchema, type SessionReference } from "@ine/contracts";
 import {
   agentDataPartSchemas,
   agentPromptSchema,

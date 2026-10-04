@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  isPersonalBankingAnalysisTitle,
+  isEligibleAnalysisTitle,
   loadSessionArchive,
   saveSessionArchive,
   SESSION_ARCHIVE_KEY,
@@ -105,18 +105,7 @@ test("no restaura el análisis de otra identidad", () => {
   assert.equal(storage.getItem(SESSION_ARCHIVE_KEY), null);
 });
 
-test("BP0 identifica sesiones heredadas de verticales ocultas sin excluir análisis bancarios", () => {
-  for (const title of [
-    "Prepara un pago de $742 MXN",
-    "Simula un préstamo a doce meses",
-    "Evalúa mi salud financiera",
-    "Crea una meta de ahorro",
-  ]) assert.equal(isPersonalBankingAnalysisTitle(title), false, title);
-
-  for (const title of [
-    "¿Cuánto tengo disponible?",
-    "Compara julio y agosto",
-    "Muéstrame mis movimientos",
-    "¿Por qué ahorré menos este mes?",
-  ]) assert.equal(isPersonalBankingAnalysisTitle(title), true, title);
+test("acepta títulos de análisis no vacíos sin filtrar por dominio", () => {
+  assert.equal(isEligibleAnalysisTitle("Compara resultados por municipio"), true);
+  assert.equal(isEligibleAnalysisTitle("  "), false);
 });

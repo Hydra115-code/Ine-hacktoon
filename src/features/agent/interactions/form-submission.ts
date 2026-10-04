@@ -1,4 +1,4 @@
-import type { UINode, UISpecification } from "@banorte/contracts";
+import type { UINode, UISpecification } from "@ine/contracts";
 
 export function collectFormValues(specification: UISpecification, sourceId: string, drafts: ReadonlyMap<string, string>): Record<string, string> | null {
   const find = (node: UINode): UINode[] | undefined => {
@@ -11,7 +11,6 @@ export function collectFormValues(specification: UISpecification, sourceId: stri
     return undefined;
   };
   const siblings = find(specification.root);
-  const paymentReviewForm = siblings?.some((node) => node.type === "button" && node.id === sourceId && /(?:revis|prepar).*pago/iu.test(node.label)) ?? false;
   const fields = siblings?.filter((node) => "event" in node && node.event === "form.value.changed");
   if (!fields?.length || fields.length > 12) return null;
   const values: Record<string, string> = {};
@@ -20,7 +19,6 @@ export function collectFormValues(specification: UISpecification, sourceId: stri
     const value = drafts.get(field.id) ?? field.initialValue ?? "";
     if (typeof value !== "string" || value.length > 500) return null;
     if (field.type === "select" && (!value || !field.options.some((option) => option.value === value && !option.disabled))) return null;
-    if (field.type === "input" && paymentReviewForm && /^(?:monto|importe|cantidad|moneda)\b/iu.test(field.label.trim()) && !value.trim()) return null;
     if (field.type === "input" && ((field.validation?.required && !value.trim()) || value.length > (field.validation?.maxLength ?? 500) || value.length < (field.validation?.minLength ?? 0))) return null;
     if (field.type === "datePicker" && ((field.required && !value) || (value && !/^\d{4}-\d{2}-\d{2}$/u.test(value)))) return null;
     values[field.id] = value;

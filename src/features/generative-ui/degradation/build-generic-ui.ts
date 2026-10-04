@@ -7,15 +7,14 @@ const excludedFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner
 const MAX_GENERIC_FIELDS = 12;
 const MAX_GENERIC_TABLE_COLUMNS = 8;
 const MAX_GENERIC_VISUALIZATIONS = 2;
-const currencyFieldPattern = /(?:amount|balance|cashflow|expenses|income|value)$/iu;
-const percentFieldPattern = /(?:percentage|percentagechange|savingsrate)$/iu;
 const knownLabels: Record<string, string> = {
-  currency: "Moneda",
-  netCashFlow: "Flujo neto",
-  savingsRate: "Tasa de ahorro",
-  totalExpenses: "Gastos totales",
-  totalIncome: "Ingresos totales",
-  transactionCount: "Movimientos",
+  category: "Categoría",
+  count: "Cantidad",
+  period: "Periodo",
+  rate: "Tasa",
+  region: "Región",
+  total: "Total",
+  value: "Valor",
 };
 
 function labelFromKey(key: string) {
@@ -40,9 +39,7 @@ function isRecord(value: DataValue): value is { [key: string]: DataValue } {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function scalarFormat(value: DataValue, field?: string) {
-  if (field && percentFieldPattern.test(field)) return "percent" as const;
-  if (field && currencyFieldPattern.test(field)) return "currency" as const;
+function scalarFormat(value: DataValue) {
   if (typeof value === "number") return "number" as const;
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/u.test(value)) return "date" as const;
   return "text" as const;
@@ -69,7 +66,7 @@ function collectMetrics(data: DataRegistryValue) {
           id: nodeId("fallback-metric", metrics.length + 1),
           label: labelFromKey(childKey),
           valueBinding: `${key}.${childKey}`,
-          format: scalarFormat(childValue, childKey),
+          format: scalarFormat(childValue),
         });
         if (metrics.length >= MAX_GENERIC_FIELDS) return metrics;
       }
@@ -111,7 +108,7 @@ function buildCollectionNodes(data: DataRegistryValue) {
         dataBinding: key,
         encoding: {
           x: { field: categoryField, type: "nominal" },
-          y: { field: quantitativeField, type: "quantitative" },
+          y: { field: quantitativeField, type: "quantitative", format: "number" },
         },
       });
     }
@@ -122,12 +119,8 @@ function buildCollectionNodes(data: DataRegistryValue) {
       ariaLabel: `Datos disponibles de ${labelFromKey(key)}`,
       dataBinding: key,
       columns: fields.map((field) => {
-        const format = scalarFormat(firstRecord[field] ?? null, field);
-        return {
-          field,
-          label: labelFromKey(field),
-          format: format === "percent" ? "percentage" : format,
-        };
+        const format = scalarFormat(firstRecord[field] ?? null);
+        return { field, label: labelFromKey(field), format };
       }),
       pagination: { pageSize: 10 },
     });

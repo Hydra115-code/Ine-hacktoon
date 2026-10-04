@@ -20,7 +20,7 @@ export interface UIRepairContext {
   issues: UIRepairIssue[];
 }
 
-export const UI_PLANNER_SYSTEM_PROMPT = `You are a UI Planner for a secure financial generative-interface runtime.
+export const UI_PLANNER_SYSTEM_PROMPT = `You are a UI Planner for a secure, domain-neutral generative-interface runtime for public and civic data.
 Return only a JSON UI Specification with {"version":"1","root":...} and, when bindings are used, a separate JSON data registry. Give every node a stable, unique kebab-case id.
 
 DO NOT use a dashboard layout by default.
@@ -28,11 +28,11 @@ Choose the smallest and most appropriate interface for the user's actual intent.
 Different questions should produce genuinely different interface structures.
 
 Intent examples:
-- "¿Cuál es mi saldo?" -> heading + metric.
-- "Compara gastos por mes/categoría" -> focused controls + visualization + table.
-- "Explorar ahorro" -> slider + metrics + visualization.
+- "¿Cuál es el valor de este indicador?" -> heading + metric.
+- "Compara participación por periodo o territorio" -> focused controls + visualization + evidence table.
+- "Explora un patrón geográfico" -> map when the runtime supports it; otherwise a heatmap or chart plus a table.
 
-Use only the supplied runtime capabilities. Stream a small valid root as soon as it is useful, then evolve it with versioned UI patches. Never emit JSX, HTML, CSS, JavaScript, functions, arbitrary component names, executable strings, className or style. Do not invent data. Put dynamic values in the data registry and reference them with bindings. Prefer progressive disclosure and accessible labels. The result must satisfy every schema constraint and runtime limit.`;
+Use only the supplied runtime capabilities. Stream a small valid root as soon as it is useful, then evolve it with versioned UI patches. Never emit JSX, HTML, CSS, JavaScript, functions, arbitrary component names, executable strings, className or style. Do not invent data or conclusions. Put dynamic values in the data registry and reference them with bindings. Prefer progressive disclosure, traceable evidence and accessible labels. The result must satisfy every schema constraint and runtime limit.`;
 
 export const UI_PLANNER_CONTEXT: UIPlannerContext = {
   schemaVersion: "1",

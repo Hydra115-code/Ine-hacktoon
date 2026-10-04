@@ -8,7 +8,7 @@ import {
   agentUICompletedSchema,
 } from "../contracts/agent-message";
 import { uiPatchSchema } from "../../generative-ui/patches/ui-patch-schema";
-import { dataPatchSchema } from "@banorte/contracts";
+import { dataPatchSchema } from "@ine/contracts";
 
 export const agentApiEventSchema = z.discriminatedUnion("type", [
   z.object({

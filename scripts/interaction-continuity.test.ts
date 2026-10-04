@@ -61,15 +61,15 @@ test("la identidad cambia con valor o revisión, pero no depende del correlation
   })));
 });
 
-test("separa visuales, simulaciones, análisis y acciones financieras", () => {
+test("separa visuales, simulaciones, análisis y acciones autoritativas", () => {
   assert.deepEqual(classifyInteractionEvent("form.value.changed"), { kind: "visual", delivery: "local" });
   assert.deepEqual(classifyInteractionEvent("form.submit"), { kind: "analysis", delivery: "agent" });
   assert.deepEqual(classifyInteractionEvent("ui.tab.changed"), { kind: "visual", delivery: "local" });
   assert.deepEqual(classifyInteractionEvent("ui.section.regenerate"), { kind: "analysis", delivery: "agent" });
-  assert.deepEqual(classifyInteractionEvent("savings.monthly.changed"), { kind: "simulation", delivery: "agent" });
-  assert.deepEqual(classifyInteractionEvent("payment.review.requested"), { kind: "analysis", delivery: "agent" });
-  assert.deepEqual(classifyInteractionEvent("payment.confirm.requested"), { kind: "financial_action", delivery: "blocked" });
-  assert.deepEqual(classifyInteractionEvent("transfer.execute_requested"), { kind: "financial_action", delivery: "blocked" });
+  assert.deepEqual(classifyInteractionEvent("scenario.sample.changed"), { kind: "simulation", delivery: "agent" });
+  assert.deepEqual(classifyInteractionEvent("report.review.edit_requested"), { kind: "analysis", delivery: "agent" });
+  assert.deepEqual(classifyInteractionEvent("report.publish.requested"), { kind: "authoritative_action", delivery: "blocked" });
+  assert.deepEqual(classifyInteractionEvent("record.delete_requested"), { kind: "authoritative_action", delivery: "blocked" });
 });
 
 test("el provider usa registro síncrono, correlación y reintento del intent", () => {

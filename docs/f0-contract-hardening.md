@@ -4,7 +4,7 @@ Fecha de validación: 2026-09-11
 
 ## Alcance cerrado
 
-- El frontend consume exclusivamente el entrypoint raíz de `@banorte/contracts`.
+- El frontend consume exclusivamente el entrypoint raíz de `@ine/contracts`.
 - Frontend y backend conservan copias idénticas del paquete común; el backend no fue modificado.
 - Los eventos canónicos con `version` se validan siempre como contrato v1 y nunca degradan silenciosamente al adaptador legado.
 - Una versión distinta de `1` produce `contract_version_unsupported`.

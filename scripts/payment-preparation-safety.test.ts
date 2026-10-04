@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dataRegistrySchema, uiSpecificationSchema, type UIEvent, type UINode } from "@banorte/contracts";
+import { dataRegistrySchema, uiSpecificationSchema, type UIEvent, type UINode } from "@ine/contracts";
 import { classifyInteractionEvent } from "../src/features/agent/interactions/interaction-policy.ts";
 import { InteractionRequestRegistry } from "../src/features/agent/interactions/interaction-request-registry.ts";
-import { maskFinancialIdentifier } from "../src/features/generative-ui/data-binding/formatting/mask-financial-identifier.ts";
+import { maskSensitiveIdentifier } from "../src/features/generative-ui/data-binding/formatting/mask-sensitive-identifier.ts";
 import {
   paymentCaptureData,
   paymentCaptureSpecification,
@@ -48,17 +48,17 @@ test("la revisión contiene todos los datos financieros requeridos y enmascara l
   const required = ["Cuenta de origen", "Beneficiario", "Monto", "Moneda", "Comisión", "Fecha", "Saldo estimado posterior"];
   const reviewLabels = labels(paymentReviewSpecification);
   required.forEach((label) => assert.ok(reviewLabels.includes(label), label));
-  assert.equal(maskFinancialIdentifier("accountNumber", paymentReviewData.accountNumber!), "•••• 4567");
+  assert.equal(maskSensitiveIdentifier("accountNumber", paymentReviewData.accountNumber!), "•••• 4567");
   assert.equal(reviewLabels.includes("Aún no realizado"), true);
 });
 
 test("confirmar, ejecutar, enviar y reintentar pagos permanecen bloqueados", () => {
   for (const event of ["payment.confirm.requested", "payment.execute.requested", "payment.send.requested", "payment.retry.requested"]) {
-    assert.deepEqual(classifyInteractionEvent(event), { kind: "financial_action", delivery: "blocked" }, event);
+    assert.deepEqual(classifyInteractionEvent(event), { kind: "authoritative_action", delivery: "blocked" }, event);
   }
   assert.deepEqual(classifyInteractionEvent("payment.review.edit_requested"), { kind: "analysis", delivery: "agent" });
   assert.deepEqual(classifyInteractionEvent("payment.review.cancel_requested"), { kind: "analysis", delivery: "agent" });
-  assert.deepEqual(classifyInteractionEvent("payment.cancel.requested"), { kind: "financial_action", delivery: "blocked" });
+  assert.deepEqual(classifyInteractionEvent("payment.cancel.requested"), { kind: "authoritative_action", delivery: "blocked" });
 });
 
 test("el doble clic de revisión sólo acepta un intent", () => {

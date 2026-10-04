@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   financialSummaryResponseSchema,
   uiSpecificationSchema,
-} from "@banorte/contracts";
+} from "@ine/contracts/legacy-financial";
 import { requestSupabaseSession } from "../src/features/auth/server/supabase-session-request.ts";
 import { fetchFinancialSummary } from "../src/features/integration/server/financial-summary-wire.ts";
 import { i3FinancialSummarySpecification } from "../src/features/integration/fixtures/i3-financial-summary-fixture.ts";
@@ -111,7 +111,7 @@ test("el fixture I3 es contractual, fijo y enlaza únicamente datos recibidos", 
     import.meta.url,
   ), "utf8");
   assert.match(formatter, /contractualFinancialAmountPattern/u);
-  assert.match(formatter, /financialDisplayNumber\(value\)/u);
+  assert.match(formatter, /numericDisplayValue\(value\)/u);
 });
 
 test("las rutas conservan JWT y refresh token en cookies HttpOnly estrictas", () => {

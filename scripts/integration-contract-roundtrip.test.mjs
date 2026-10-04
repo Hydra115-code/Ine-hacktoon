@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import test from "node:test";
-import * as frontend from "@banorte/contracts";
+import * as frontend from "@ine/contracts";
 
 const backendDist = process.env.BANORTE_BACKEND_CONTRACT_DIST
   ?? resolve(import.meta.dirname, "../../Moc-back/packages/contracts/dist/index.js");

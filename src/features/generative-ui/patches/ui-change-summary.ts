@@ -1,4 +1,4 @@
-import type { UINode, UIPatch, UISpecification } from "@banorte/contracts";
+import type { UINode, UIPatch, UISpecification } from "@ine/contracts";
 
 export interface UIChangeSummary {
   items: readonly string[];

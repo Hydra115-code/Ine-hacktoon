@@ -1,5 +1,5 @@
 import { formatDataValue } from "../data-binding/formatting/format-data-value";
-import { maskFinancialIdentifier } from "../data-binding/formatting/mask-financial-identifier";
+import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { TableColumn, TableNode } from "../schemas/table-node";
@@ -55,7 +55,7 @@ export function formatTableCell(
   if (value === undefined) return "—";
 
   try {
-    return maskFinancialIdentifier(column.field, value)
+    return maskSensitiveIdentifier(column.field, value)
       ?? formatDataValue(value, column.format, options)
       ?? "—";
   } catch {

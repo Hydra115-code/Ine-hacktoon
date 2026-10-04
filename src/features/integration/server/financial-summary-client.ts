@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { FinancialSummaryRequest, FinancialSummaryResponse } from "@banorte/contracts";
+import type { FinancialSummaryRequest, FinancialSummaryResponse } from "@ine/contracts/legacy-financial";
 import { readAgentApiConfig } from "../../agent/server/agent-api-config";
 import {
   fetchFinancialSummary,

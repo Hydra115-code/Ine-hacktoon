@@ -1,4 +1,4 @@
-import type { DataRegistryValue, UISpecification } from "@banorte/contracts";
+import type { DataRegistryValue, UISpecification } from "@ine/contracts";
 
 export const paymentCaptureData: DataRegistryValue = {};
 

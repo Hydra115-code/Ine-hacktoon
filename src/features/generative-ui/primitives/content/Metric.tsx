@@ -26,7 +26,7 @@ export function Metric({
   trend,
   comparison,
   importance = "secondary",
-  semanticState = "financial.neutral",
+  semanticState = "data.neutral",
 }: MetricProps) {
   const hasValue = value !== undefined && value !== null;
   const valueKey = typeof value === "string" || typeof value === "number"

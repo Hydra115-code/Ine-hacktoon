@@ -108,11 +108,11 @@ test("los cinco tipos de UI Patch se aplican sin perder validación", () => {
   assert.equal(state.state.nodeIndex.has("fresh-data-alert"), false);
 });
 
-test("sesión expirada, saldo insuficiente y duplicados no ofrecen reintento peligroso", () => {
+test("sesión expirada, acciones autoritativas y duplicados no ofrecen reintento peligroso", () => {
   for (const [code, title] of [
     ["session_expired", "Tu sesión expiró"],
-    ["payment_insufficient_funds", "Saldo insuficiente"],
-    ["duplicate_payment", "La operación ya fue recibida"],
+    ["action_backend_required", "Esta acción requiere confirmación"],
+    ["duplicate_action", "La operación ya fue recibida"],
   ] as const) {
     const presentation = presentAgentFailure({ code, recoverable: true, hasPartialData: true });
     assert.equal(presentation.title, title);

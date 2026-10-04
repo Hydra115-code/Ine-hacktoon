@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  errorPayloadSchema,
-  financialSummaryRequestSchema,
-} from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
+import { financialSummaryRequestSchema } from "@ine/contracts/legacy-financial";
 import {
   refreshSupabaseSession,
   SupabaseAuthenticationError,

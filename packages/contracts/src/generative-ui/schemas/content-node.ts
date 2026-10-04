@@ -15,11 +15,11 @@ export { bindingReferenceSchema } from "../data-binding/schemas/binding-schema.j
 const shortTextSchema = z.string().trim().min(1).max(120);
 const bodyTextSchema = z.string().trim().min(1).max(600);
 
-export const financialSemanticStateSchema = z.enum([
-  "financial.positive",
-  "financial.negative",
-  "financial.neutral",
-  "financial.warning",
+export const dataSemanticStateSchema = z.enum([
+  "data.positive",
+  "data.negative",
+  "data.neutral",
+  "data.warning",
 ]);
 
 export const statusSemanticStateSchema = z.enum([
@@ -56,13 +56,13 @@ export interface MetricNode extends IdentifiableNode {
   trendBinding?: string;
   comparisonBinding?: string;
   importance?: "primary" | "secondary" | "tertiary";
-  semanticState?: z.infer<typeof financialSemanticStateSchema>;
+  semanticState?: z.infer<typeof dataSemanticStateSchema>;
 }
 
 export interface BadgeNode extends IdentifiableNode {
   type: "badge";
   label: string;
-  semanticState?: z.infer<typeof statusSemanticStateSchema> | "financial.neutral";
+  semanticState?: z.infer<typeof statusSemanticStateSchema> | "data.neutral";
   emphasis?: "soft" | "strong";
 }
 
@@ -87,7 +87,7 @@ export interface IconNode extends IdentifiableNode {
   name: "info" | "success" | "warning" | "error" | "trend-up" | "trend-down" | "neutral";
   label?: string;
   size?: "sm" | "md" | "lg";
-  semanticState?: z.infer<typeof statusSemanticStateSchema> | z.infer<typeof financialSemanticStateSchema>;
+  semanticState?: z.infer<typeof statusSemanticStateSchema> | z.infer<typeof dataSemanticStateSchema>;
 }
 
 export interface ListItemNode {
@@ -141,7 +141,7 @@ export const metricNodeBaseSchema = z.object({
   trendBinding: bindingReferenceSchema.optional(),
   comparisonBinding: bindingReferenceSchema.optional(),
   importance: z.enum(["primary", "secondary", "tertiary"]).optional(),
-  semanticState: financialSemanticStateSchema.optional(),
+  semanticState: dataSemanticStateSchema.optional(),
 }).strict();
 
 export function validateMetricNode(node: MetricNode, context: z.RefinementCtx) {
@@ -159,7 +159,7 @@ export const badgeNodeSchema = z.object({
   type: z.literal("badge"),
   ...optionalNodeIdField,
   label: shortTextSchema,
-  semanticState: z.union([statusSemanticStateSchema, z.literal("financial.neutral")]).optional(),
+  semanticState: z.union([statusSemanticStateSchema, z.literal("data.neutral")]).optional(),
   emphasis: z.enum(["soft", "strong"]).optional(),
 }).strict();
 
@@ -187,7 +187,7 @@ export const iconNodeSchema = z.object({
   name: z.enum(["info", "success", "warning", "error", "trend-up", "trend-down", "neutral"]),
   label: shortTextSchema.optional(),
   size: z.enum(["sm", "md", "lg"]).optional(),
-  semanticState: z.union([statusSemanticStateSchema, financialSemanticStateSchema]).optional(),
+  semanticState: z.union([statusSemanticStateSchema, dataSemanticStateSchema]).optional(),
 }).strict();
 
 const listItemSchema = z.object({

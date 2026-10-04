@@ -2,7 +2,7 @@ import { bindingSchema, type Binding, type BindingValueType } from "../schemas/b
 import type { DataValue } from "../schemas/data-registry-schema";
 import { DataRegistry } from "../registry/DataRegistry";
 import { formatDataValue } from "../formatting/format-data-value";
-import { maskFinancialIdentifier } from "../formatting/mask-financial-identifier";
+import { maskSensitiveIdentifier } from "../formatting/mask-sensitive-identifier";
 import { readDataField } from "./read-data-field";
 
 export type BindingResolutionStatus = "resolved" | "missing" | "invalid" | "type_mismatch" | "format_error";
@@ -62,7 +62,7 @@ export class BindingResolver {
     const binding: Binding = parsed.data;
     const value = this.#resolveValue(binding.path);
     const formatValue = (candidate: DataValue, format = binding.format) => (
-      maskFinancialIdentifier(binding.path, candidate)
+      maskSensitiveIdentifier(binding.path, candidate)
       ?? formatDataValue(candidate, format, { locale: this.#locale, currency: this.#currency })
     );
 

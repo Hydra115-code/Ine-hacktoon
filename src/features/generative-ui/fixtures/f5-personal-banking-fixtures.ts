@@ -1,4 +1,4 @@
-import type { DataRegistryValue, UISpecification } from "@banorte/contracts";
+import type { DataRegistryValue, UISpecification } from "@ine/contracts";
 
 export type PersonalBankingScenarioId = "available-balance" | "recent-transactions" | "monthly-spending" | "period-comparison";
 
@@ -43,7 +43,7 @@ export const availableBalanceScenario: PersonalBankingScenario = {
           columns: 2,
           gap: "md",
           children: [
-            { type: "metric", id: "available-balance", label: "Disponible", valueBinding: "availableBalance", format: "currency", importance: "primary", semanticState: "financial.positive" },
+            { type: "metric", id: "available-balance", label: "Disponible", valueBinding: "availableBalance", format: "currency", importance: "primary", semanticState: "data.positive" },
             { type: "metric", id: "available-account", label: "Cuenta", valueBinding: "accountNumber", format: "text", importance: "tertiary" },
           ],
         },
@@ -169,8 +169,8 @@ export const monthlySpendingScenario: PersonalBankingScenario = {
           columns: 3,
           gap: "md",
           children: [
-            { type: "metric", id: "spending-total", label: "Gasto analizado", valueBinding: "totalSpent", format: "currency", importance: "primary", semanticState: "financial.neutral" },
-            { type: "metric", id: "spending-highest", label: "Hogar", valueBinding: "highestCategoryAmount", format: "currency", importance: "secondary", semanticState: "financial.warning" },
+            { type: "metric", id: "spending-total", label: "Gasto analizado", valueBinding: "totalSpent", format: "currency", importance: "primary", semanticState: "data.neutral" },
+            { type: "metric", id: "spending-highest", label: "Hogar", valueBinding: "highestCategoryAmount", format: "currency", importance: "secondary", semanticState: "data.warning" },
             { type: "metric", id: "spending-share", label: "Participación de Hogar", valueBinding: "categoryShare", format: "percent", importance: "tertiary" },
           ],
         },
@@ -238,7 +238,7 @@ export const periodComparisonScenario: PersonalBankingScenario = {
           children: [
             { type: "metric", id: "comparison-current", label: "Septiembre", valueBinding: "currentSpent", format: "currency", importance: "primary" },
             { type: "metric", id: "comparison-previous", label: "Agosto", valueBinding: "previousSpent", format: "currency", importance: "secondary" },
-            { type: "metric", id: "comparison-change", label: "Variación", valueBinding: "spendingChange", format: "percent", importance: "secondary", semanticState: "financial.positive" },
+            { type: "metric", id: "comparison-change", label: "Variación", valueBinding: "spendingChange", format: "percent", importance: "secondary", semanticState: "data.positive" },
           ],
         },
         {

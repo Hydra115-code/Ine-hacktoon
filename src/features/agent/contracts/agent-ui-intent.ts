@@ -1,2 +1,2 @@
-export { uiEventSchema as agentUIIntentSchema } from "@banorte/contracts";
-export type { UIEvent as AgentUIIntent } from "@banorte/contracts";
+export { uiEventSchema as agentUIIntentSchema } from "@ine/contracts";
+export type { UIEvent as AgentUIIntent } from "@ine/contracts";

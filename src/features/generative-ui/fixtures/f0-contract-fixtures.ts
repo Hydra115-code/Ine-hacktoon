@@ -1,4 +1,4 @@
-import type { DataRegistryValue, UISpecification, UIPatch } from "@banorte/contracts";
+import type { DataRegistryValue, UISpecification, UIPatch } from "@ine/contracts";
 
 export interface ContractFixture {
   id: "personal-banking" | "financial-education" | "payment-preparation";
@@ -43,8 +43,8 @@ export const personalBankingFixture: ContractFixture = {
           columns: 2,
           gap: "md",
           children: [
-            { type: "metric", id: "balance-metric", label: "Saldo total", valueBinding: "balance", format: "currency", importance: "primary", semanticState: "financial.neutral" },
-            { type: "metric", id: "change-metric", label: "Cambio mensual", valueBinding: "monthlyChange", format: "percent", trendBinding: "monthlyChange", semanticState: "financial.positive" },
+            { type: "metric", id: "balance-metric", label: "Saldo total", valueBinding: "balance", format: "currency", importance: "primary", semanticState: "data.neutral" },
+            { type: "metric", id: "change-metric", label: "Cambio mensual", valueBinding: "monthlyChange", format: "percent", trendBinding: "monthlyChange", semanticState: "data.positive" },
             { type: "metric", id: "account-metric", label: "Cuenta", valueBinding: "accountNumber", format: "text", importance: "tertiary" },
           ],
         },
@@ -139,7 +139,7 @@ export const financialEducationFixture: ContractFixture = {
                   id: "education-result",
                   gap: "sm",
                   children: [
-                    { type: "metric", id: "projected-savings", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", semanticState: "financial.positive" },
+                    { type: "metric", id: "projected-savings", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", semanticState: "data.positive" },
                     { type: "progress", id: "goal-progress", label: "Avance estimado de meta", valueBinding: "goalProgress", showValue: true, semanticState: "status.success" },
                     { type: "icon", id: "education-icon", name: "info", label: "Resultado informativo", semanticState: "status.info" },
                   ],

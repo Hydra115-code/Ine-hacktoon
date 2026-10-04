@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { errorPayloadSchema } from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
 import {
   refreshSupabaseSession,
   SupabaseAuthenticationError,

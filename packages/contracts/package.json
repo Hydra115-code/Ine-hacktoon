@@ -1,5 +1,5 @@
 {
-  "name": "@banorte/contracts",
+  "name": "@ine/contracts",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -62,13 +62,9 @@
       "types": "./dist/protocol.d.ts",
       "import": "./dist/protocol.js"
     },
-    "./financial-domain": {
-      "types": "./dist/financial-domain.d.ts",
-      "import": "./dist/financial-domain.js"
-    },
-    "./fixtures": {
-      "types": "./dist/fixtures.d.ts",
-      "import": "./dist/fixtures.js"
+    "./legacy-financial": {
+      "types": "./dist/legacy/financial-protocol.d.ts",
+      "import": "./dist/legacy/financial-protocol.js"
     }
   },
   "files": [

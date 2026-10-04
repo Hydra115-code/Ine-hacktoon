@@ -1,4 +1,4 @@
-import type { UISpecification, UINode } from "@banorte/contracts";
+import type { UISpecification, UINode } from "@ine/contracts";
 
 export interface UIAccessibilityIssue {
   code: "duplicate_id" | "missing_id" | "missing_label" | "invalid_default" | "missing_accessible_name";

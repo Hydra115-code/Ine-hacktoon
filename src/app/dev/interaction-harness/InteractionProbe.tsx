@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { UIEvent, UISpecification } from "@banorte/contracts";
+import type { UIEvent, UISpecification } from "@ine/contracts";
 import { UIRenderer } from "@/features/generative-ui/renderer/UIRenderer";
 import type { LocalUIEvent } from "@/features/generative-ui/interactions/events/local-ui-event";
 import { classifyInteractionEvent } from "@/features/agent/interactions/interaction-policy";

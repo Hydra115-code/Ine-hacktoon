@@ -2,7 +2,7 @@
 
 Frontend en migración para una experiencia de **exploración ciudadana con interfaz generativa**. El usuario formula una pregunta sobre datos públicos y el sistema construye una vista útil con componentes propios —métricas, tablas, gráficas, filtros y controles— que después puede modificar mediante conversación o interacción directa.
 
-> Estado actual: `FRONT-01` completado. El shell, la identidad y el lenguaje visible ya corresponden al proyecto INE. Los contratos y fixtures financieros heredados permanecen temporalmente como baseline técnico y se neutralizarán en `FRONT-02`.
+> Estado actual: `FRONT-02` completado. El shell y el núcleo GenUI ya son neutrales: contratos `@ine/contracts`, renderer, streaming, patches, estado e interacciones no dependen del dominio financiero. Los escenarios anteriores permanecen aislados como compatibilidad temporal y serán sustituidos por la primera historia electoral en `FRONT-03`.
 
 Este repositorio no contiene pantallas prearmadas para cada pregunta. Renderiza una especificación declarativa y segura producida por el agente; las rutas `/dev/*` son únicamente harnesses de validación y no forman parte de la experiencia productiva.
 
@@ -47,7 +47,7 @@ sequenceDiagram
     participant Agent as Backend agente
     participant UI as Renderer GenUI
 
-    Usuario->>Chat: Pregunta financiera
+    Usuario->>Chat: Pregunta sobre datos públicos
     Chat->>Next: Mensajes + sesión
     Next->>Agent: POST /api/agent + JWT
     Agent-->>Next: Stream: texto + datos + UI
@@ -66,7 +66,7 @@ sequenceDiagram
 | Aplicación | Next.js 16, React 19 y TypeScript |
 | Conversación/stream | Vercel AI SDK (`ai`, `@ai-sdk/react`) |
 | Estado | Zustand |
-| Contratos | Zod y paquete compartido `@banorte/contracts` |
+| Contratos | Zod y paquete compartido `@ine/contracts` |
 | Visualización | ECharts, tablas y componentes propios |
 | Movimiento | Motion |
 | Autenticación | Supabase Auth desde rutas server-side |
@@ -98,9 +98,9 @@ AGENT_API_URL=http://127.0.0.1:3101/api/agent
 AGENT_API_TOKEN=
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
 SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
-BANORTE_DEMO_LOGIN_ENABLED=false
-BANORTE_DEMO_EMAIL=
-BANORTE_DEMO_PASSWORD=
+INE_DEMO_LOGIN_ENABLED=false
+INE_DEMO_EMAIL=
+INE_DEMO_PASSWORD=
 ```
 
 | Variable | Obligatoria | Uso |
@@ -110,9 +110,9 @@ BANORTE_DEMO_PASSWORD=
 | `SUPABASE_PUBLISHABLE_KEY` | Sí | Clave pública/anon de Supabase; no usar `service_role`. |
 | `AI_PROVIDER` | No | Identificador de proveedor; actualmente `google`. |
 | `AGENT_API_TOKEN` | No | Compatibilidad con backends legados; no sustituye el JWT de usuario. |
-| `BANORTE_DEMO_LOGIN_ENABLED` | No | Muestra “Entrar a demostración” cuando también existen email y contraseña. |
-| `BANORTE_DEMO_EMAIL` | Condicional | Cuenta sintética de demo; sólo variable server-side. |
-| `BANORTE_DEMO_PASSWORD` | Condicional | Secreto de demo; nunca usar prefijo `NEXT_PUBLIC_`. |
+| `INE_DEMO_LOGIN_ENABLED` | No | Muestra “Entrar a demostración” cuando también existen email y contraseña. |
+| `INE_DEMO_EMAIL` | Condicional | Cuenta sintética de demo; sólo variable server-side. |
+| `INE_DEMO_PASSWORD` | Condicional | Secreto de demo; nunca usar prefijo `NEXT_PUBLIC_`. |
 
 No copies el `.env` de otra máquina ni subas secretos. El usuario se autentica en Supabase y Next.js conserva access/refresh tokens en cookies `HttpOnly`, `SameSite=Strict` y `Secure` en producción.
 
@@ -165,7 +165,7 @@ pnpm typecheck
 pnpm build
 pnpm contracts:verify
 pnpm protocol:verify
-pnpm banking:verify
+pnpm front-02:verify
 pnpm dynamic-ui:verify
 pnpm interaction:verify
 pnpm quality:verify
@@ -186,10 +186,10 @@ Los harnesses bajo `/dev/*` sólo se incluyen en desarrollo para inspeccionar co
 
 ## Contratos y seguridad
 
-- `packages/contracts` debe conservar el mismo fingerprint que el paquete del backend.
+- `packages/contracts` publica un núcleo neutral; la compatibilidad anterior vive únicamente en `@ine/contracts/legacy-financial` y no participa en el fingerprint principal.
 - La UI aceptada es una estructura declarativa validada; no se ejecuta HTML o JavaScript generado por el modelo.
 - Los eventos incluyen correlación, sesión y revisiones para evitar aplicar cambios obsoletos.
-- Los datos financieros pertenecen al usuario autenticado; el backend aplica RLS.
+- Los datos protegidos pertenecen al usuario autenticado; el backend aplica sus controles de acceso y trazabilidad.
 - Ante pérdida de stream, conflicto de revisión o UI inválida, el frontend recupera snapshot o muestra una degradación segura.
 - Nunca expongas `GEMINI_API_KEY`, `ELEVENLABS_API_KEY`, `SUPABASE_ACCESS_TOKEN` o `service_role` al navegador.
 

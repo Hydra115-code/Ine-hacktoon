@@ -1,4 +1,4 @@
-import { dataPatchSchema, type DataPatch } from "@banorte/contracts";
+import { dataPatchSchema, type DataPatch } from "@ine/contracts";
 import type { DataRegistryValue } from "../schemas/data-registry-schema";
 import { DataRegistry } from "./DataRegistry.ts";
 

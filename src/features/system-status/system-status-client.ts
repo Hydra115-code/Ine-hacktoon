@@ -3,7 +3,7 @@ import {
   errorPayloadSchema,
   systemStatusSchema,
   type SystemStatus,
-} from "@banorte/contracts";
+} from "@ine/contracts";
 
 export type SystemStatusErrorCode =
   | "backend_unavailable"

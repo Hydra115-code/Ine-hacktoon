@@ -2,8 +2,9 @@ import { readDataField } from "../data-binding/resolver/read-data-field";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { VisualizationNode } from "../schemas/visualization-node";
 import type { VisualizationDataRow } from "./VisualizationCompiler";
-import { maskFinancialIdentifier } from "../data-binding/formatting/mask-financial-identifier";
+import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { formatDataValue, localizeDisplayValue } from "../data-binding/formatting/format-data-value";
+import type { BindingFormat } from "../data-binding/schemas/binding-schema";
 
 interface VisualizationDataTableProps {
   rows: VisualizationDataRow[];
@@ -13,6 +14,7 @@ interface VisualizationDataTableProps {
 interface AccessibleColumn {
   field: string;
   label: string;
+  format?: BindingFormat;
 }
 
 const MAX_ACCESSIBLE_ROWS = 100;
@@ -25,25 +27,22 @@ function getAccessibleColumns(spec: VisualizationNode): AccessibleColumn[] {
     columns.set(channel.field, {
       field: channel.field,
       label: channel.label ?? channel.field,
+      ...(channel.format ? { format: channel.format } : {}),
     });
   });
 
   return [...columns.values()];
 }
 
-const monetaryField = /(?:^|_)(?:amount|balance|spending|expense|income|gasto|importe|monto)(?:$|_)/iu;
-
-function formatAccessibleValue(value: DataValue | undefined, field: string, row: VisualizationDataRow) {
+function formatAccessibleValue(value: DataValue | undefined, column: AccessibleColumn, row: VisualizationDataRow) {
   if (value === null || value === undefined) return "Sin dato";
-  const masked = maskFinancialIdentifier(field, value);
+  const masked = maskSensitiveIdentifier(column.field, value);
   if (masked) return masked;
+  if (column.format) {
+    const currency = typeof row.currency === "string" && /^[A-Z]{3}$/u.test(row.currency) ? row.currency : "MXN";
+    return formatDataValue(value, column.format, { locale: "es-MX", currency }) ?? "Sin dato";
+  }
   if (typeof value === "number") {
-    if (monetaryField.test(field)) {
-      const currency = typeof row.currency === "string" && /^[A-Z]{3}$/u.test(row.currency)
-        ? row.currency
-        : "MXN";
-      return formatDataValue(value, "currency", { locale: "es-MX", currency }) ?? "Sin dato";
-    }
     return new Intl.NumberFormat("es-MX", { maximumFractionDigits: 2 }).format(value);
   }
   if (typeof value === "boolean") return value ? "Sí" : "No";
@@ -73,7 +72,7 @@ export function VisualizationDataTable({ rows, spec }: VisualizationDataTablePro
             {visibleRows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {columns.map((column) => (
-                  <td key={column.field}>{formatAccessibleValue(readDataField(row, column.field), column.field, row)}</td>
+                  <td key={column.field}>{formatAccessibleValue(readDataField(row, column.field), column, row)}</td>
                 ))}
               </tr>
             ))}

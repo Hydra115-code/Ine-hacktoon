@@ -16,8 +16,8 @@ export async function POST() {
 
   try {
     const session = await signInWithPassword(
-      process.env.BANORTE_DEMO_EMAIL!.trim(),
-      process.env.BANORTE_DEMO_PASSWORD!,
+      process.env.INE_DEMO_EMAIL!.trim(),
+      process.env.INE_DEMO_PASSWORD!,
     );
     const response = NextResponse.json({ authenticated: true }, {
       headers: { "Cache-Control": "no-store" },

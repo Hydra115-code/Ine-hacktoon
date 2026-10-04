@@ -1,4 +1,4 @@
-import { errorPayloadSchema } from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
 import {
   IntegrationConfigurationError,
   requestBackendSystemStatus,

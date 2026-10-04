@@ -1,11 +1,11 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { errorPayloadSchema } from "@ine/contracts";
 import {
-  errorPayloadSchema,
   financialSummaryResponseSchema,
   type FinancialSummaryResponse,
-} from "@banorte/contracts";
+} from "@ine/contracts/legacy-financial";
 import { DataRegistry } from "@/features/generative-ui/data-binding/registry/DataRegistry";
 import { UIRenderer } from "@/features/generative-ui/renderer/UIRenderer";
 import { i3FinancialSummarySpecification } from "@/features/integration/fixtures/i3-financial-summary-fixture";

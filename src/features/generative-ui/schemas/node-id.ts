@@ -1,1 +1,1 @@
-export * from "@banorte/contracts";
+export * from "@ine/contracts";

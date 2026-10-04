@@ -1,4 +1,4 @@
-import { uiSpecificationSchema } from "@banorte/contracts";
+import { uiSpecificationSchema } from "@ine/contracts";
 
 // Fixture fijo y exclusivo del checkpoint I3. No se usa en la experiencia productiva.
 export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
@@ -22,7 +22,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "primary",
-        semanticState: "financial.positive",
+        semanticState: "data.positive",
       },
       {
         type: "metric",
@@ -32,7 +32,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "secondary",
-        semanticState: "financial.negative",
+        semanticState: "data.negative",
       },
       {
         type: "metric",
@@ -42,7 +42,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "secondary",
-        semanticState: "financial.neutral",
+        semanticState: "data.neutral",
       },
     ],
   },

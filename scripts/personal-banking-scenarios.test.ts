@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { dataRegistrySchema, uiSpecificationSchema, type UINode } from "@banorte/contracts";
-import { maskFinancialIdentifier } from "../src/features/generative-ui/data-binding/formatting/mask-financial-identifier.ts";
+import { dataRegistrySchema, uiSpecificationSchema, type UINode } from "@ine/contracts";
+import { maskSensitiveIdentifier } from "../src/features/generative-ui/data-binding/formatting/mask-sensitive-identifier.ts";
 import { formatDataValue, localizeDisplayValue } from "../src/features/generative-ui/data-binding/formatting/format-data-value.ts";
 import {
   availableBalanceScenario,
@@ -101,7 +101,7 @@ test("ninguna serie mezcla cuenta o moneda y los identificadores quedan enmascar
       }
     }
   }
-  assert.equal(maskFinancialIdentifier("accountNumber", availableBalanceScenario.data.accountNumber), "•••• 4567");
+  assert.equal(maskSensitiveIdentifier("accountNumber", availableBalanceScenario.data.accountNumber), "•••• 4567");
 });
 
 test("el compositor de texto permanece disponible junto a cualquier resultado", () => {

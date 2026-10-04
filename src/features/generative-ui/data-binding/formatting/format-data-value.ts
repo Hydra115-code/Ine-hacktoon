@@ -16,13 +16,10 @@ interface FormatDataValueOptions {
 }
 
 const isoDatePattern = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
-const contractualFinancialAmountPattern = /^-?\d{1,16}(?:\.\d{1,2})?$/;
+const decimalAmountPattern = /^-?\d{1,16}(?:\.\d{1,2})?$/;
 const localizedDisplayValues: Readonly<Record<string, string>> = {
-  checking: "Cuenta de cheques",
-  savings: "Cuenta de ahorro",
-  credit_card: "Tarjeta de crédito",
-  active: "Activa",
-  inactive: "Inactiva",
+  active: "Activo",
+  inactive: "Inactivo",
   pending: "Pendiente",
   completed: "Completada",
   failed: "Fallida",
@@ -30,8 +27,6 @@ const localizedDisplayValues: Readonly<Record<string, string>> = {
   success: "Correcta",
   positive: "Positiva",
   negative: "Negativa",
-  debit: "Cargo",
-  credit: "Abono",
   observed: "Observado",
   simulated: "Simulado",
 };
@@ -40,13 +35,13 @@ export function localizeDisplayValue(value: string) {
   return localizedDisplayValues[value.trim().toLocaleLowerCase("es-MX")] ?? value;
 }
 
-function financialDisplayNumber(value: DataValue) {
+function numericDisplayValue(value: DataValue) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && contractualFinancialAmountPattern.test(value)) {
+  if (typeof value === "string" && decimalAmountPattern.test(value)) {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
   }
-  throw new TypeError("currency requiere un importe financiero válido");
+  throw new TypeError("currency requiere un valor numérico válido");
 }
 
 export function formatDataValue(
@@ -64,7 +59,7 @@ export function formatDataValue(
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
-      .format(financialDisplayNumber(value));
+      .format(numericDisplayValue(value));
   }
 
   if (format === "number") {

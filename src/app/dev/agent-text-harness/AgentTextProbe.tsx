@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { FormEvent, useMemo, useRef, useState } from "react";
-import { errorPayloadSchema } from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
 import {
   agentDataPartSchemas,
   type AgentUIMessage,

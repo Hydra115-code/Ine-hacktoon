@@ -20,8 +20,8 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("form_validation")) {
     return {
       code: input.code,
-      title: "Revisa los datos del pago",
-      message: input.message ?? "Completa los campos requeridos antes de revisar el pago.",
+      title: "Revisa los campos",
+      message: input.message ?? "Completa los campos requeridos antes de continuar.",
       canRetry: false,
       canContinue: false,
     };
@@ -32,18 +32,8 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
       code: input.code,
       title: "Tu sesión expiró",
       message: canContinue
-        ? "Conservamos la información visible. Recarga la página e inicia sesión antes de consultar o confirmar otra operación."
-        : "Recarga la página e inicia sesión antes de volver a consultar o confirmar una operación.",
-      canRetry: false,
-      canContinue,
-    };
-  }
-
-  if (code.includes("insufficient_funds") || code.includes("saldo_insuficiente")) {
-    return {
-      code: input.code,
-      title: "Saldo insuficiente",
-      message: "El pago no se realizó. Conservamos los datos para que puedas corregir el monto o elegir otra cuenta.",
+        ? "Conservamos la información visible. Recarga la página e inicia sesión antes de continuar."
+        : "Recarga la página e inicia sesión antes de volver a consultar.",
       canRetry: false,
       canContinue,
     };
@@ -54,6 +44,16 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
       code: input.code,
       title: "La operación ya fue recibida",
       message: "No enviaremos la operación otra vez. Verifica su estado autoritativo antes de intentar una acción nueva.",
+      canRetry: false,
+      canContinue,
+    };
+  }
+
+  if (code.includes("action_backend_required") || code.includes("authoritative_action")) {
+    return {
+      code: input.code,
+      title: "Esta acción requiere confirmación",
+      message: input.message ?? "La interfaz no ejecutará esta acción sin validación autoritativa del backend.",
       canRetry: false,
       canContinue,
     };
@@ -79,11 +79,11 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
     };
   }
 
-  if (code.includes("financial-reasoning")) {
+  if (code.includes("evidence-validation") || code.includes("financial-reasoning")) {
     return {
       code: input.code,
       title: "No pudimos respaldar el análisis con suficiente evidencia",
-      message: "Descartamos una conclusión financiera que podía resultar engañosa. Puedes reintentar o precisar el periodo, la categoría o el escenario que quieres analizar.",
+      message: "Descartamos una conclusión que no estaba suficientemente respaldada. Puedes reintentar o precisar el periodo, territorio, indicador o escenario que quieres analizar.",
       canRetry: input.recoverable,
       canContinue: false,
     };

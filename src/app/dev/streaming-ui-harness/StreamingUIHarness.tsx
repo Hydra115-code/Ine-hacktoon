@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { errorPayloadSchema } from "@banorte/contracts";
+import { errorPayloadSchema } from "@ine/contracts";
 import { AppShell } from "@/features/workspace/components/AppShell";
 import styles from "./page.module.css";
 

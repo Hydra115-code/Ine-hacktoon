@@ -27,7 +27,7 @@ El build usa la API estable de TypeScript de Next porque su ruta experimental CL
 
 Ya cumple:
 
-- `@banorte/contracts` se consume desde el entrypoint raíz.
+- `@ine/contracts` se consume desde el entrypoint raíz.
 - Las fachadas de schemas dentro de `src` reexportan el contrato común; no mantienen otra definición pública.
 - El código valida solicitudes, eventos, UI, Data Patches y UI Patches.
 - Existe un adaptador central de eventos hacia data parts de AI SDK.

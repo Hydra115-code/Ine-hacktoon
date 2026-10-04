@@ -2,7 +2,7 @@ import {
   CONTRACT_VERSION,
   textAgentStreamEventSchema,
   type TextAgentStreamEvent,
-} from "@banorte/contracts";
+} from "@ine/contracts";
 
 export type AgentApiErrorCode =
   | "authentication_required"

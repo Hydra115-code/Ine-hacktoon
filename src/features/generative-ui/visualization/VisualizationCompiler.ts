@@ -2,7 +2,7 @@ import type { EChartsOption } from "echarts";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { VisualizationNode } from "../schemas/visualization-node";
 import { readDataField } from "../data-binding/resolver/read-data-field";
-import { maskFinancialIdentifier } from "../data-binding/formatting/mask-financial-identifier";
+import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { formatDataValue } from "../data-binding/formatting/format-data-value";
 
 export interface VisualizationDataRow {
@@ -23,7 +23,7 @@ interface CompileVisualizationOptions {
 
 function asCategory(value: DataValue | undefined, field: string) {
   if (value !== undefined) {
-    const masked = maskFinancialIdentifier(field, value);
+    const masked = maskSensitiveIdentifier(field, value);
     if (masked) return masked;
   }
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
@@ -253,9 +253,7 @@ export function compileVisualizationOption(
       ? heatmapOption(spec, rows)
       : cartesianOption(spec, rows);
   const themedMarkOption = applyThemeToMarkOption(markOption, theme);
-  const quantitativeField = spec.encoding.value?.field ?? spec.encoding.y?.field;
-  const isMonetary = quantitativeField !== undefined
-    && /(?:^|_)(?:amount|balance|spending|expense|income|gasto|importe|monto)(?:$|_)/iu.test(quantitativeField);
+  const quantitativeChannel = spec.encoding.value ?? spec.encoding.y;
   const firstCurrency = rows.find((row) => typeof row.currency === "string" && /^[A-Z]{3}$/u.test(row.currency))?.currency;
   const currency = typeof firstCurrency === "string" ? firstCurrency : "MXN";
 
@@ -283,9 +281,9 @@ export function compileVisualizationOption(
       backgroundColor: theme.surface,
       borderColor: theme.border,
       textStyle: { color: theme.text },
-      valueFormatter: isMonetary
+      valueFormatter: quantitativeChannel?.format
         ? (value) => typeof value === "number"
-          ? formatDataValue(value, "currency", { locale: "es-MX", currency }) ?? "—"
+          ? formatDataValue(value, quantitativeChannel.format, { locale: "es-MX", currency }) ?? "—"
           : String(value ?? "—")
         : undefined,
     },

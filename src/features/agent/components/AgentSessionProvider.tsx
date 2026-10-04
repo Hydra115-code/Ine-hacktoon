@@ -40,7 +40,7 @@ import {
 } from "../recovery/agent-error-presentation";
 import {
   clearSessionArchive,
-  isPersonalBankingAnalysisTitle,
+  isEligibleAnalysisTitle,
   loadSessionArchive,
   saveSessionArchive,
   type PersistedAnalysisSnapshot,
@@ -245,10 +245,10 @@ function restoreAnalysisSnapshot(snapshot: PersistedAnalysisSnapshot): AnalysisS
   }
 }
 
-function failureScopeFromCode(code: string): "conversation" | "ui" | "data_registry" | "payment" {
+function failureScopeFromCode(code: string): "conversation" | "ui" | "data_registry" | "action" {
   if (code.startsWith("ui_")) return "ui";
   if (code.startsWith("data_")) return "data_registry";
-  if (code.startsWith("payment_") || code.startsWith("action_")) return "payment";
+  if (code.startsWith("action_") || code.startsWith("action_")) return "action";
   return "conversation";
 }
 
@@ -288,7 +288,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
   const [failure, setFailure] = useState<AgentFailurePresentation>();
   const [suppressedAnswerId, setSuppressedAnswerId] = useState<string>();
   const [frontendPerformance, setFrontendPerformance] = useState<FrontendPerformanceSummary>();
-  const [activityMessage, setActivityMessage] = useState("Listo para analizar tus finanzas");
+  const [activityMessage, setActivityMessage] = useState("Listo para explorar datos públicos");
   const [sessionTitle, setSessionTitle] = useState<string>();
   const [activeAnalysisId, setActiveAnalysisId] = useState<string>();
   const [analysisSnapshots, setAnalysisSnapshots] = useState<AnalysisSnapshot[]>([]);
@@ -346,7 +346,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     recoverable = true,
     code = "agent_error",
     hasPartialData?: boolean,
-    scope: "conversation" | "ui" | "data_registry" | "payment" = "conversation",
+    scope: "conversation" | "ui" | "data_registry" | "action" = "conversation",
   ) => {
     if (scope === "ui" || scope === "data_registry") {
       console.warn(`Agent stream validation failed: ${code} (${scope})`);
@@ -553,7 +553,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       } else if (part.type === "data-agentError") {
         if (part.data.code === "authentication_required") {
           useWorkspaceStore.setState({ draft: lastPromptRef.current ?? useWorkspaceStore.getState().draft });
-          window.dispatchEvent(new Event("banorte:authentication-required"));
+          window.dispatchEvent(new Event("ine:authentication-required"));
         }
         if (part.data.correlationId) setCorrelationId(part.data.correlationId);
         failGracefully(
@@ -568,7 +568,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     onError: (error) => {
       if (error instanceof AgentTransportError) {
         useWorkspaceStore.setState({ draft: lastPromptRef.current ?? useWorkspaceStore.getState().draft });
-        window.dispatchEvent(new Event("banorte:authentication-required"));
+        window.dispatchEvent(new Event("ine:authentication-required"));
         failGracefully(error.message, false, error.code);
         return;
       }
@@ -586,7 +586,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     if (!archive) return;
 
     const restoredSnapshots = archive.snapshots
-      .filter((snapshot) => isPersonalBankingAnalysisTitle(snapshot.title))
+      .filter((snapshot) => isEligibleAnalysisTitle(snapshot.title))
       .map(restoreAnalysisSnapshot)
       .filter((snapshot): snapshot is AnalysisSnapshot => snapshot !== null);
     if (restoredSnapshots.length === 0) {
@@ -822,7 +822,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     setChangeSummary(undefined);
     setActiveAnalysisId(undefined);
     setSessionTitle(createSessionTitle(prompt));
-    setActivityMessage("Interpretando tu consulta financiera");
+    setActivityMessage("Interpretando tu consulta");
     renderStartedAtRef.current = undefined;
     frontendRenderLatencyRef.current = undefined;
     patchStateRef.current = undefined;
@@ -943,15 +943,15 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       return;
     }
     if (policy.delivery === "blocked") {
-      const message = "Esta acción financiera requiere confirmación y ejecución autoritativas del backend; no se enviará desde la UI generada.";
+      const message = "Esta acción modifica información o publica resultados y requiere confirmación autoritativa del backend; no se enviará desde la UI generada.";
       setFailure(presentAgentFailure({
-        code: "payment_backend_required",
+        code: "action_backend_required",
         message,
         recoverable: false,
         hasPartialData: Boolean(patchStateRef.current),
       }));
       setCanRetry(false);
-      setActivityMessage("Acción financiera protegida");
+      setActivityMessage("Acción autoritativa protegida");
       return;
     }
 
@@ -976,7 +976,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       setCanRetry(false);
       setFailure(presentAgentFailure({
         code: "form_validation",
-        message: "Selecciona origen y destinatario y completa monto y moneda antes de revisar el pago.",
+        message: "Completa todos los campos requeridos antes de continuar.",
         recoverable: false,
         hasPartialData: true,
       }));

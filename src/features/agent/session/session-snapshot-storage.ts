@@ -1,11 +1,10 @@
 import { z } from "zod";
-import { dataRegistrySchema, uiSpecificationSchema } from "@banorte/contracts";
+import { dataRegistrySchema, uiSpecificationSchema } from "@ine/contracts";
 
-export const SESSION_ARCHIVE_KEY = "banorte:agent-session:v1";
+export const SESSION_ARCHIVE_KEY = "ine:genui-session:v1";
 export const SESSION_ARCHIVE_TTL_MS = 30 * 60 * 1_000;
 export const MAX_SESSION_ARCHIVE_BYTES = 750_000;
 const MAX_PERSISTED_ANALYSES = 8;
-const HIDDEN_VERTICAL_TITLE = /\b(?:pago(?:s)?|pagar|beneficiario(?:s)?|transfer(?:ir|encia|encias)?|prestamo(?:s)?|credito(?:s)?|deuda(?:s)?|salud\s+financiera|educacion\s+financiera|simul(?:a|ar|acion)|meta\s+de\s+ahorro)\b/u;
 
 export interface SessionStorageLike {
   getItem(key: string): string | null;
@@ -46,13 +45,13 @@ function byteLength(value: string) {
   return new TextEncoder().encode(value).byteLength;
 }
 
-export function isPersonalBankingAnalysisTitle(title: string): boolean {
+export function isEligibleAnalysisTitle(title: string): boolean {
   const normalized = title
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
     .toLocaleLowerCase("es-MX")
     .trim();
-  return !HIDDEN_VERTICAL_TITLE.test(normalized);
+  return normalized.length > 0;
 }
 
 function removeQuietly(storage: SessionStorageLike) {

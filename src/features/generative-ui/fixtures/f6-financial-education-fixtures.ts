@@ -1,4 +1,4 @@
-import type { DataPatch, DataRegistryValue, UIPatch, UISpecification } from "@banorte/contracts";
+import type { DataPatch, DataRegistryValue, UIPatch, UISpecification } from "@ine/contracts";
 
 export const educationInitialData: DataRegistryValue = {
   monthlyIncome: 32000,
@@ -43,7 +43,7 @@ export const educationInitialSpecification: UISpecification = {
                 children: [
                   { type: "metric", id: "education-income", label: "Ingreso", valueBinding: "monthlyIncome", format: "currency", importance: "secondary" },
                   { type: "metric", id: "education-fixed", label: "Gastos fijos", valueBinding: "fixedExpenses", format: "currency", importance: "secondary" },
-                  { type: "metric", id: "education-flexible", label: "Gastos flexibles", valueBinding: "flexibleExpenses", format: "currency", importance: "secondary", semanticState: "financial.warning" },
+                  { type: "metric", id: "education-flexible", label: "Gastos flexibles", valueBinding: "flexibleExpenses", format: "currency", importance: "secondary", semanticState: "data.warning" },
                   { type: "metric", id: "education-current-rate", label: "Tasa de ahorro actual", valueBinding: "currentSavingsRate", format: "percent", importance: "secondary" },
                 ],
               },
@@ -86,7 +86,7 @@ export const educationInitialSpecification: UISpecification = {
                   { type: "heading", id: "education-simulation-title", content: "Escenario de ahorro a 12 meses", level: 3, size: "section" },
                   { type: "alert", id: "education-simulation-disclaimer", title: "Resultado orientativo", message: "Esta simulación es orientativa y no constituye una oferta financiera.", semanticState: "status.warning" },
                   { type: "slider", id: "education-monthly-saving", label: "Aportación mensual", event: "savings.monthly.changed", min: 500, max: 5000, step: 100, initialValue: 2500, showValue: true, helpText: "El valor cambia localmente; el resultado se reconcilia al soltar." },
-                  { type: "metric", id: "education-projected", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", importance: "primary", semanticState: "financial.positive" },
+                  { type: "metric", id: "education-projected", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", importance: "primary", semanticState: "data.positive" },
                   { type: "progress", id: "education-goal-progress", label: "Avance de tu meta", valueBinding: "goalProgress", showValue: true, semanticState: "status.info" },
                 ],
               },

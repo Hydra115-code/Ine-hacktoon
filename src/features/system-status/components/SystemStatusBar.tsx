@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { type SystemStatus } from "@banorte/contracts";
+import { type SystemStatus } from "@ine/contracts";
 import { requestSystemStatus } from "../system-status-client";
 
 type LoadStatus = () => Promise<SystemStatus>;

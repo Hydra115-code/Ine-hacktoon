@@ -1,9 +1,9 @@
-.ui-semantic--financial-positive { --ui-semantic-color: var(--color-financial-positive); }
+.ui-semantic--data-positive { --ui-semantic-color: var(--color-data-positive); }
 .ui-semantic--status-success { --ui-semantic-color: var(--color-status-success); }
-.ui-semantic--financial-negative { --ui-semantic-color: var(--color-financial-negative); }
+.ui-semantic--data-negative { --ui-semantic-color: var(--color-data-negative); }
 .ui-semantic--status-error { --ui-semantic-color: var(--color-status-error); }
-.ui-semantic--financial-neutral { --ui-semantic-color: var(--color-financial-neutral); }
-.ui-semantic--financial-warning { --ui-semantic-color: var(--color-financial-warning); }
+.ui-semantic--data-neutral { --ui-semantic-color: var(--color-data-neutral); }
+.ui-semantic--data-warning { --ui-semantic-color: var(--color-data-warning); }
 .ui-semantic--status-warning { --ui-semantic-color: var(--color-status-warning); }
 .ui-semantic--status-info { --ui-semantic-color: var(--color-status-info); }
 

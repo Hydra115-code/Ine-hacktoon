@@ -1,4 +1,4 @@
-import type { UIPatch, UISpecification } from "@banorte/contracts";
+import type { UIPatch, UISpecification } from "@ine/contracts";
 
 export const continuitySpecification: UISpecification = {
   version: "1",

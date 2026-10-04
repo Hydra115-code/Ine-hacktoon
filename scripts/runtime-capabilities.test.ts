@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
-  isSensitiveFinancialField,
-  maskFinancialIdentifier,
-} from "../src/features/generative-ui/data-binding/formatting/mask-financial-identifier.ts";
+  isSensitiveIdentifierField,
+  maskSensitiveIdentifier,
+} from "../src/features/generative-ui/data-binding/formatting/mask-sensitive-identifier.ts";
 import {
   knownNodeTypes,
   nodeCapabilityMatrix,
@@ -36,12 +36,12 @@ test("enmascara cuentas, tarjetas, PAN, CLABE e IBAN conservando sólo cuatro ca
     "card.pan",
   ];
   for (const path of protectedPaths) {
-    assert.equal(isSensitiveFinancialField(path), true, path);
-    assert.equal(maskFinancialIdentifier(path, "0123-4567-8901-2345"), "•••• 2345", path);
+    assert.equal(isSensitiveIdentifierField(path), true, path);
+    assert.equal(maskSensitiveIdentifier(path, "0123-4567-8901-2345"), "•••• 2345", path);
   }
-  assert.equal(maskFinancialIdentifier("accountType", "Débito"), undefined);
-  assert.equal(maskFinancialIdentifier("amount", 12345), undefined);
-  assert.equal(maskFinancialIdentifier("cardNumber", "1234"), "••••");
+  assert.equal(maskSensitiveIdentifier("accountType", "Débito"), undefined);
+  assert.equal(maskSensitiveIdentifier("amount", 12345), undefined);
+  assert.equal(maskSensitiveIdentifier("cardNumber", "1234"), "••••");
 });
 
 test("bindings, tablas y visualizaciones consumen la misma política de masking", () => {
@@ -53,6 +53,6 @@ test("bindings, tablas y visualizaciones consumen la misma política de masking"
   ];
   for (const relativePath of consumers) {
     const source = readFileSync(new URL(relativePath, import.meta.url), "utf8");
-    assert.match(source, /maskFinancialIdentifier/u, relativePath);
+    assert.match(source, /maskSensitiveIdentifier/u, relativePath);
   }
 });

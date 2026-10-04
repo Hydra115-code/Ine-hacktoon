@@ -1,10 +1,10 @@
+import { errorPayloadSchema } from "@ine/contracts";
 import {
-  errorPayloadSchema,
   financialSummaryRequestSchema,
   financialSummaryResponseSchema,
   type FinancialSummaryRequest,
   type FinancialSummaryResponse,
-} from "@banorte/contracts";
+} from "@ine/contracts/legacy-financial";
 
 const MAX_FINANCIAL_RESPONSE_BYTES = 1_000_000;
 

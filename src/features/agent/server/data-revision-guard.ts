@@ -1,4 +1,4 @@
-import { dataPatchSchema, type SessionReference } from "@banorte/contracts";
+import { dataPatchSchema, type SessionReference } from "@ine/contracts";
 
 /** Validates the authoritative registry sequence without inventing missing values. */
 export class DataRevisionGuard {

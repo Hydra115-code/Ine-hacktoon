@@ -1,7 +1,7 @@
 import type { AgentApiEvent } from "./agent-api-event";
 import type { UIPlannerContext, UIRepairContext } from "../planner/ui-planner";
 import type { AgentUIIntent } from "../contracts/agent-ui-intent";
-import type { SessionReference } from "@banorte/contracts";
+import type { SessionReference } from "@ine/contracts";
 
 export type AIProviderId = "google" | "openai";
 

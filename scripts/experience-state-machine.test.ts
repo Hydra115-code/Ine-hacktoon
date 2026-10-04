@@ -29,7 +29,7 @@ test("completa una generación inicial con dominios separados", () => {
     conversation: "active",
     ui: "stable",
     dataRegistry: "current",
-    payment: "idle",
+    action: "idle",
   });
 });
 
@@ -59,36 +59,36 @@ test("generar sobre un snapshot se modela como actualización", () => {
   assert.equal(updating.state.hasValidSnapshot, true);
 });
 
-test("el pago no reutiliza el estado de generación del agente", () => {
+test("una acción autoritativa no reutiliza el estado de generación del agente", () => {
   const restored = transitionExperience(createInitialExperienceState(), { type: "RESTORE_SESSION" });
   assert.equal(restored.accepted, true);
-  const awaiting = transitionExperience(restored.state, { type: "PAYMENT_CONFIRMATION_REQUIRED" });
+  const awaiting = transitionExperience(restored.state, { type: "ACTION_CONFIRMATION_REQUIRED" });
   assert.equal(awaiting.accepted, true);
   assert.equal(awaiting.state.status, "awaiting_confirmation");
   assert.equal(awaiting.state.domains.ui, "stable");
-  assert.equal(awaiting.state.domains.payment, "awaiting_confirmation");
+  assert.equal(awaiting.state.domains.action, "awaiting_confirmation");
 
-  const executing = transitionExperience(awaiting.state, { type: "PAYMENT_CONFIRMED" });
+  const executing = transitionExperience(awaiting.state, { type: "ACTION_CONFIRMED" });
   assert.equal(executing.accepted, true);
   assert.equal(executing.state.status, "executing_action");
-  assert.equal(executing.state.domains.payment, "executing");
+  assert.equal(executing.state.domains.action, "executing");
 });
 
-test("un pago en ejecución no acepta una cancelación tardía", () => {
+test("una acción en ejecución no acepta una cancelación tardía", () => {
   const restored = transitionExperience(createInitialExperienceState(), { type: "RESTORE_SESSION" });
   assert.equal(restored.accepted, true);
-  const awaiting = transitionExperience(restored.state, { type: "PAYMENT_CONFIRMATION_REQUIRED" });
+  const awaiting = transitionExperience(restored.state, { type: "ACTION_CONFIRMATION_REQUIRED" });
   assert.equal(awaiting.accepted, true);
-  const executing = transitionExperience(awaiting.state, { type: "PAYMENT_CONFIRMED" });
+  const executing = transitionExperience(awaiting.state, { type: "ACTION_CONFIRMED" });
   assert.equal(executing.accepted, true);
-  const cancelled = transitionExperience(executing.state, { type: "CANCEL", scope: "payment" });
+  const cancelled = transitionExperience(executing.state, { type: "CANCEL", scope: "action" });
 
   assert.equal(cancelled.accepted, false);
   assert.equal(cancelled.state.status, "executing_action");
-  assert.equal(cancelled.state.domains.payment, "executing");
+  assert.equal(cancelled.state.domains.action, "executing");
 });
 
-test("un error del agente no convierte el estado del pago en fallido", () => {
+test("un error del agente no convierte el estado de la acción en fallido", () => {
   const restored = transitionExperience(createInitialExperienceState(), { type: "RESTORE_SESSION" });
   assert.equal(restored.accepted, true);
   const updating = transitionExperience(restored.state, { type: "UI_UPDATE_STARTED" });
@@ -98,7 +98,7 @@ test("un error del agente no convierte el estado del pago en fallido", () => {
   assert.equal(failed.accepted, true);
   assert.equal(failed.state.status, "error");
   assert.equal(failed.state.domains.ui, "stable");
-  assert.equal(failed.state.domains.payment, "idle");
+  assert.equal(failed.state.domains.action, "idle");
 });
 
 test("una captura corregida puede actualizar la UI después de un error conservando el snapshot", () => {
@@ -135,7 +135,7 @@ test("un conflicto de revisión entra a recuperación de datos", () => {
 
 test("rechaza transiciones que no pertenecen al estado actual", () => {
   const initial = createInitialExperienceState();
-  const result = transitionExperience(initial, { type: "PAYMENT_CONFIRMED" });
+  const result = transitionExperience(initial, { type: "ACTION_CONFIRMED" });
 
   assert.equal(result.accepted, false);
   assert.equal(result.state, initial);

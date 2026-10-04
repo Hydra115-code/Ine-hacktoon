@@ -75,12 +75,12 @@ export function SessionAccessGate({ children }: {
       setMessage("Tu sesión expiró. Inicia sesión para continuar con tu consulta.");
     };
     window.addEventListener("focus", onFocus);
-    window.addEventListener("banorte:authentication-required", onAuthenticationRequired);
+    window.addEventListener("ine:authentication-required", onAuthenticationRequired);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       requestSequence.current += 1;
       window.removeEventListener("focus", onFocus);
-      window.removeEventListener("banorte:authentication-required", onAuthenticationRequired);
+      window.removeEventListener("ine:authentication-required", onAuthenticationRequired);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [checkSession]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { DataRegistryValue, UISpecification } from "@banorte/contracts";
+import type { DataRegistryValue, UISpecification } from "@ine/contracts";
 import { auditUISpecificationAccessibility } from "@/features/generative-ui/accessibility/audit-ui-accessibility";
 import { monthlySpendingScenario } from "@/features/generative-ui/fixtures/f5-personal-banking-fixtures";
 import { educationInitialData, educationInitialSpecification } from "@/features/generative-ui/fixtures/f6-financial-education-fixtures";

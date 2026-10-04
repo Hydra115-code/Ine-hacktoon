@@ -143,7 +143,7 @@ resultados anteriores corresponden a RPC/HTTP reales, no a ese archivo SQL.
   vencidas, ajenas o sin snapshot íntegro.
 - Frontend `/api/agent/snapshot`: JWT HttpOnly enviado únicamente desde servidor;
   respuestas no cacheables, validación del DTO compuesto con los esquemas ya
-  compartidos, identidad y timeout. No se modificó `@banorte/contracts`.
+  compartidos, identidad y timeout. No se modificó `@ine/contracts`.
 - Botón «Sincronizar UI y datos» en conflictos: valida ambos estados antes de
   restaurarlos juntos. Ignora respuestas tardías de otra sesión; un fallo mantiene
   la vista y el bloqueo. No reenvía la interacción ni permite reintento ciego.

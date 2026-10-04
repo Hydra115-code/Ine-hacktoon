@@ -3,8 +3,8 @@ import "server-only";
 import type { NextRequest, NextResponse } from "next/server";
 import type { SupabaseUserSession } from "./supabase-session";
 
-export const ACCESS_TOKEN_COOKIE = "banorte-user-session";
-export const REFRESH_TOKEN_COOKIE = "banorte-user-refresh";
+export const ACCESS_TOKEN_COOKIE = "ine-user-session";
+export const REFRESH_TOKEN_COOKIE = "ine-user-refresh";
 
 const baseCookie = {
   httpOnly: true,

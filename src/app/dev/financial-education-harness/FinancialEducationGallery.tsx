@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { DataRegistryValue, UISpecification, UINode } from "@banorte/contracts";
+import type { DataRegistryValue, UISpecification, UINode } from "@ine/contracts";
 import { UIRenderer } from "@/features/generative-ui/renderer/UIRenderer";
 import { applyUIPatch, createUIPatchState } from "@/features/generative-ui/patches/ui-patch-engine";
 import { applyDataRegistryPatch, createDataRegistryPatchState } from "@/features/generative-ui/data-binding/registry/data-registry-patch-engine";

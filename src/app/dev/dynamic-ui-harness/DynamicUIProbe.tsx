@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { UISpecification } from "@banorte/contracts";
+import type { UISpecification } from "@ine/contracts";
 import { UIRenderer } from "@/features/generative-ui/renderer/UIRenderer";
 import {
   captureGeneratedUIFocus,

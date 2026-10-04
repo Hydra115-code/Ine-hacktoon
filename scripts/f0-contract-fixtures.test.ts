@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dataRegistrySchema, uiPatchSchema, uiSpecificationSchema } from "@banorte/contracts";
+import { dataRegistrySchema, uiPatchSchema, uiSpecificationSchema } from "@ine/contracts";
 import {
   f0ContractFixtures,
   personalBankingPatchSequence,

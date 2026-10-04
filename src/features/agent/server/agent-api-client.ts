@@ -4,7 +4,7 @@ import {
   type SessionReference,
   type TextAgentRequest,
   type TextAgentStreamEvent,
-} from "@banorte/contracts";
+} from "@ine/contracts";
 import { agentApiEventSchema, type AgentApiEvent } from "./agent-api-event";
 import {
   AgentApiError,
