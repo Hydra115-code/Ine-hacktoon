@@ -50,3 +50,8 @@ temp/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local assistant instructions and internal planning notes
+/AGENTS.md
+/CLAUDE.md
+/docs/
