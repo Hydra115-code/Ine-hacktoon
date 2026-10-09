@@ -1,0 +1,1 @@
+export const CONTRACT_FINGERPRINT = "376867fcb25be0e8d227eeea9ae80c3a6bc4c4f5b2c4b505b76f95cb3f747b76" as const;
