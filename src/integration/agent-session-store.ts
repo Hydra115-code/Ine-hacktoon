@@ -108,7 +108,7 @@ export function createFollowUpQuery(state: AgentSessionSnapshot, prompt: string)
     ...(state.specification ? { currentPresentation: summarizePresentation(state.specification) } : {}),
   };
   return [
-    "Continúa la sesión financiera usando sólo el contexto relevante incluido abajo.",
+    "Continúa la conversación usando sólo el contexto relevante incluido abajo.",
     "No asumas que los datos anteriores siguen vigentes; consulta MCP cuando la nueva solicitud lo requiera.",
     "Si constraintsChanged es true, vuelve a calcular simulaciones y recomendaciones; está prohibido reutilizar la recomendación anterior.",
     "Si la nueva solicitud sólo cambia filtros o datos, conserva los controles y las identidades que sigan siendo útiles; puedes cambiar la visualización si la nueva evidencia se comunica mejor de otra forma.",

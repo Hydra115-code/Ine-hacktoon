@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ChallengeHarness, queryRequest } from "./support/challenge-harness.js";
+import { CivicHarness, queryRequest } from "./support/civic-harness.js";
 import {
   createIntentAwareEarlyUiPayload,
   createProvisionalUiPayload,
 } from "../src/integration/shared-ui-stream.js";
 
 test("I6 emite DataPatch antes de la primera UI que consume sus bindings", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const events = await harness.run(queryRequest(
     "33000000-0000-4000-8000-000000000001",
     "44000000-0000-4000-8000-000000000001",
-    "¿En qué se me está yendo el dinero?",
+    "Muéstrame una gráfica de votos por partido a nivel nacional en 2024",
   ));
   const dataIndex = events.findIndex((event) => event.type === "data-patch");
   const uiIndex = events.findIndex((event) => event.type === "ui-started" || event.type === "ui");
@@ -31,11 +31,11 @@ test("I6 emite DataPatch antes de la primera UI que consume sus bindings", async
 });
 
 test("GEN4 mantiene feedback inmediato y no publica UI falsa con planificador lento", async () => {
-  const harness = new ChallengeHarness({ uiGenerationDelayMs: 250 });
+  const harness = new CivicHarness({ uiGenerationDelayMs: 250 });
   const request = queryRequest(
     "33000000-0000-4000-8000-000000000002",
     "44000000-0000-4000-8000-000000000002",
-    "¿Qué categorías presionaron más mis gastos de agosto?",
+    "¿Cómo votó Jalisco en la elección presidencial de 2024?",
   );
   const startedAt = performance.now();
   const observed: Array<{ type: string; atMs: number }> = [];
@@ -54,14 +54,14 @@ test("GEN4 mantiene feedback inmediato y no publica UI falsa con planificador le
 });
 
 test("GEN4 publica una sola vista final al consultar nuevos datos en el mismo hilo", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const sessionId = "33000000-0000-4000-8000-000000000003";
-  await harness.run(queryRequest(sessionId, "44000000-0000-4000-8000-000000000003", "¿En qué gasté más?"));
+  await harness.run(queryRequest(sessionId, "44000000-0000-4000-8000-000000000003", "Resultados nacionales de la elección presidencial 2024"));
   const previous = harness.sessions.latest();
   const events = await harness.run(queryRequest(
     sessionId,
     "44000000-0000-4000-8000-000000000004",
-    "¿Cuál es el saldo disponible en mis cuentas?",
+    "¿Y cuál fue la participación en Oaxaca?",
     previous,
   ));
   const replacements = events.filter((event) => event.type === "ui-started");

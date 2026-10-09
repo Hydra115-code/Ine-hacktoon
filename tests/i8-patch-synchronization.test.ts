@@ -1,19 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { type TextAgentStreamEvent } from "@banorte/contracts";
-import { ChallengeHarness, interactionRequest, queryRequest } from "./support/challenge-harness.js";
+import {
+  CivicHarness,
+  ENTITY_FILTER_EVENT,
+  ENTITY_FILTER_ID,
+  interactionRequest,
+  queryRequest,
+} from "./support/civic-harness.js";
 
 test("I8 mantiene secuencias UI/datos independientes y ordenadas entre turnos", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const sessionId = "38000000-0000-4000-8000-000000000001";
   const first = await harness.run(queryRequest(sessionId,
     "39000000-0000-4000-8000-000000000001",
-    "Quiero ahorrar $50,000 en 8 meses sin reducir gastos de salud y educación. ¿Qué aportación mensual necesito?"));
+    "Compara los resultados de Jalisco con el nivel nacional en 2024."));
   const initial = harness.sessions.latest();
   assertSequence(first, 0, 0);
   const next = await harness.run(interactionRequest(sessionId,
     "39000000-0000-4000-8000-000000000002", initial,
-    { name: "simulation.changed", sourceId: "monthly-saving", value: 8000 }));
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "oaxaca" }));
   assertSequence(next, initial.interfaceRevision, initial.dataRevision);
   const completed = harness.sessions.latest();
   const replayed: Record<string, unknown> = {};
@@ -34,7 +40,7 @@ test("I8 mantiene secuencias UI/datos independientes y ordenadas entre turnos", 
   const callsBefore = harness.toolCalls.length;
   const stale = await harness.run(interactionRequest(sessionId,
     "39000000-0000-4000-8000-000000000003", initial,
-    { name: "simulation.changed", sourceId: "monthly-saving", value: 7500 }));
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "nuevo-leon" }));
   assert.ok(stale.some((event) => event.type === "error" && event.error.code === "session_revision_conflict"));
   assert.equal(harness.toolCalls.length, callsBefore);
   assert.deepEqual(harness.sessions.latest(), completed);

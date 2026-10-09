@@ -35,7 +35,7 @@ export function createUiEventQuery(
   };
 
   return [
-    "Actualiza la información financiera visible según esta interacción.",
+    "Actualiza la información electoral visible según esta interacción.",
     "Decide qué herramientas MCP son necesarias; el cliente no ha seleccionado ninguna herramienta.",
     "El valor validado del control representa la selección absoluta del usuario, no un incremento ni una sugerencia: úsalo exactamente en cualquier parámetro MCP equivalente y consérvalo en el control actualizado.",
     "Respeta las preferencias de presentación de la solicitud original, como evitar tablas, gráficas o resúmenes.",

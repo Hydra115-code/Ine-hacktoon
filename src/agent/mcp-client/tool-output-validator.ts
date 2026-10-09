@@ -10,6 +10,7 @@ import { GetAccountsOutputSchema } from "../../schemas/get-accounts.schema.js";
 import { GetTransactionsOutputSchema } from "../../schemas/get-transactions.schema.js";
 import { EvaluateFinancialHealthOutputSchema } from "../../schemas/financial-health.schema.js";
 import { PingOutputSchema } from "../../schemas/ping.schema.js";
+import { GetElectionResultsOutputSchema } from "../../schemas/election-results.schema.js";
 import {
   CancelPaymentIntentOutputSchema,
   ConfirmPaymentOutputSchema,
@@ -24,6 +25,7 @@ import {
 
 const TOOL_OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
   ping: PingOutputSchema,
+  get_election_results: GetElectionResultsOutputSchema,
   get_accounts: GetAccountsOutputSchema,
   get_transactions: GetTransactionsOutputSchema,
   get_financial_summary: FinancialSummaryOutputSchema,

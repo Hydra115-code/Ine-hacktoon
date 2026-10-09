@@ -15,11 +15,7 @@ import {
   type PaymentWriteGrant,
   type PaymentWritePermission,
 } from "../../application/ports/payment-write-authorization.js";
-import {
-  CRITICAL_WRITE_FINANCIAL_TOOL_NAMES,
-  PERSONAL_BANKING_TOOL_NAMES,
-  READ_FINANCIAL_TOOL_NAMES,
-} from "../tool-policy.js";
+import { CIVIC_TOOL_NAMES } from "../civic-tool-policy.js";
 import { randomUUID } from "node:crypto";
 
 export type SessionFactory = () => Promise<AuthenticatedSupabaseSession>;
@@ -43,14 +39,7 @@ export async function createAgentRuntime(
   const geminiConfig = requireGeminiConfig();
   const supabaseSession = await sessionFactory();
   const paymentWriteGrant = resolvePaymentWriteGrant(options, supabaseSession.user.id);
-  const personalBankingOnly = env.FINANCIAL_EXPERIENCE_SCOPE === "personal_banking";
-  const permittedToolNames = personalBankingOnly
-    ? [...PERSONAL_BANKING_TOOL_NAMES]
-    : [
-        ...READ_FINANCIAL_TOOL_NAMES,
-        ...(paymentWriteGrant?.permissions.map((permission) => permission.toolName) ?? []),
-        ...(options.paymentConfirmationGrant ? CRITICAL_WRITE_FINANCIAL_TOOL_NAMES : []),
-      ];
+  const permittedToolNames = [...CIVIC_TOOL_NAMES];
   const mcpClient = await FinancialMcpClient.connect(
     crearServidor(supabaseSession, {
       ...(paymentWriteGrant ? {

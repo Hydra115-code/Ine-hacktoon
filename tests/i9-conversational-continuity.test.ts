@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { type UISpecification } from "@banorte/contracts";
 import { createSharedUiPatches } from "../src/integration/shared-ui-stream.js";
-import { ChallengeHarness, queryRequest } from "./support/challenge-harness.js";
+import { CivicHarness, queryRequest } from "./support/civic-harness.js";
 
 const current: UISpecification = { version: "1", root: {
   type: "section", id: "root", ariaLabel: "Gastos", children: [
@@ -36,9 +36,9 @@ test("L9 elimina sólo el nodo solicitado; reordenar exige reemplazo seguro", ()
 });
 
 test("L9 tres mensajes recuperan contexto de la misma sesión y encadenan revisiones", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const sessionId = "48000000-0000-4000-8000-000000000001";
-  const prompts = ["Quiero ahorrar $50,000 en 8 meses sin reducir salud y educación.", "Ahora puedo aportar $1,000 más al mes.", "Mantén el plazo de 8 meses y explica la simulación actual."];
+  const prompts = ["Muéstrame los resultados de Jalisco en 2024.", "Ahora compáralos con Oaxaca.", "Explica la participación en Oaxaca."];
   let previous;
   for (const [index, prompt] of prompts.entries()) {
     const events = await harness.run(queryRequest(sessionId, `49000000-0000-4000-8000-00000000000${index + 1}`, prompt, previous));
@@ -56,7 +56,7 @@ test("L9 tres mensajes recuperan contexto de la misma sesión y encadenan revisi
     assert.equal(previous.interfaceRevision, revision);
   }
   assert.equal(harness.sessions.completions.length, 3);
-  assert.match(harness.modelQueries.at(-1)!, /50,000/);
-  assert.match(harness.modelQueries.at(-1)!, /1,000/);
-  assert.ok(harness.toolCalls.every((call) => !call.name.includes("payment")));
+  assert.match(harness.modelQueries.at(-1)!, /Jalisco/);
+  assert.match(harness.modelQueries.at(-1)!, /compáralos con Oaxaca/);
+  assert.ok(harness.toolCalls.every((call) => call.name === "get_election_results"));
 });

@@ -30,8 +30,7 @@ import { type PaymentConfirmationGrant } from "../application/ports/payment-conf
 import { type PaymentWriteGrant } from "../application/ports/payment-write-authorization.js";
 import { paymentWritePermissionsForQuery } from "../agent/payment-write-policy.js";
 import { paymentReviewPermission } from "./payment-review-permission.js";
-import { env } from "../config/env.js";
-import { classifyFinancialQuery } from "../agent/security/financial-scope-policy.js";
+import { classifyCivicQuery } from "../agent/security/civic-scope-policy.js";
 import { transformPersistedUi } from "./ui-transformation.js";
 
 interface TextAgentServiceDependencies {
@@ -314,7 +313,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
     };
     if (session.isContinuation && !isUiInteraction && currentSpecification
       && request.responseMode === "complete-ui") {
-      const scope = classifyFinancialQuery(agentQuery, env.FINANCIAL_EXPERIENCE_SCOPE);
+      const scope = classifyCivicQuery(agentQuery);
       let transformation: ReturnType<typeof transformPersistedUi> = null;
       let patches: ReturnType<typeof createSharedUiPatches> = [];
       const previousSpecification = currentSpecification;

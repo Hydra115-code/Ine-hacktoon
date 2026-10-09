@@ -10,11 +10,13 @@ import { createUiEventQuery, reconcileUiEventControl, SharedUiEventValidationErr
 import { adaptUiDataSource } from "../src/integration/shared-contract-adapter.js";
 import {
   ACTOR_ID,
-  ChallengeHarness,
+  CivicHarness,
+  ENTITY_FILTER_EVENT,
+  ENTITY_FILTER_ID,
   interactionRequest,
   queryRequest,
   referenceFrom,
-} from "./support/challenge-harness.js";
+} from "./support/civic-harness.js";
 
 const SESSION_ID = "34000000-0000-4000-8000-000000000001";
 
@@ -82,7 +84,7 @@ test("DateRange, Select, Slider y Button producen intención semántica sin sele
       dataKeys: ["source_1"],
       event,
     });
-    const query = createUiEventQuery(interaction, controls, "Analiza mis finanzas");
+    const query = createUiEventQuery(interaction, controls, "Analiza los resultados electorales");
     assert.match(query, new RegExp(event.name.replaceAll(".", "\\."), "u"));
     assert.doesNotMatch(query, /"toolName"/u);
     assert.match(query, /Decide qué herramientas MCP son necesarias/u);
@@ -203,12 +205,12 @@ test("rechaza eventos fabricados o valores que no pertenecen al control", () => 
   assert.throws(() => createUiEventQuery(invalidSlider, controls), SharedUiEventValidationError);
 });
 
-test("un Slider vuelve al Agent, recalcula por MCP y produce DataPatch/UIPatch sin prompt nuevo", async () => {
-  const harness = new ChallengeHarness();
+test("un selector de entidad vuelve al Agent, consulta MCP y produce DataPatch/UIPatch sin prompt nuevo", async () => {
+  const harness = new CivicHarness();
   await harness.run(queryRequest(
     SESSION_ID,
     "35000000-0000-4000-8000-000000000020",
-    "Quiero ahorrar $50,000 en 8 meses.",
+    "Muéstrame los resultados de Jalisco en 2024.",
   ));
   const initial = harness.sessions.latest();
 
@@ -216,18 +218,18 @@ test("un Slider vuelve al Agent, recalcula por MCP y produce DataPatch/UIPatch s
     SESSION_ID,
     "35000000-0000-4000-8000-000000000021",
     initial,
-    { name: "simulation.changed", sourceId: "monthly-saving", value: 7_500 },
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "oaxaca" },
   ));
 
   assertSuccessful(events);
   assert.ok(events.some((event) => event.type === "data-patch"));
   assert.ok(events.some((event) => event.type === "ui-patch"));
-  const simulations = harness.toolCalls.filter((call) => call.name === "simulate_savings");
-  assert.equal(simulations.at(-1)?.arguments.periodicContribution, "7500.00");
+  const requestedEntities = harness.toolCalls.map((call) => call.arguments.entity);
+  assert.ok(requestedEntities.slice(-2).includes("Oaxaca"));
   const completed = harness.sessions.latest();
   assert.equal(completed.prompt, undefined);
-  assert.equal(completed.interaction?.name, "simulation.changed");
-  assert.equal(completed.interaction?.value, 7_500);
+  assert.equal(completed.interaction?.name, ENTITY_FILTER_EVENT);
+  assert.equal(completed.interaction?.value, "oaxaca");
   assert.ok(completed.interfaceRevision > initial.interfaceRevision);
   assert.ok(completed.dataRevision > initial.dataRevision);
 
@@ -241,16 +243,16 @@ test("un Slider vuelve al Agent, recalcula por MCP y produce DataPatch/UIPatch s
   assert.equal(inspection.success, true);
   if (!inspection.success) return;
   assert.equal(inspection.state.turns.length, 1, "la interacción no debe fingir un prompt escrito");
-  assert.equal(inspection.state.interactionState["simulation.changed"], 7_500);
+  assert.equal(inspection.state.interactionState[ENTITY_FILTER_EVENT], "oaxaca");
   await harness.sessions.release(ACTOR_ID, SESSION_ID, inspectionCorrelationId);
 });
 
 test("una revisión obsoleta se rechaza antes de invocar MCP", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   await harness.run(queryRequest(
     SESSION_ID,
     "35000000-0000-4000-8000-000000000030",
-    "Quiero ahorrar $50,000 en 8 meses.",
+    "Muéstrame los resultados de Jalisco en 2024.",
   ));
   const current = harness.sessions.latest();
   const callsBefore = harness.toolCalls.length;
@@ -258,7 +260,7 @@ test("una revisión obsoleta se rechaza antes de invocar MCP", async () => {
     SESSION_ID,
     "35000000-0000-4000-8000-000000000031",
     current,
-    { name: "simulation.changed", sourceId: "monthly-saving", value: 7_500 },
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "oaxaca" },
     -1,
   ));
 

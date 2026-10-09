@@ -9,24 +9,24 @@ import {
 import { createSystemApi } from "../src/http/system-api.js";
 import { type TextAgentService } from "../src/integration/text-agent-service.js";
 import {
-  ChallengeHarness,
+  CivicHarness,
   queryRequest,
-} from "./support/challenge-harness.js";
+} from "./support/civic-harness.js";
 
 const SESSION_ID = "12000000-0000-4000-8000-000000000001";
 const CORRELATION_ID = "22000000-0000-4000-8000-000000000001";
 const ACCESS_TOKEN = "i4-user-access-token-with-sufficient-length";
 
 test("responseMode text conserva MCP y texto sin emitir eventos UI", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const request = textAgentRequestSchema.parse({
-    ...queryRequest(SESSION_ID, CORRELATION_ID, "¿En qué gasté más este mes?"),
+    ...queryRequest(SESSION_ID, CORRELATION_ID, "¿Cuál fue la participación nacional en 2024?"),
     responseMode: "text",
   });
 
   const events = await harness.run(request);
 
-  assert.deepEqual(harness.toolCalls.map((call) => call.name), ["get_spending_by_category"]);
+  assert.deepEqual(harness.toolCalls.map((call) => call.name), ["get_election_results"]);
   assert.ok(events.some((event) => event.type === "data-patch"));
   assert.ok(events.some((event) => event.type === "text-delta"));
   assert.equal(events.at(-1)?.type, "completed");
@@ -80,7 +80,7 @@ test("cerrar el consumidor HTTP aborta la ejecución activa del agente", async (
       correlationId: CORRELATION_ID,
       provider: "google",
       responseMode: "text",
-      query: "¿Cuánto tengo disponible?",
+      query: "¿Cuál fue la participación en Jalisco?",
     })),
     signal: controller.signal,
   });

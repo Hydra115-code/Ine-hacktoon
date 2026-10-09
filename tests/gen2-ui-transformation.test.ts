@@ -6,7 +6,7 @@ import { AgentSessionStore } from "../src/integration/agent-session-store.js";
 import { createTextAgentService } from "../src/integration/text-agent-service.js";
 import { createSharedUiPatches } from "../src/integration/shared-ui-stream.js";
 import { type SessionStore } from "../src/application/ports/session-store.js";
-import { ChallengeHarness, queryRequest } from "./support/challenge-harness.js";
+import { CivicHarness, queryRequest } from "./support/civic-harness.js";
 
 const specification: UISpecification = {
   version: "1",
@@ -173,12 +173,12 @@ test("GEN2 reordena con move sin reemplazar el contenedor ni cambiar IDs", () =>
 });
 
 test("GEN2 usa ruta directa: cero modelo/MCP, revisión de datos intacta y ui-completed", async () => {
-  const harness = new ChallengeHarness();
+  const harness = new CivicHarness();
   const sessionId = "82000000-0000-4000-8000-000000000001";
   await harness.run(queryRequest(
     sessionId,
     "82000000-0000-4000-8000-000000000101",
-    "Analiza en qué se está yendo el dinero durante septiembre de 2026.",
+    "Analiza los resultados nacionales de la elección presidencial 2024.",
   ));
   const initial = harness.sessions.latest();
   const modelCalls = harness.modelQueries.length;
@@ -225,8 +225,8 @@ test("GEN2 completa las cuatro transformaciones sin runtime, MCP ni cambio de da
       actorId, sessionId, correlationId: seedCorrelationId,
       interfaceRevision: 0, dataRevision: 1, dataKeys: ["source_1"],
       dataRegistry, specification,
-      prompt: "Compara mis gastos de agosto de 2026 por categoría.",
-      answer: "Tus gastos financieros se concentran en dos categorías.",
+      prompt: "Compara los votos por partido de la elección de 2024.",
+      answer: "Los votos se concentran en dos partidos.",
     });
     const service = createTextAgentService({
       sessionStore: store,
@@ -267,8 +267,8 @@ test("GEN2 conserva la última UI y no publica parches si falla la persistencia"
     actorId, sessionId, correlationId: initialCorrelationId,
     interfaceRevision: 0, dataRevision: 1, dataKeys: ["source_1"],
     dataRegistry, specification,
-    prompt: "Compara mis gastos de agosto de 2026 por categoría.",
-    answer: "El análisis financiero está listo.",
+    prompt: "Compara los votos por partido de la elección de 2024.",
+    answer: "El análisis electoral está listo.",
   });
   const failingStore: SessionStore = {
     begin: (input) => delegate.begin(input),

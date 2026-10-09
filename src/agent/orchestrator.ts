@@ -30,7 +30,7 @@ import {
   isAllowedTool,
   selectAllowedTools,
   toolCallFingerprint,
-} from "./tool-policy.js";
+} from "./civic-tool-policy.js";
 import {
   type UiDataSource,
   type UiDocument,
@@ -53,13 +53,12 @@ import {
   type TraceContext,
 } from "../observability/telemetry.js";
 import {
-  classifyFinancialQuery,
-  createMissingPeriodResponse,
-  createFinancialScopeResponse,
-  isFinancialResponseSafe,
-  type FinancialScopeBlockReason,
-  type FinancialExperienceScope,
-} from "./security/financial-scope-policy.js";
+  classifyCivicQuery,
+  createCivicScopeResponse,
+  isCivicResponseSafe,
+  type CivicScopeBlockReason,
+} from "./security/civic-scope-policy.js";
+import type { FinancialExperienceScope } from "./security/financial-scope-policy.js";
 
 interface AgentOrchestratorConfig {
   maxToolCalls: number;
@@ -145,36 +144,18 @@ export class AgentOrchestrator {
       yield publish({
         type: "status",
         stage: "planning",
-        message: "Analizando la consulta financiera",
+        message: "Analizando la consulta",
       });
-      const scopeDecision = classifyFinancialQuery(query, this.config.experienceScope);
+      const scopeDecision = classifyCivicQuery(query);
       if (!scopeDecision.allowed) {
         logger.warn("Agente: consulta bloqueada por política de ámbito", {
           reason: scopeDecision.reason,
         });
-        const response = createScopeAgentResponse(scopeDecision.reason, [], this.config.experienceScope);
+        const response = createScopeAgentResponse(scopeDecision.reason);
         yield publish({
           type: "status",
           stage: "rendering-ui",
-          message: "Aplicando la política de seguridad financiera",
-        });
-        yield publish({ type: "ui-snapshot", ui: response.ui, dataSources: [] });
-        requestSpan.complete({ toolCallCount: 0 });
-        yield publish({ type: "completed", response });
-        return;
-      }
-      const missingPeriod = createMissingPeriodResponse(query);
-      if (missingPeriod) {
-        const response = AgentResponseSchema.parse({
-          answer: missingPeriod.answer,
-          toolsUsed: [],
-          ui: missingPeriod.ui,
-          dataSources: [],
-        });
-        yield publish({
-          type: "status",
-          stage: "rendering-ui",
-          message: "Solicitando el periodo necesario para el análisis",
+          message: "Aplicando la política de seguridad",
         });
         yield publish({ type: "ui-snapshot", ui: response.ui, dataSources: [] });
         requestSpan.complete({ toolCallCount: 0 });
@@ -204,16 +185,16 @@ export class AgentOrchestrator {
 
         if (turn.toolCalls.length === 0) {
           if (!turn.text) throw new AgentExecutionError("El modelo no produjo una respuesta");
-          if (!isFinancialResponseSafe(turn.text)) {
+          if (!isCivicResponseSafe(turn.text)) {
             logger.warn("Agente: respuesta bloqueada por política de ámbito", {
               reason: "unsafe-response",
               toolCallCount: toolsUsed.length,
             });
-            const response = createScopeAgentResponse("unsafe-response", toolsUsed, this.config.experienceScope);
+            const response = createScopeAgentResponse("unsafe-response", toolsUsed);
             yield publish({
               type: "status",
               stage: "rendering-ui",
-              message: "Aplicando la política de seguridad financiera",
+              message: "Aplicando la política de seguridad",
             });
             yield publish({ type: "ui-snapshot", ui: response.ui, dataSources: [] });
             requestSpan.complete({ toolCallCount: attemptedToolCalls });
@@ -433,11 +414,10 @@ export class AgentOrchestrator {
 }
 
 function createScopeAgentResponse(
-  reason: FinancialScopeBlockReason | "unsafe-response",
+  reason: CivicScopeBlockReason | "unsafe-response",
   toolsUsed: readonly string[] = [],
-  experienceScope: FinancialExperienceScope = "full",
 ): AgentResponse {
-  const safe = createFinancialScopeResponse(reason, experienceScope);
+  const safe = createCivicScopeResponse(reason);
   return AgentResponseSchema.parse({
     answer: safe.answer,
     toolsUsed: [...toolsUsed],
