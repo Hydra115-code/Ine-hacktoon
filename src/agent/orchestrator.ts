@@ -8,7 +8,7 @@ import {
 } from "./mcp-client/financial-mcp-client.js";
 import { GeminiModelError } from "./model/gemini-api-client.js";
 import { type ModelGateway } from "./model/model.js";
-import { createFinancialSystemPrompt } from "./prompts/system-prompt.js";
+import { createCivicSystemPrompt } from "./prompts/civic-system-prompt.js";
 import {
   createFinancialReasoningRepairPrompt,
   FinancialReasoningError,
@@ -186,7 +186,7 @@ export class AgentOrchestrator {
       const session = this.model.createSession({
         query,
         tools: definitions,
-        systemInstruction: createFinancialSystemPrompt(this.currentDate(), this.config.experienceScope),
+        systemInstruction: createCivicSystemPrompt(this.currentDate()),
       });
       const executedCalls = new Set<string>();
       let pendingResults: AgentToolResult[] = [];
