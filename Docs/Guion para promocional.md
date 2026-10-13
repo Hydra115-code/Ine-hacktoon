@@ -1,39 +1,65 @@
-### Guion para promocional para Ine-hakckatoon (borrador)
-*Actores*
-* Actor1: Alumno1
-* Actor2: Alumno2
-* Narrador
-*Duracion:* Aprox 4 - 8 min
+### Guion Promocional Modificado
 
-El Alumno1 va con su amigo a biblioteca para conectarse a internet con su portatil, en el camino pregunta a su compañero sobre como fueron las ultimas votaciones quien de su localidad voto mas por un partido politico en especifico de las ultimas votaciones.
+    Duración estimada: 3 a 4 minutos.
 
-*Alumno1:* oye las votaciones se acercan y me da curiosidad saber por cual partido politico se voto mas en mi localidad.
+    Personajes:
 
-El Alumno2 respode:
+        Alumno 1: Curioso, frustrado al inicio, aliviado al final.
 
-*Alumno2:* bro.. puedes revisar la pagina del ine vamos a biblioteca tienes tu portatil.
+        Alumno 2: Amigo acompañante, pragmático.
 
-En biblioteca el Alumno1 entra a la pagina del ine y no sabe a que mover, como filtrar resultados (la pagina esta sobre saturada de opciones, no es intuitiva).
+        Narrador: Voz grave, profunda, épica e imponente.
 
-*Alumno1:* Amigo! como! como funciona esto no entiendo nada hay muchas opciones, la pagina parece del año 2005.
+        [Nombre de la Mascota]: Asistente virtual (interfaz/bot).
 
-*Alumno2:* Diablos no sabia que la pagina era muy complicada para ver resultados electorales.
+**ESCENA 1: EL PROBLEMA**
 
-Aqui entra el narrador con voz gravisima asi bien cabrona.
+(Ubicación: Pasillo camino a la biblioteca. Alumno 1 y Alumno 2 van caminando con sus mochilas).
 
-*Narrador:* Una pagina mal diseñada puede hacer que la persona que solo quiere conocer datos de votaciones electorales se frustre, tenga una mala experiencia con la pagina y sobre todo que no llgue a ver los datos que el queria revisar.
+    Alumno 1: Oye, ya casi son las votaciones y me dio bastante curiosidad... ¿sabes por cuál partido votaron más aquí en nuestra localidad la elección pasada?
 
-Transicion a nuestro proyecto funcionando .
+    Alumno 2: Bro, eso lo puedes ver directo en la página del INE. Vamos a la biblioteca, ahí hay buen internet y sacas tu portátil.
 
-*Narrador:* Aqui es donde entra [nombre de nuestra mascota] con una interfaz limpia, intuiva y agradable a cualquier usuario incluido con un chat bot para agilizar aun mas el proceso para revisar los datos permitiendo realizar graficas y responder a preguntas refentes al tema de votaciones con ayuda de la inteligencia artifial.
-(en el texto de arriba puede agregar como funciona nuestro proyecto, pero de forma muy simpplificada y sin inundar de informacion al inversor).
+**ESCENA 2: LA FRUSTRACIÓN (El dolor del usuario)**
 
-tiempo para que Alumno1 haga consultas y pruebe nuestro proyecto (aprox 2 a 3 min) mostrar solo lo mas importante.
+(Ubicación: Biblioteca. Alumno 1 abre la laptop y teclea. La pantalla muestra un sitio saturado de menús, PDFs y botones confusos).
 
-*Alumno1:* WOW vaya [inserte nombre de mascota] me mostraste todo lo que necesito gracias eres un grande.
+    Alumno 1: (Confundido, rascándose la cabeza) ¡Amigo, no entiendo nada! Hay mil opciones, menús desplegables por todos lados... esta página parece diseñada en 2005.
 
-*Alumno2:* genial esta muy facil. oye puedo consultar algo yo?.
+    Alumno 2: (Acercándose a mirar la pantalla) Diablos... no sabía que ver un simple dato electoral fuera un dolor de cabeza tan grande.
 
-camara se desenfoca y se aleja a lo lejos mostrando lentamente el logo de [nombre de nuestra mascota].
+**ESCENA 3: LA INTERVENCIÓN DEL NARRADOR**
 
-*Narrador:* [nombre de nuestra mascota] no es solo una mascota es una herramienta intuitiva de consulta y sobre todo... miralo es adorable.
+(Efecto de sonido: Pausa dramática o congelado de pantalla).
+
+    Narrador (Voz grave y profunda): Una página mal diseñada no solo frustra al usuario: destruye la transparencia y aleja a los ciudadanos de la información que les pertenece.
+
+(Efecto visual: Transición limpia con animación fluida hacia la interfaz de la solución).
+
+    Narrador: Pero la información electoral no tiene por qué ser un laberinto. Presentamos a [Nombre de tu mascota].
+
+**ESCENA 4: LA SOLUCIÓN Y DEMOSTRACIÓN (1:30 - 2:00 min)**
+
+(En pantalla se observa una interfaz moderna, limpia y la mascota animada saludando).
+
+    Narrador: Un asistente inteligente y amigable que simplifica la consulta de datos. A través de un chat natural, [Nombre de la mascota] procesa bases de datos complejas, responde preguntas puntuales y genera gráficas claras al instante con el poder de la Inteligencia Artificial.
+
+(Demostración en pantalla del Alumno 1 interactuando con el sistema):
+
+    Consulta en lenguaje natural: Alumno 1 escribe: "¿Cuál fue el partido más votado en [Localidad] en las últimas elecciones?"
+
+    Respuesta rápida: La mascota responde de forma concisa.
+
+    Generación gráfica: El sistema despliega automáticamente una gráfica de barras interactiva y fácil de entender.
+
+    Alumno 1: (Entusiasmado) ¡WOW! En menos de 10 segundos [Nombre de la mascota] me dio la gráfica exacta y el resumen que buscaba. ¡Qué cambio tan radical!
+
+    Alumno 2: (Sorprendido) ¡Genial! Está super fácil. Oye... ¿puedo probar una consulta yo?
+
+**ESCENA 5: CIERRE Y CALL TO ACTION**
+
+(La cámara comienza a desenfocarse y se aleja lentamente mientras muestra el logo brillante de la mascota y el proyecto).
+
+    Narrador: [Nombre de la mascota] no es solo una cara amigable... es la herramienta que revoluciona el acceso a la información electoral: intuitiva, visual y al alcance de todos. Miralo... es un ganador.
+
+(Aparece en pantalla el logo final del proyecto y del INE-Hackathon).
