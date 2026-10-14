@@ -18,9 +18,12 @@ import { SimulationService } from "./services/simulation.service.js";
 import { FinancialHealthService } from "./services/financial-health.service.js";
 import { BeneficiaryService } from "./services/beneficiary.service.js";
 import { PaymentService } from "./services/payment.service.js";
-import { ElectionResultsService } from "./services/election-results.service.js";
+import { CivicDataService } from "./services/civic-data.service.js";
 import { registrarHerramientaPing } from "./tools/ping.tool.js";
-import { registrarHerramientaElectionResults } from "./tools/election-results.tool.js";
+import { registerGetParticipationSummaryTool } from "./tools/get-participation-summary.tool.js";
+import { registerCompareElectionsTool } from "./tools/compare-elections.tool.js";
+import { registerGetParticipationBreakdownTool } from "./tools/get-participation-breakdown.tool.js";
+import { registerGetSupportingRecordsTool } from "./tools/get-supporting-records.tool.js";
 import { registrarHerramientaGetAccounts } from "./tools/get-accounts.tool.js";
 import { registrarHerramientaGetTransactions } from "./tools/get-transactions.tool.js";
 import { registrarHerramientaComparePeriods, registrarHerramientasAnalytics } from "./tools/analytics.tools.js";
@@ -92,7 +95,11 @@ export function crearServidor(context: ServerContext, options: ServerOptions = {
   const rateLimiter = (options.rateLimiter ?? sharedToolRateLimiter).forScope(context.user.id);
 
   registrarHerramientaPing(server, rateLimiter);
-  registrarHerramientaElectionResults(server, new ElectionResultsService(), rateLimiter);
+  const civicDataService = new CivicDataService();
+  registerGetParticipationSummaryTool(server, civicDataService, rateLimiter);
+  registerCompareElectionsTool(server, civicDataService, rateLimiter);
+  registerGetParticipationBreakdownTool(server, civicDataService, rateLimiter);
+  registerGetSupportingRecordsTool(server, civicDataService, rateLimiter);
   registrarHerramientaGetAccounts(server, accountService, rateLimiter);
   registrarHerramientaGetTransactions(server, transactionService, rateLimiter);
   registrarHerramientasAnalytics(server, analyticsService, rateLimiter);
@@ -114,7 +121,7 @@ export function crearServidor(context: ServerContext, options: ServerOptions = {
   logger.info("Servidor MCP configurado", {
     nombre: env.MCP_SERVER_NAME,
     version: env.MCP_SERVER_VERSION,
-    totalHerramientas: 14
+    totalHerramientas: 17
       + (options.paymentWriteAuthorizer ? 2 : 0)
       + (options.paymentConfirmationAuthorizer ? 1 : 0),
     totalRecursos: 4,

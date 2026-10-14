@@ -26,7 +26,7 @@ test("responseMode text conserva MCP y texto sin emitir eventos UI", async () =>
 
   const events = await harness.run(request);
 
-  assert.deepEqual(harness.toolCalls.map((call) => call.name), ["get_election_results"]);
+  assert.deepEqual(harness.toolCalls.map((call) => call.name), ["get_participation_summary"]);
   assert.ok(events.some((event) => event.type === "data-patch"));
   assert.ok(events.some((event) => event.type === "text-delta"));
   assert.equal(events.at(-1)?.type, "completed");

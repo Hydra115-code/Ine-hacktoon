@@ -106,6 +106,7 @@ const numericFinancialFields = new Set([
   "totalPaid",
 ]);
 const percentageFinancialFields = new Set([
+  "abstentionPercentage",
   "expenseToIncomeRatio",
   "percentage",
   "percentageChange",

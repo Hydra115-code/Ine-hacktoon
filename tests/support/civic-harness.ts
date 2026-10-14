@@ -20,10 +20,10 @@ import {
 import { AgentSessionStore } from "../../src/integration/agent-session-store.js";
 import { createTextAgentService, type TextAgentService } from "../../src/integration/text-agent-service.js";
 import {
-  GetElectionResultsInputSchema,
-  type GetElectionResultsOutput,
-} from "../../src/schemas/election-results.schema.js";
-import { ElectionResultsService } from "../../src/services/election-results.service.js";
+  GetParticipationSummaryInputSchema,
+  type GetParticipationSummaryOutput,
+} from "../../src/schemas/civic.schema.js";
+import { CivicDataService } from "../../src/services/civic-data.service.js";
 import { UiDocumentSchema, type UiDocument } from "../../src/ui/dsl/ui.schema.js";
 import { type UiGenerator } from "../../src/ui/generation/ui-generator.js";
 
@@ -31,6 +31,7 @@ export const ACTOR_ID = "10000000-0000-4000-8000-000000000001";
 export const ENTITY_FILTER_ID = "entity-select";
 export const ENTITY_FILTER_EVENT = "filters.value.changed";
 const QUERIED_AT = "2026-10-08T12:00:00.000Z";
+export const SUMMARY_TOOL = "get_participation_summary";
 const ENTITIES = [
   { value: "nacional", label: "Nacional" },
   { value: "jalisco", label: "Jalisco" },
@@ -118,7 +119,7 @@ export class RecordingSessionStore implements SessionStore {
 }
 
 class CivicToolClient implements FinancialToolClient {
-  private readonly service = new ElectionResultsService(undefined, () => new Date(QUERIED_AT));
+  private readonly service = new CivicDataService({ now: () => new Date(QUERIED_AT) });
 
   constructor(private readonly calls: RecordedToolCall[]) {}
 
@@ -131,10 +132,10 @@ class CivicToolClient implements FinancialToolClient {
   }
 
   async callTool(call: AgentToolCall): Promise<unknown> {
-    if (call.name !== "get_election_results") throw new Error(`Herramienta inesperada: ${call.name}`);
+    if (call.name !== SUMMARY_TOOL) throw new Error(`Herramienta inesperada: ${call.name}`);
     this.calls.push({ name: call.name, arguments: structuredClone(call.arguments) });
-    const input = GetElectionResultsInputSchema.parse(call.arguments);
-    return validateToolOutput(call.name, this.service.getResults(input));
+    const input = GetParticipationSummaryInputSchema.parse(call.arguments);
+    return validateToolOutput(call.name, await this.service.getParticipationSummary(input));
   }
 }
 
@@ -163,22 +164,22 @@ function callsForQuery(query: string): AgentToolCall[] {
     ?? findEntity(latestRequest(query))
     ?? "Nacional";
   const call = (name: string): AgentToolCall => ({
-    name: "get_election_results",
+    name: SUMMARY_TOOL,
     arguments: { year: 2024, office: "presidencia", entity: name },
   });
   return entity === "Nacional" ? [call("Nacional")] : [call(entity), call("Nacional")];
 }
 
 function answerFor(results: AgentToolResult[]): string {
-  const output = results[0]?.output as GetElectionResultsOutput | undefined;
-  if (!output) throw new Error("No se recibió el resultado de get_election_results");
+  const output = results[0]?.output as GetParticipationSummaryOutput | undefined;
+  if (!output) throw new Error(`No se recibió el resultado de ${SUMMARY_TOOL}`);
   const [top] = [...output.results].sort((left, right) => right.votes - left.votes);
   return `En ${output.entity}, ${top!.party} obtuvo ${top!.percentage} % de los votos y la participación fue de ${output.participation.turnoutPercentage} % (datos de ejemplo).`;
 }
 
 const civicUiGenerator: UiGenerator = {
   generate: async (input) => {
-    const source = input.dataSources.find((candidate) => candidate.toolName === "get_election_results");
+    const source = input.dataSources.find((candidate) => candidate.toolName === SUMMARY_TOOL);
     if (!source) throw new Error("El escenario no produjo datos para la interfaz");
     const chart = {
       id: "results-chart",

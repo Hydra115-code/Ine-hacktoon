@@ -58,5 +58,5 @@ test("L9 tres mensajes recuperan contexto de la misma sesión y encadenan revisi
   assert.equal(harness.sessions.completions.length, 3);
   assert.match(harness.modelQueries.at(-1)!, /Jalisco/);
   assert.match(harness.modelQueries.at(-1)!, /compáralos con Oaxaca/);
-  assert.ok(harness.toolCalls.every((call) => call.name === "get_election_results"));
+  assert.ok(harness.toolCalls.every((call) => call.name === "get_participation_summary"));
 });

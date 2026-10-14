@@ -2,7 +2,10 @@ import { type AgentToolCall, type AgentToolDefinition } from "./schemas/agent.sc
 
 /** Tools de sólo lectura que el agente cívico puede usar. */
 export const CIVIC_TOOL_NAMES = [
-  "get_election_results",
+  "get_participation_summary",
+  "compare_elections",
+  "get_participation_breakdown",
+  "get_supporting_records",
 ] as const;
 
 const ALLOWED_TOOLS = new Set<string>(CIVIC_TOOL_NAMES);
