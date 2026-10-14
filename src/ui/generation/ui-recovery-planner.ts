@@ -37,17 +37,6 @@ export function createUiRecoveryPlan(input: UiRecoveryPlanInput): string {
 
 function recoveryActionForIssue(issue: SemanticUiIssue): string[] {
   switch (issue.code) {
-    case "payment_capture_required":
-      return ["Genera form editable con select de cuenta origen y beneficiario, campo monto, campo moneda y concepto, submitLabel 'Revisar pago'. Opciones basadas en get_accounts/get_beneficiaries; no confirmes ni inventes saldo estimado."];
-    case "payment_option_unverified":
-    case "payment_prefill_unverified":
-      return [issue.message];
-    case "payment_review_incomplete":
-      return ["Muestra un resumen de intención pendiente con cuenta origen y beneficiario verificados, monto, concepto, comisión, saldo estimado, vencimiento y un solo botón Confirmar pago; no regreses al formulario."];
-    case "payment_receipt_required":
-      return ["Muestra un comprobante definitivo enlazado a confirm_payment con número de recibo, monto, comisión, saldo posterior y estado; elimina controles de captura y confirmación."];
-    case "education_guidance_required":
-      return ["Incluye texto o alertas con la explicación y recomendaciones de answer, identificadas como RECOMMENDED. Respeta categorías intocables y vincula cifras observadas a datos; no inventes excedentes. Si faltan datos, explica esa limitación."];
     case "dashboard_forbidden":
       return ["Elimina todos los nodos dashboard."];
     case "dashboard_composition_forbidden":
@@ -81,10 +70,6 @@ function recoveryActionForIssue(issue: SemanticUiIssue): string[] {
       return ["Usa como series únicamente claves numéricas comprobadas del catálogo."];
     case "empty_metric":
       return ["Vincula la métrica a un valor escalar comprobado del catálogo."];
-    case "payment_confirmation_required":
-      return ["Incluye un único button con action.type confirm-payment para el intent pendiente."];
-    case "payment_confirmation_forbidden":
-      return ["Elimina todo button confirm-payment porque no existe un intent pendiente."];
     default:
       return [issue.message];
   }

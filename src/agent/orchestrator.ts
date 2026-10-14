@@ -117,7 +117,7 @@ export class AgentOrchestrator {
     const streamId = options.streamId ?? randomUUID();
     const traceContext = createTraceContext(streamId, this.config.userId);
     const requestSpan = telemetry.startSpan(
-      { component: "agent", operation: "financial-request" },
+      { component: "agent", operation: "civic-request" },
       traceContext,
     );
     let sequence = 0;
@@ -223,14 +223,14 @@ export class AgentOrchestrator {
             yield publish({
               type: "status",
               stage: "planning",
-              message: "Verificando la consistencia del análisis financiero",
+              message: "Verificando que las cifras estén respaldadas por los datos",
             });
             continue;
           }
           yield publish({
             type: "status",
             stage: "generating-ui",
-            message: "Generando la interfaz financiera",
+            message: "Generando la interfaz",
           });
           const ui = await runWithTraceContext(traceContext, () => telemetry.observe(
             { component: "ui", operation: "generate" },
@@ -306,7 +306,7 @@ export class AgentOrchestrator {
         yield publish({
           type: "status",
           stage: "planning",
-          message: "Interpretando los resultados financieros",
+          message: "Interpretando los datos electorales",
         });
       }
     } catch (error) {
@@ -554,7 +554,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "financial-reasoning-error",
-      message: "No pudimos respaldar el análisis con evidencia financiera suficiente",
+      message: "No pudimos respaldar la respuesta con evidencia suficiente",
       recoverable: true,
       hasPartialData,
     };
@@ -578,13 +578,10 @@ function createErrorEvent(
     };
   }
   if (error instanceof FinancialToolError || error instanceof FinancialToolTransportError) {
-    if (error instanceof FinancialToolError && error.code === "insufficient_funds") {
-      return { type: "error", code: "insufficient_funds", message: "Saldo insuficiente. El pago no se realizó.", recoverable: false, hasPartialData };
-    }
     return {
       type: "error",
       code: "tool-error",
-      message: "Una herramienta financiera no pudo completar la solicitud",
+      message: "Una herramienta de datos no pudo completar la solicitud",
       recoverable: error instanceof FinancialToolTransportError,
       hasPartialData,
     };
@@ -601,7 +598,7 @@ function createErrorEvent(
   return {
     type: "error",
     code: "internal-error",
-    message: "No fue posible completar la consulta financiera",
+    message: "No fue posible completar la consulta",
     recoverable: false,
     hasPartialData,
   };
