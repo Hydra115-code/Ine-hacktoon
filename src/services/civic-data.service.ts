@@ -192,6 +192,7 @@ export class CivicDataService {
           label: `Votos de ${result.party}`,
           value: result.votes,
           kind: "dato_fuente" as const,
+          derivation: "Dato de la fuente.",
         })),
         {
           recordId: record.recordId,
@@ -199,6 +200,7 @@ export class CivicDataService {
           label: "Lista nominal",
           value: record.nominalList,
           kind: "dato_fuente" as const,
+          derivation: "Dato de la fuente.",
         },
         {
           recordId: record.recordId,

@@ -23,6 +23,8 @@ import {
 } from "./semantic-ui-validator.js";
 import { createUiRecoveryPlan } from "./ui-recovery-planner.js";
 import { createIntentAwareUiFallback } from "./intent-aware-ui-fallback.js";
+import { validateCivicUi } from "./civic-semantic-ui-validator.js";
+import { createCivicUiFallback } from "./civic-ui-fallback.js";
 import { logger } from "../../config/logger.js";
 import type { FinancialExperienceScope } from "../../agent/security/financial-scope-policy.js";
 import { containsUnsupportedNegativeAnomalyClaim } from "../../agent/reasoning/anomaly-claim.js";
@@ -91,6 +93,13 @@ export class GeminiUiGenerator implements UiGenerator {
           }
           throw new UiSemanticValidationError(semanticResult.issues);
         }
+        const civicIssues = validateCivicUi({
+          query: input.query,
+          answer: input.answer,
+          document,
+          dataSources: input.dataSources,
+        });
+        if (civicIssues.length > 0) throw new UiSemanticValidationError(civicIssues);
         return document;
       } catch (error) {
         if (!isInvalidGeneratedUi(error)) throw error;
@@ -106,6 +115,21 @@ export class GeminiUiGenerator implements UiGenerator {
         });
         if (error instanceof UiSemanticValidationError) semanticIssues = error.issues;
         if (attempt === MAX_UI_GENERATION_ATTEMPTS) {
+          const civicFallback = createCivicUiFallback(input.dataSources);
+          if (civicFallback) {
+            const document = parseUiDocument(civicFallback, input.dataSources);
+            const civicIssues = validateCivicUi({
+              query: input.query,
+              answer: input.answer,
+              document,
+              dataSources: input.dataSources,
+            });
+            const respectsUserRequest = validateUiSemantics(input.query, document, input.dataSources).success;
+            if (civicIssues.length === 0 && respectsUserRequest) {
+              logger.warn("UI cívica de respaldo usada tras agotar reparaciones", { attempts: attempt });
+              return document;
+            }
+          }
           const fallback = createIntentAwareUiFallback(input.query, input.dataSources, this.experienceScope);
           if (fallback) {
             const result = validateUiSemantics(input.query, fallback, input.dataSources, {
