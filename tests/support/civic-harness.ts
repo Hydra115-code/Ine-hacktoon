@@ -174,7 +174,9 @@ function answerFor(results: AgentToolResult[]): string {
   const output = results[0]?.output as GetParticipationSummaryOutput | undefined;
   if (!output) throw new Error(`No se recibió el resultado de ${SUMMARY_TOOL}`);
   const [top] = [...output.results].sort((left, right) => right.votes - left.votes);
-  return `En ${output.entity}, ${top!.party} obtuvo ${top!.percentage} % de los votos y la participación fue de ${output.participation.turnoutPercentage} % (datos de ejemplo).`;
+  const { totalVotes, nominalList, turnoutPercentage } = output.participation;
+  return `En ${output.entity}, ${top!.party} obtuvo ${top!.percentage} % de los votos y la participación fue de ${turnoutPercentage} % `
+    + `(${totalVotes.toLocaleString("en-US")} votos de una lista nominal de ${nominalList.toLocaleString("en-US")}; datos de ejemplo).`;
 }
 
 const civicUiGenerator: UiGenerator = {

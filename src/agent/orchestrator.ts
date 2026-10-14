@@ -10,13 +10,12 @@ import { GeminiModelError } from "./model/gemini-api-client.js";
 import { type ModelGateway } from "./model/model.js";
 import { createCivicSystemPrompt } from "./prompts/civic-system-prompt.js";
 import {
-  createFinancialReasoningRepairPrompt,
-  FinancialReasoningError,
-  groundComparisonPeriodDisclosure,
-  groundMerchantIdentityAnswer,
-  validateFinancialReasoning,
-} from "./reasoning/financial-reasoning-validator.js";
-import { shapeFinancialDataForIntent } from "./reasoning/financial-intent-data-shaper.js";
+  CivicReasoningError,
+  createCivicReasoningRepairPrompt,
+  groundCivicAnswer,
+  validateCivicReasoning,
+} from "./reasoning/civic-reasoning-validator.js";
+import { shapeCivicDataForUi } from "./reasoning/civic-data-shaper.js";
 import {
   AgentQuerySchema,
   AgentResponseSchema,
@@ -200,26 +199,22 @@ export class AgentOrchestrator {
             yield publish({ type: "completed", response });
             return;
           }
-          const uiDataSources = shapeFinancialDataForIntent({
+          const uiDataSources = shapeCivicDataForUi(dataSources);
+          const reasoningIssues = validateCivicReasoning({
             query,
-            currentDate: this.currentDate(),
-            dataSources,
-            ...(this.config.experienceScope ? { experienceScope: this.config.experienceScope } : {}),
-          });
-          const merchantGroundedAnswer = groundMerchantIdentityAnswer(query, uiDataSources, turn.text);
-          const groundedAnswer = groundComparisonPeriodDisclosure(uiDataSources, merchantGroundedAnswer);
-          const reasoningIssues = validateFinancialReasoning({
-            query,
-            answer: groundedAnswer,
-            toolsUsed,
+            answer: turn.text,
             dataSources: uiDataSources,
           });
           if (reasoningIssues.length > 0) {
             if (reasoningRepairs >= (this.config.maxReasoningRepairs ?? 1)) {
-              throw new FinancialReasoningError(reasoningIssues);
+              throw new CivicReasoningError(reasoningIssues);
             }
+            logger.info("Respuesta rechazada por el validador cívico", {
+              issues: reasoningIssues.map((issue) => issue.code),
+              attempt: reasoningRepairs + 1,
+            });
             reasoningRepairs += 1;
-            reasoningFeedback = createFinancialReasoningRepairPrompt(reasoningIssues);
+            reasoningFeedback = createCivicReasoningRepairPrompt(reasoningIssues);
             yield publish({
               type: "status",
               stage: "planning",
@@ -227,6 +222,7 @@ export class AgentOrchestrator {
             });
             continue;
           }
+          const groundedAnswer = groundCivicAnswer(turn.text, uiDataSources);
           yield publish({
             type: "status",
             stage: "generating-ui",
@@ -550,7 +546,7 @@ function createErrorEvent(
       hasPartialData,
     };
   }
-  if (error instanceof FinancialReasoningError) {
+  if (error instanceof CivicReasoningError) {
     return {
       type: "error",
       code: "financial-reasoning-error",
