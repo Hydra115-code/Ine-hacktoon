@@ -2,15 +2,9 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { createHash, timingSafeEqual } from "node:crypto";
 import {
   errorPayloadSchema,
-  financialSummaryRequestSchema,
   textAgentRequestSchema,
   textAgentStreamEventSchema,
-  type FinancialSummaryResponse,
 } from "@banorte/contracts";
-import {
-  createFinancialSummaryService,
-  type FinancialSummaryService,
-} from "../integration/financial-summary-service.js";
 import { createTextAgentService, type TextAgentService } from "../integration/text-agent-service.js";
 import { createSystemStatus, type RuntimeCapabilities } from "./system-status.js";
 import { env } from "../config/env.js";
@@ -32,7 +26,6 @@ import {
 import { ElevenLabsRealtimeTranscriptionGateway } from "../infrastructure/elevenlabs/elevenlabs-realtime-transcription.js";
 
 const STATUS_PATH = "/api/system/status";
-const FINANCIAL_SUMMARY_PATH = "/api/integration/financial-summary";
 const AGENT_PATH = "/api/agent";
 const SNAPSHOT_PATH = "/api/agent/snapshot";
 const REALTIME_TRANSCRIPTION_SESSION_PATH = "/api/transcription/realtime-session";
@@ -41,7 +34,6 @@ const MAX_REQUEST_BYTES = 16_384;
 export interface SystemApiOptions {
   readCapabilities?: () => RuntimeCapabilities;
   now?: () => Date;
-  financialSummary?: FinancialSummaryService;
   textAgent?: TextAgentService;
   realtimeTranscription?: RealtimeTranscriptionSessionService;
   apiToken?: string;
@@ -52,7 +44,6 @@ export interface SystemApiOptions {
 }
 
 export function createSystemApi(options: SystemApiOptions = {}) {
-  const financialSummary = options.financialSummary ?? createFinancialSummaryService();
   const textAgent = options.textAgent ?? createTextAgentService();
   const realtimeTranscription = options.realtimeTranscription
     ?? createDefaultRealtimeTranscriptionService();
@@ -69,7 +60,6 @@ export function createSystemApi(options: SystemApiOptions = {}) {
       request,
       response,
       options,
-      financialSummary,
       textAgent,
       realtimeTranscription,
       authenticationRateLimiter,
@@ -85,7 +75,6 @@ async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
   options: SystemApiOptions,
-  financialSummary: FinancialSummaryService,
   textAgent: TextAgentService,
   realtimeTranscription: RealtimeTranscriptionSessionService,
   authenticationRateLimiter: ToolRateLimiter,
@@ -137,11 +126,6 @@ async function handleRequest(
   if (request.method === "GET" && request.url === STATUS_PATH) {
     const status = createSystemStatus(options.readCapabilities?.(), options.now);
     writeJson(response, 200, status);
-    return;
-  }
-
-  if (request.method === "POST" && request.url === FINANCIAL_SUMMARY_PATH) {
-    await handleFinancialSummary(request, response, financialSummary, authenticatedSessionFactory!);
     return;
   }
 
@@ -254,32 +238,6 @@ async function handleTextAgent(
   }
 }
 
-async function handleFinancialSummary(
-  request: IncomingMessage,
-  response: ServerResponse,
-  service: FinancialSummaryService,
-  sessionFactory: SessionFactory,
-): Promise<void> {
-  const controller = new AbortController();
-  request.once("aborted", () => controller.abort());
-
-  try {
-    const parsed = financialSummaryRequestSchema.safeParse(await readJsonBody(request));
-    if (!parsed.success) {
-      writeError(response, 400, "invalid_request", "Solicitud inválida", false);
-      return;
-    }
-    const result: FinancialSummaryResponse = await service(parsed.data, controller.signal, sessionFactory);
-    writeJson(response, 200, result);
-  } catch (error) {
-    if (error instanceof InvalidJsonBodyError) {
-      writeError(response, 400, "invalid_request", "Solicitud inválida", false);
-      return;
-    }
-    writeError(response, 502, "financial_data_unavailable", "No fue posible obtener los datos financieros", true);
-  }
-}
-
 function writeJson(response: ServerResponse, statusCode: number, body: unknown): void {
   response.statusCode = statusCode;
   response.end(JSON.stringify(body));
@@ -324,8 +282,7 @@ class InvalidJsonBodyError extends Error {}
 function isProtectedRoute(request: IncomingMessage): boolean {
   return request.method === "POST"
     && (
-      request.url === FINANCIAL_SUMMARY_PATH
-      || request.url === AGENT_PATH
+      request.url === AGENT_PATH
       || request.url === SNAPSHOT_PATH
       || request.url === REALTIME_TRANSCRIPTION_SESSION_PATH
     );

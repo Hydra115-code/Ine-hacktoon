@@ -26,10 +26,6 @@ import { logger } from "../config/logger.js";
 import { createFollowUpQuery } from "./agent-session-store.js";
 import { type SessionStore } from "../application/ports/session-store.js";
 import { SupabaseSessionStore } from "../repositories/supabase-session.repository.js";
-import { type PaymentConfirmationGrant } from "../application/ports/payment-confirmation-authorization.js";
-import { type PaymentWriteGrant } from "../application/ports/payment-write-authorization.js";
-import { paymentWritePermissionsForQuery } from "../agent/payment-write-policy.js";
-import { paymentReviewPermission } from "./payment-review-permission.js";
 import { classifyCivicQuery } from "../agent/security/civic-scope-policy.js";
 import { transformPersistedUi } from "./ui-transformation.js";
 
@@ -37,8 +33,6 @@ interface TextAgentServiceDependencies {
   createRuntime?: (
     sessionFactory: SessionFactory,
     responseMode: TextAgentRequest["responseMode"],
-    paymentConfirmationGrant?: PaymentConfirmationGrant,
-    paymentWriteGrant?: PaymentWriteGrant,
   ) => Promise<AgentRuntime>;
   sessionFactory?: SessionFactory;
   sessionStore?: SessionStore;
@@ -147,9 +141,6 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
       interfaceRevision: session.state.interfaceRevision,
       dataRevision: session.state.dataRevision,
     });
-    let paymentConfirmationIntentId: string | undefined;
-    let paymentConfirmationGrant: PaymentConfirmationGrant | undefined;
-    let paymentWriteGrant: PaymentWriteGrant | undefined;
     try {
       if (isUiInteraction) {
         if (
@@ -161,32 +152,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         }
         const specification = session.state.specification;
         if (!specification) throw new SharedUiEventValidationError("La sesión no contiene una interfaz activa");
-        if (request.uiEvent.event.name === "payment.confirmed") {
-          if (!session.state.pendingPaymentIntentId) {
-            throw new SharedUiEventValidationError("La sesión no contiene un pago pendiente");
-          }
-          paymentConfirmationIntentId = session.state.pendingPaymentIntentId;
-        }
         agentQuery = createUiEventQuery(request.uiEvent, specification, session.state.turns.at(-1)?.user);
-        const reviewPermission = paymentReviewPermission(request.uiEvent, specification,
-          session.state.turns.at(-1)?.user ?? "", session.state.pendingPaymentIntentId);
-        if (reviewPermission) {
-          paymentWriteGrant = { actorId, sessionId: request.sessionId, correlationId: request.correlationId,
-            interfaceRevision: request.uiEvent.interfaceRevision, dataRevision: request.uiEvent.dataRevision,
-            permissions: [reviewPermission] };
-          agentQuery += ` Prepara únicamente la intención para revisión con estos parámetros validados por el servidor: ${JSON.stringify(reviewPermission.payment)}. Después consulta get_accounts y get_beneficiaries para vincular a la revisión los nombres verificados de origen y destino. Muestra ambos, monto, concepto, comisión, saldo estimado y vencimiento antes de ofrecer confirmación. No confirmes ni ejecutes el pago.`;
-        }
-        if (paymentConfirmationIntentId) {
-          agentQuery += ` La persona confirmó explícitamente el intent ${paymentConfirmationIntentId}. Invoca confirm_payment con paymentIntentId exactamente igual a ese UUID; no prepares otro pago. Después consulta get_accounts y get_transactions para mostrar comprobante y saldo actualizado.`;
-          paymentConfirmationGrant = {
-            actorId,
-            paymentIntentId: paymentConfirmationIntentId,
-            sessionId: request.sessionId,
-            correlationId: request.correlationId,
-            interfaceRevision: request.uiEvent.interfaceRevision,
-            dataRevision: request.uiEvent.dataRevision,
-          };
-        }
         logger.info("UIEvent validado para el Agent Runtime", {
           correlationId: request.correlationId,
           eventName: request.uiEvent.event.name,
@@ -194,20 +160,6 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
           interfaceRevision: request.uiEvent.interfaceRevision,
         });
       } else {
-        const permissions = paymentWritePermissionsForQuery(
-          request.query,
-          session.state.pendingPaymentIntentId ?? undefined,
-        );
-        if (permissions.length > 0) {
-          paymentWriteGrant = {
-            actorId,
-            sessionId: request.sessionId,
-            correlationId: request.correlationId,
-            interfaceRevision: session.state.interfaceRevision,
-            dataRevision: session.state.dataRevision,
-            permissions,
-          };
-        }
         agentQuery = session.isContinuation
           ? createFollowUpQuery(session.state, request.query)
           : request.query;
@@ -416,16 +368,10 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
       }
     }
     try {
-      runtime = await createRuntime(
-        requestSessionFactory,
-        request.responseMode,
-        paymentConfirmationGrant,
-        paymentWriteGrant,
-      );
+      runtime = await createRuntime(requestSessionFactory, request.responseMode);
       for await (const source of runtime.orchestrator.stream(agentQuery, {
         ...(signal ? { signal } : {}),
         streamId: request.correlationId,
-        ...(paymentConfirmationIntentId ? { paymentConfirmationIntentId } : {}),
       })) {
         if (source.type === "status") {
           if (
@@ -629,7 +575,6 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
               ...(!isUiInteraction ? { prompt: request.query } : {}),
               answer: source.response.answer,
               ...(isUiInteraction ? { interaction: request.uiEvent.event } : {}),
-              ...paymentIntentSessionUpdate(source.response.dataSources),
             });
             isSessionCompleted = true;
             yield event({ type: "ui-completed", revision: interfaceRevision });
@@ -672,7 +617,6 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
               ...(!isUiInteraction ? { prompt: request.query } : {}),
               answer: source.response.answer,
               ...(isUiInteraction ? { interaction: request.uiEvent.event } : {}),
-              ...paymentIntentSessionUpdate(source.response.dataSources),
             });
             isSessionCompleted = true;
           }
@@ -745,31 +689,10 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         ...(currentSpecification ? { specification: currentSpecification } : {}),
         ...(!isUiInteraction ? { prompt: request.query } : {}),
         answer: "",
-        ...paymentIntentSessionUpdate(dataSources),
       });
       isSessionCompleted = true;
     }
   };
-}
-
-function paymentIntentSessionUpdate(
-  dataSources: readonly UiDataSource[],
-): { pendingPaymentIntentId: string | null } | Record<string, never> {
-  const terminal = dataSources.find((source) => (
-    source.toolName === "confirm_payment" || source.toolName === "cancel_payment_intent"
-  ));
-  if (terminal) return { pendingPaymentIntentId: null };
-
-  const created = dataSources.find((source) => source.toolName === "create_payment_intent");
-  if (!created || !isRecord(created.data) || created.data.status !== "awaiting_confirmation") return {};
-  const id = created.data.id;
-  return typeof id === "string" && /^[0-9a-f-]{36}$/iu.test(id)
-    ? { pendingPaymentIntentId: id }
-    : {};
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function mapAgentStage(stage: "planning" | "consulting-tools" | "generating-ui" | "rendering-ui") {
@@ -845,15 +768,9 @@ export type TextAgentService = ReturnType<typeof createTextAgentService>;
 function createRuntimeForMode(
   sessionFactory: SessionFactory,
   responseMode: TextAgentRequest["responseMode"],
-  paymentConfirmationGrant?: PaymentConfirmationGrant,
-  paymentWriteGrant?: PaymentWriteGrant,
 ) {
   return createAgentRuntime(
     sessionFactory,
-    {
-      ...(responseMode === "text" ? { uiGenerator: textOnlyUiGenerator } : {}),
-      ...(paymentConfirmationGrant ? { paymentConfirmationGrant } : {}),
-      ...(paymentWriteGrant ? { paymentWriteGrant } : {}),
-    },
+    responseMode === "text" ? { uiGenerator: textOnlyUiGenerator } : {},
   );
 }

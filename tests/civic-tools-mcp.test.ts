@@ -3,7 +3,7 @@ import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { CIVIC_TOOL_NAMES } from "../src/agent/civic-tool-policy.js";
+import { CIVIC_TOOL_NAMES, selectAllowedTools } from "../src/agent/civic-tool-policy.js";
 import { type CivicDataSource } from "../src/application/ports/civic-data.js";
 import { readToolErrorDetails } from "../src/application/tool-error-result.js";
 import { ToolRateLimiter } from "../src/application/tool-rate-limiter.js";
@@ -12,6 +12,7 @@ import { registerCompareElectionsTool } from "../src/tools/compare-elections.too
 import { registerGetParticipationBreakdownTool } from "../src/tools/get-participation-breakdown.tool.js";
 import { registerGetParticipationSummaryTool } from "../src/tools/get-participation-summary.tool.js";
 import { registerGetSupportingRecordsTool } from "../src/tools/get-supporting-records.tool.js";
+import { crearServidor } from "../src/server.js";
 
 /** Levanta un servidor MCP en memoria sólo con las 4 tools cívicas. */
 async function connect(service = new CivicDataService(), maxCalls = 60) {
@@ -28,7 +29,7 @@ async function connect(service = new CivicDataService(), maxCalls = 60) {
   return client;
 }
 
-test("listTools ofrece exactamente las 4 tools cívicas", async () => {
+test("listTools ofrece exactamente las 4 tools cívicas y ninguna financiera", async () => {
   const client = await connect();
   const { tools } = await client.listTools();
   assert.deepEqual(tools.map((tool) => tool.name).sort(), [...CIVIC_TOOL_NAMES].sort());
@@ -84,5 +85,27 @@ test("rate limit: al pasar el límite responde que se intente más tarde", async
   assert.notEqual(first.isError, true);
   assert.equal(second.isError, true);
   assert.deepEqual(readToolErrorDetails(second._meta), { code: "rate_limited", retryable: true });
+  await client.close();
+});
+
+test("el agente sólo ve tools cívicas aunque el servidor ofrezca otras", () => {
+  const definitions = ["get_participation_summary", "compare_elections", "get_accounts", "confirm_payment"]
+    .map((name) => ({ name, description: name, inputSchema: { type: "object" } }));
+  assert.deepEqual(
+    selectAllowedTools(definitions).map((tool) => tool.name),
+    ["get_participation_summary", "compare_elections"],
+  );
+});
+
+test("el servidor ofrece los recursos de referencia cívicos", async () => {
+  const server = crearServidor({ client: {} as never, user: { id: "user-a" } });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: "civic-test-client", version: "0.0.0" });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+  const { tools } = await client.listTools();
+  const { resources } = await client.listResources();
+  assert.deepEqual(tools.map((tool) => tool.name).sort(), [...CIVIC_TOOL_NAMES].sort());
+  assert.deepEqual(resources.map((resource) => resource.uri).sort(), ["civic://coverage", "civic://metric-definitions"]);
   await client.close();
 });

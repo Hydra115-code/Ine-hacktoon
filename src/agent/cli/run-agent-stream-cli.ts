@@ -3,13 +3,10 @@ import { AgentQuerySchema } from "../schemas/agent.schema.js";
 import { serializeAgentStreamEvent } from "../stream/agent-stream.schema.js";
 import { AgentStreamSession } from "../stream/agent-stream-session.js";
 import { createAgentRuntime, type SessionFactory } from "./agent-runtime.js";
-import { paymentWritePermissionsForQuery } from "../payment-write-policy.js";
 
 export async function runAgentStreamCli(sessionFactory: SessionFactory): Promise<void> {
   const query = AgentQuerySchema.parse(process.argv.slice(2).join(" "));
-  const runtime = await createAgentRuntime(sessionFactory, {
-    paymentWritePermissions: paymentWritePermissionsForQuery(query),
-  });
+  const runtime = await createAgentRuntime(sessionFactory);
   const stream = new AgentStreamSession(runtime.orchestrator, query);
   const cancel = () => stream.cancel();
   process.once("SIGINT", cancel);

@@ -7,13 +7,10 @@ import { AgentQuerySchema } from "../schemas/agent.schema.js";
 import { createAgentRuntime, type SessionFactory } from "./agent-runtime.js";
 import { InteractiveLoginError } from "./interactive-credentials.js";
 import { logger } from "../../config/logger.js";
-import { paymentWritePermissionsForQuery } from "../payment-write-policy.js";
 
 export async function runAgentCli(sessionFactory: SessionFactory): Promise<void> {
   const query = AgentQuerySchema.parse(process.argv.slice(2).join(" "));
-  const runtime = await createAgentRuntime(sessionFactory, {
-    paymentWritePermissions: paymentWritePermissionsForQuery(query),
-  });
+  const runtime = await createAgentRuntime(sessionFactory);
   const requestId = randomUUID();
 
   try {
@@ -46,7 +43,7 @@ export function handleAgentCliError(error: unknown): void {
     ? error.message
     : error instanceof AgentExecutionError || error instanceof GeminiModelError
     ? error.message
-    : "No fue posible completar la consulta financiera";
+    : "No fue posible completar la consulta";
   process.stderr.write(`${message}\n`);
   process.exitCode = 1;
 }

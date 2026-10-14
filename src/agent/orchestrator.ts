@@ -76,7 +76,6 @@ export interface AgentStreamOptions {
   signal?: AbortSignal;
   streamId?: string;
   replayBuffer?: AgentStreamBuffer;
-  paymentConfirmationIntentId?: string;
 }
 
 type AgentStreamEventPayload = AgentStreamEvent extends infer TEvent
@@ -271,12 +270,7 @@ export class AgentOrchestrator {
           stage: "consulting-tools",
           message: "Consultando datos mediante MCP",
         });
-        validateToolCalls(
-          turn.toolCalls,
-          knownTools,
-          executedCalls,
-          options.paymentConfirmationIntentId,
-        );
+        validateToolCalls(turn.toolCalls, knownTools, executedCalls);
         attemptedToolCalls += turn.toolCalls.length;
         const sourceOffset = dataSources.length;
         for (const [callIndex, call] of turn.toolCalls.entries()) {
@@ -436,17 +430,9 @@ function validateToolCall(
   call: Parameters<FinancialToolClient["callTool"]>[0],
   knownTools: ReadonlySet<string>,
   executedCalls: Set<string>,
-  paymentConfirmationIntentId?: string,
 ): void {
   if (!isAllowedTool(toolName) || !knownTools.has(toolName)) {
     throw new AgentExecutionError("El modelo solicitó una herramienta no disponible");
-  }
-  if (toolName === "confirm_payment" && (
-    paymentConfirmationIntentId === undefined
-    || call.arguments.paymentIntentId !== paymentConfirmationIntentId
-    || call.arguments.confirmed !== true
-  )) {
-    throw new AgentExecutionError("La confirmación del pago no proviene de una interacción autorizada");
   }
   const fingerprint = toolCallFingerprint(call);
   if (executedCalls.has(fingerprint)) {
@@ -459,10 +445,9 @@ function validateToolCalls(
   calls: AgentToolCall[],
   knownTools: ReadonlySet<string>,
   executedCalls: Set<string>,
-  paymentConfirmationIntentId?: string,
 ): void {
   for (const call of calls) {
-    validateToolCall(call.name, call, knownTools, executedCalls, paymentConfirmationIntentId);
+    validateToolCall(call.name, call, knownTools, executedCalls);
   }
 }
 

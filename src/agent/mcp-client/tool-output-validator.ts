@@ -1,54 +1,17 @@
 import { z } from "zod";
 import {
-  CashflowOutputSchema,
-  FinancialSummaryOutputSchema,
-  SpendingByCategoryOutputSchema,
-} from "../../schemas/analytics.schema.js";
-import { ComparePeriodsOutputSchema } from "../../schemas/compare-periods.schema.js";
-import { DetectAnomaliesOutputSchema } from "../../schemas/detect-anomalies.schema.js";
-import { GetAccountsOutputSchema } from "../../schemas/get-accounts.schema.js";
-import { GetTransactionsOutputSchema } from "../../schemas/get-transactions.schema.js";
-import { EvaluateFinancialHealthOutputSchema } from "../../schemas/financial-health.schema.js";
-import { PingOutputSchema } from "../../schemas/ping.schema.js";
-import {
   CompareElectionsOutputSchema,
   GetParticipationBreakdownOutputSchema,
   GetParticipationSummaryOutputSchema,
   GetSupportingRecordsOutputSchema,
 } from "../../schemas/civic.schema.js";
-import {
-  CancelPaymentIntentOutputSchema,
-  ConfirmPaymentOutputSchema,
-  CreatePaymentIntentOutputSchema,
-  GetPaymentStatusOutputSchema,
-} from "../../schemas/payment.schema.js";
-import { GetBeneficiariesOutputSchema } from "../../schemas/beneficiary.schema.js";
-import {
-  SimulateLoanOutputSchema,
-  SimulateSavingsOutputSchema,
-} from "../../schemas/simulation.schema.js";
 
+/** Contrato de salida de cada tool: si una salida no lo cumple, se rechaza. */
 const TOOL_OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
-  ping: PingOutputSchema,
   get_participation_summary: GetParticipationSummaryOutputSchema,
   compare_elections: CompareElectionsOutputSchema,
   get_participation_breakdown: GetParticipationBreakdownOutputSchema,
   get_supporting_records: GetSupportingRecordsOutputSchema,
-  get_accounts: GetAccountsOutputSchema,
-  get_transactions: GetTransactionsOutputSchema,
-  get_financial_summary: FinancialSummaryOutputSchema,
-  get_spending_by_category: SpendingByCategoryOutputSchema,
-  get_cashflow: CashflowOutputSchema,
-  compare_periods: ComparePeriodsOutputSchema,
-  detect_transaction_anomalies: DetectAnomaliesOutputSchema,
-  evaluate_financial_health: EvaluateFinancialHealthOutputSchema,
-  get_beneficiaries: GetBeneficiariesOutputSchema,
-  create_payment_intent: CreatePaymentIntentOutputSchema,
-  confirm_payment: ConfirmPaymentOutputSchema,
-  get_payment_status: GetPaymentStatusOutputSchema,
-  cancel_payment_intent: CancelPaymentIntentOutputSchema,
-  simulate_loan: SimulateLoanOutputSchema,
-  simulate_savings: SimulateSavingsOutputSchema,
 };
 
 export function validateToolOutput(toolName: string, output: unknown): unknown {

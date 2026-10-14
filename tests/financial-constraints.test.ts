@@ -9,7 +9,6 @@ import {
 import { createIntentAwareUiFallback } from "../src/ui/generation/intent-aware-ui-fallback.js";
 import { validateUiSemantics } from "../src/ui/generation/semantic-ui-validator.js";
 import { parseUiDocument } from "../src/ui/dsl/ui.schema.js";
-import { SimulationService } from "../src/services/simulation.service.js";
 
 test("conserva y versiona las restricciones financieras relevantes", () => {
   const first = updateFinancialConstraints(
@@ -48,16 +47,6 @@ test("invalida recomendaciones anteriores cuando cambia una restricción", () =>
   assert.match(query, /"constraintsChanged":true/u);
   assert.match(query, /RECOMMENDED anterior invalidada/u);
   assert.doesNotMatch(query, /ahorra 3,000 al mes/u);
-});
-
-test("marca las proyecciones del motor determinístico como simuladas", () => {
-  const result = new SimulationService().simulateSavings({
-    initialAmount: "1000.00", periodicContribution: "500.00", annualRate: "0.00",
-    durationMonths: 2, frequency: "monthly",
-  });
-
-  assert.equal(result.dataType, "SIMULATED");
-  assert.equal(result.projectedBalance, "2000.00");
 });
 
 test("rechaza etiquetas de evidencia sin una conclusión legible", () => {

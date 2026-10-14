@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { EventEmitter } from "node:events";
 import { type IncomingMessage, type ServerResponse } from "node:http";
-import { type SupabaseClient } from "@supabase/supabase-js";
 import { type AuthenticatedSupabaseSession } from "../src/config/supabase.js";
 import { RateLimitError } from "../src/application/errors/rate-limit.error.js";
 import { ToolRateLimiter } from "../src/application/tool-rate-limiter.js";
@@ -21,32 +20,32 @@ test("comparte contadores entre scopes derivados y aísla usuarios", () => {
     now: () => now,
   });
 
-  limiter.forScope("user-a").consume("get_accounts");
-  limiter.forScope("user-a").consume("get_accounts");
+  limiter.forScope("user-a").consume("get_participation_summary");
+  limiter.forScope("user-a").consume("get_participation_summary");
   assert.throws(
-    () => limiter.forScope("user-a").consume("get_accounts"),
+    () => limiter.forScope("user-a").consume("get_participation_summary"),
     (error: unknown) => error instanceof RateLimitError && error.retryAfterMs === 1_000,
   );
-  assert.doesNotThrow(() => limiter.forScope("user-b").consume("get_accounts"));
+  assert.doesNotThrow(() => limiter.forScope("user-b").consume("get_participation_summary"));
 
   now = 2_001;
-  assert.doesNotThrow(() => limiter.forScope("user-a").consume("get_accounts"));
+  assert.doesNotThrow(() => limiter.forScope("user-a").consume("get_participation_summary"));
 });
 
-test("aplica un límite menor a operaciones WRITE", () => {
+test("aplica un límite propio a una operación específica", () => {
   const limiter = new ToolRateLimiter({
     maxCalls: 3,
     windowMs: 60_000,
-    policyForOperation: (operation) => operation === "confirm_payment"
+    policyForOperation: (operation) => operation === "compare_elections"
       ? { maxCalls: 1, windowMs: 60_000 }
       : undefined,
   }).forScope("user-a");
 
-  limiter.consume("get_accounts");
-  limiter.consume("get_accounts");
-  limiter.consume("confirm_payment");
-  assert.throws(() => limiter.consume("confirm_payment"), RateLimitError);
-  assert.doesNotThrow(() => limiter.consume("get_accounts"));
+  limiter.consume("get_participation_summary");
+  limiter.consume("get_participation_summary");
+  limiter.consume("compare_elections");
+  assert.throws(() => limiter.consume("compare_elections"), RateLimitError);
+  assert.doesNotThrow(() => limiter.consume("get_participation_summary"));
 });
 
 test("conserva el límite MCP al recrear el runtime del mismo usuario", async () => {
@@ -74,11 +73,7 @@ test("la API limita autenticación por red y peticiones costosas por usuario", a
     authenticationRateLimiter,
     requestRateLimiter,
     createUserSession: async (token) => session(token.endsWith("a") ? "user-a" : "user-b"),
-    financialSummary: async (request) => ({
-      version: "1",
-      correlationId: request.correlationId,
-      dataRegistry: { version: "1", revision: 0, data: {} },
-    }),
+    realtimeTranscription: async () => ({ token: "token-efimero-de-prueba" }) as never,
   });
 
   const first = await dispatch(server, "valid-supabase-access-token-user-a", "10.0.0.1");
@@ -104,30 +99,16 @@ function session(userId: string): AuthenticatedSupabaseSession {
 }
 
 function connectStatusClient(userId: string, rateLimiter: ToolRateLimiter) {
-  const client = {
-    rpc: async () => ({
-      data: [{
-        payment_intent_id: "40000000-0000-4000-8000-000000000001",
-        status: "awaiting_confirmation",
-        receipt_number: null,
-        amount: "500.00",
-        currency: "MXN",
-        balance_after: null,
-        executed_at: null,
-      }],
-      error: null,
-    }),
-  } as unknown as SupabaseClient;
   return FinancialMcpClient.connect(crearServidor(
-    { client, user: { id: userId } },
+    { client: {} as AuthenticatedSupabaseSession["client"], user: { id: userId } },
     { rateLimiter },
   ));
 }
 
 function statusCall() {
   return {
-    name: "get_payment_status",
-    arguments: { paymentIntentId: "40000000-0000-4000-8000-000000000001" },
+    name: "get_participation_summary",
+    arguments: { year: 2024, office: "presidencia" },
   };
 }
 
@@ -140,18 +121,9 @@ function dispatch(
     const headers: Record<string, string> = {};
     const request = Object.assign(new EventEmitter(), {
       method: "POST",
-      url: "/api/integration/financial-summary",
+      url: "/api/transcription/realtime-session",
       headers: { authorization: `Bearer ${accessToken}` },
       socket: { remoteAddress },
-      async *[Symbol.asyncIterator]() {
-        yield Buffer.from(JSON.stringify({
-          version: "1",
-          correlationId: "20000000-0000-4000-8000-000000000001",
-          startDate: "2026-09-01",
-          endDate: "2026-09-12",
-          currency: "MXN",
-        }));
-      },
     }) as unknown as IncomingMessage;
     const response = {
       statusCode: 200,

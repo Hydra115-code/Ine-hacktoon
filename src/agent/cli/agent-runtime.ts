@@ -6,17 +6,7 @@ import { FinancialMcpClient } from "../mcp-client/financial-mcp-client.js";
 import { GeminiModel } from "../model/gemini-model.js";
 import { AgentExecutionError, AgentOrchestrator } from "../orchestrator.js";
 import { type UiGenerator } from "../../ui/generation/ui-generator.js";
-import {
-  createPaymentConfirmationAuthorizer,
-  type PaymentConfirmationGrant,
-} from "../../application/ports/payment-confirmation-authorization.js";
-import {
-  createPaymentWriteAuthorizer,
-  type PaymentWriteGrant,
-  type PaymentWritePermission,
-} from "../../application/ports/payment-write-authorization.js";
 import { CIVIC_TOOL_NAMES } from "../civic-tool-policy.js";
-import { randomUUID } from "node:crypto";
 
 export type SessionFactory = () => Promise<AuthenticatedSupabaseSession>;
 
@@ -27,9 +17,6 @@ export interface AgentRuntime {
 
 interface AgentRuntimeOptions {
   uiGenerator?: UiGenerator;
-  paymentConfirmationGrant?: PaymentConfirmationGrant;
-  paymentWriteGrant?: PaymentWriteGrant;
-  paymentWritePermissions?: readonly PaymentWritePermission[];
 }
 
 export async function createAgentRuntime(
@@ -38,19 +25,9 @@ export async function createAgentRuntime(
 ): Promise<AgentRuntime> {
   const geminiConfig = requireGeminiConfig();
   const supabaseSession = await sessionFactory();
-  const paymentWriteGrant = resolvePaymentWriteGrant(options, supabaseSession.user.id);
   const permittedToolNames = [...CIVIC_TOOL_NAMES];
   const mcpClient = await FinancialMcpClient.connect(
-    crearServidor(supabaseSession, {
-      ...(paymentWriteGrant ? {
-        paymentWriteAuthorizer: createPaymentWriteAuthorizer(paymentWriteGrant),
-      } : {}),
-      ...(options.paymentConfirmationGrant ? {
-        paymentConfirmationAuthorizer: createPaymentConfirmationAuthorizer(
-          options.paymentConfirmationGrant,
-        ),
-      } : {}),
-    }),
+    crearServidor(supabaseSession),
     env.AGENT_TOOL_TIMEOUT_MS,
   );
   const orchestrator = new AgentOrchestrator(
@@ -70,22 +47,6 @@ export async function createAgentRuntime(
   return {
     orchestrator,
     close: async () => mcpClient.close(),
-  };
-}
-
-function resolvePaymentWriteGrant(
-  options: AgentRuntimeOptions,
-  actorId: string,
-): PaymentWriteGrant | undefined {
-  if (options.paymentWriteGrant) return options.paymentWriteGrant;
-  if (!options.paymentWritePermissions?.length) return undefined;
-  return {
-    actorId,
-    sessionId: randomUUID(),
-    correlationId: randomUUID(),
-    interfaceRevision: 0,
-    dataRevision: 0,
-    permissions: options.paymentWritePermissions,
   };
 }
 
