@@ -5,6 +5,8 @@ import { ThemeToggle } from "@/shared/design-system/components/ThemeToggle";
 import { useAgentSession } from "../../agent/components/AgentSessionProvider";
 import { CivicBrand } from "./CivicBrand";
 
+import Link from "next/link";
+
 export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void> }) {
   const status = useWorkspaceStore((state) => state.experience.status);
   const reset = useWorkspaceStore((state) => state.reset);
@@ -12,19 +14,18 @@ export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void>
   const hasStarted = status !== "empty";
 
   return (
-    <header className="workspace-header">
+    <header className="workspace-header" aria-label="Cabecera del explorador ciudadano">
       <div className="workspace-header__identity">
-        <CivicBrand />
+        <Link href="/" className="workspace-header__brand-link" aria-label="Ir al inicio de INE Explora">
+          <CivicBrand />
+        </Link>
         <span className="workspace-header__divider" aria-hidden="true" />
-        <span className="workspace-header__product">Explorador ciudadano</span>
-        <span className="workspace-header__edition">Prototipo Hackathon 2026</span>
+        <Link href="/" className="session-reset workspace-header__home">
+          ← Inicio
+        </Link>
+        <span className="workspace-header__product">Conversar con Paper</span>
       </div>
-
       <div className="workspace-header__session">
-        <span className="session-status">
-          <span className="session-status__dot" aria-hidden="true" />
-          Sesión segura
-        </span>
         <ThemeToggle />
         {hasStarted ? (
           <button className="session-reset" type="button" onClick={() => {
@@ -34,7 +35,7 @@ export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void>
             Nueva consulta
           </button>
         ) : null}
-        {onSignOut ? <button className="session-reset" type="button" onClick={() => void onSignOut()}>Salir</button> : null}
+        {onSignOut ? <button className="session-reset" type="button" onClick={() => void onSignOut()}>Cerrar sesión</button> : null}
       </div>
     </header>
   );

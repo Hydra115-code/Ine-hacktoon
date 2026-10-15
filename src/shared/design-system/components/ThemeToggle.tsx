@@ -1,17 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
+const THEME_KEY = "ine-explora-theme";
+
+function readStoredTheme(): Theme | null {
+  try {
+    const storedTheme = window.localStorage.getItem(THEME_KEY);
+    if (storedTheme === "dark" || storedTheme === "light") return storedTheme;
+  } catch {
+    // Algunos modos privados bloquean Storage; la cookie mantiene la preferencia.
+  }
+
+  const cookieTheme = document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${THEME_KEY}=`))
+    ?.split("=")[1];
+  return cookieTheme === "dark" || cookieTheme === "light" ? cookieTheme : null;
+}
+
+function storeTheme(theme: Theme) {
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    // La cookie inferior funciona como respaldo si Storage no está disponible.
+  }
+  document.cookie = `${THEME_KEY}=${theme}; path=/; max-age=31536000; samesite=lax`;
+}
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("light");
   const isDark = theme === "dark";
 
+  useEffect(() => {
+    const storedTheme = readStoredTheme();
+    const domTheme = document.documentElement.dataset.theme;
+    const nextTheme: Theme = storedTheme
+      ? storedTheme
+      : domTheme === "dark"
+        ? "dark"
+        : "light";
+
+    document.documentElement.dataset.theme = nextTheme;
+    setTheme(nextTheme);
+  }, []);
+
   function toggleTheme() {
     const nextTheme = isDark ? "light" : "dark";
 
     document.documentElement.dataset.theme = nextTheme;
+    storeTheme(nextTheme);
     setTheme(nextTheme);
   }
 

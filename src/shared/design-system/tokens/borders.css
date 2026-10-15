@@ -2,5 +2,5 @@
   --border-width-subtle: 1px;
   --border-width-strong: 2px;
   --border-subtle: var(--border-width-subtle) solid var(--color-border-subtle);
-  --border-strong: var(--border-width-subtle) solid var(--color-border-strong);
+  --border-strong: var(--border-width-strong) solid var(--color-border-strong);
 }

@@ -1,0 +1,368 @@
+/* Componentes LEGO de GenUI Cívica - INE Explora */
+
+/* 1. MetricCard */
+.civic-metric-card {
+  background: var(--color-surface-elevated);
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+  transition: transform var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+
+.civic-metric-card:hover {
+  border-color: var(--color-brand-border);
+  transform: translateY(-2px);
+}
+
+.civic-metric-card[data-highlight="true"] {
+  border-color: var(--color-brand-primary);
+  background: var(--color-surface-primary);
+  box-shadow: 0 4px 18px var(--color-brand-soft);
+}
+
+.civic-metric-card[data-highlight="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-crayon);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.civic-metric-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.civic-metric-card__label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.civic-metric-card__value {
+  font-family: var(--font-family-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.civic-metric-card__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.civic-metric-card__delta[data-direction="positive"] {
+  background: var(--color-success-ring);
+  color: var(--color-data-positive);
+}
+
+.civic-metric-card__delta[data-direction="negative"] {
+  background: var(--color-error-soft);
+  color: var(--color-data-negative);
+}
+
+.civic-metric-card__footnote {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* 2. ElectionTimeline */
+.civic-timeline {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  scrollbar-width: thin;
+}
+
+.civic-timeline-node {
+  flex: 0 0 160px;
+  background: var(--color-surface-elevated);
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--duration-fast) var(--ease-standard);
+  position: relative;
+}
+
+.civic-timeline-node:hover {
+  border-color: var(--color-brand-primary);
+}
+
+.civic-timeline-node[data-selected="true"] {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-soft);
+  box-shadow: 0 0 0 2px var(--color-brand-primary);
+}
+
+.civic-timeline-node__year {
+  font-family: var(--font-family-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.civic-timeline-node__badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.civic-timeline-node__turnout {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-brand-primary);
+}
+
+/* 3. Bar Charts (Age & Gender & Comparison) */
+.civic-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.civic-bar-item {
+  display: grid;
+  grid-template-columns: 110px 1fr 60px;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.875rem;
+}
+
+.civic-bar-item--interactive {
+  width: 100%;
+  padding: 0.25rem 0.35rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.civic-bar-item--interactive:disabled {
+  cursor: default;
+}
+
+.civic-bar-item--interactive:not(:disabled):hover {
+  background: var(--color-brand-soft) !important;
+}
+
+.civic-bar-item--interactive:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.civic-bar-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.civic-bar-track {
+  height: 18px;
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+}
+
+.civic-bar-fill {
+  height: 100%;
+  background: var(--color-brand-primary);
+  border-radius: var(--radius-sm);
+  transition: width 0.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.civic-bar-fill--secondary {
+  background: var(--color-civic-accent);
+}
+
+.civic-bar-fill--highlight {
+  background: var(--color-crayon);
+}
+
+.civic-bar-val {
+  text-align: right;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 4. InsightCard */
+.civic-insight-card {
+  display: flex;
+  gap: var(--space-4);
+  background: var(--color-surface-elevated);
+  border-left: 4px solid var(--color-crayon);
+  border-top: 1px solid var(--color-border-subtle);
+  border-right: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-paper);
+}
+
+.civic-insight-card h4 {
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-primary);
+}
+
+.civic-insight-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* 5. SourceCard (Talón de boleta) */
+.civic-source-card {
+  background: var(--color-surface-primary);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+}
+
+.civic-source-card::after {
+  content: "INE · CCPC OFICIAL";
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  background: var(--color-surface-page);
+  padding: 0 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-primary);
+}
+
+.civic-source-card__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.civic-source-card__meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* 6. SuggestedQuestions */
+.civic-suggested-questions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.civic-suggested-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.civic-question-chip {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  padding: 0.45rem 0.95rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-border-strong) 55%, transparent);
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
+  text-align: left;
+}
+
+.civic-question-chip:hover {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-soft);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-brand-primary) 45%, transparent);
+  transform: translate(-1px, -1px);
+}
+
+.civic-question-chip:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* 7. Territorial Grid Map */
+.civic-territorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+
+.civic-territorial-tile {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.civic-territorial-tile:hover {
+  border-color: var(--color-brand-primary);
+  transform: translateY(-1px);
+}
+
+.civic-territorial-tile[data-selected="true"] {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-soft);
+}
+
+.civic-territorial-tile__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.civic-territorial-tile__pct {
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-brand-primary);
+  margin-top: 0.2rem;
+  display: block;
+}

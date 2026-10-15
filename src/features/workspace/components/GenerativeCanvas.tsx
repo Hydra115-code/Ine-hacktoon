@@ -9,6 +9,9 @@ import { UIEventProvider } from "../../generative-ui/interactions/events/UIEvent
 import { isGuidanceOnly } from "../presentation/is-guidance-only";
 import { ElectoralExplorationStart } from "../../electoral-exploration/components/ElectoralExplorationStart";
 import { electoralExplorationIntents } from "../../electoral-exploration/electoral-exploration-intents";
+import { PaperAvatar } from "../../paper/components/PaperAvatar";
+import { PaperDialogue } from "../../paper/components/PaperDialogue";
+import { paperStatusVoices } from "../../paper/paper-voice";
 
 interface StatusContent {
   detail: string;
@@ -136,6 +139,17 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   const guidanceOnly = status === "ready" && !failure && !errorMessage
     && isGuidanceOnly(generatedInterface?.specification, hasBoundData);
 
+  const preparePrompt = (prompt: string) => {
+    setDraft(prompt);
+    onShowChat?.();
+    window.requestAnimationFrame(() => document.getElementById("civic-prompt")?.focus());
+  };
+
+  const askPaperForHelp = () => {
+    onShowChat?.();
+    window.requestAnimationFrame(() => document.getElementById("civic-prompt")?.focus());
+  };
+
   useEffect(() => {
     if (!failure) return;
     requestAnimationFrame(() => failureRef.current?.focus({ preventScroll: true }));
@@ -167,10 +181,12 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           <p className="canvas__eyebrow">Laboratorio de datos públicos</p>
           <h1 id="canvas-title">Explorador ciudadano</h1>
         </div>
-        <span className="canvas__status" data-status={status}>
-          <span aria-hidden="true" />
-          {isHistoricalView ? "Revisión anterior" : content.label}
-        </span>
+        {status !== "empty" ? (
+          <span className="canvas__status" data-status={status}>
+            <span aria-hidden="true" />
+            {isHistoricalView ? "Revisión anterior" : content.label}
+          </span>
+        ) : null}
       </header>
 
       <div
@@ -187,7 +203,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             <p>Esta petición no produjo un análisis visual. Puedes pedir una comparación, una distribución territorial o un cambio concreto en una interfaz existente.</p>
             <div className="canvas-guidance__actions">
               {electoralExplorationIntents.slice(0, 2).map(({ id, prompt }) => (
-                <button key={id} type="button" onClick={() => { setDraft(prompt); onShowChat?.(); }}>{prompt}</button>
+                <button key={id} type="button" onClick={() => preparePrompt(prompt)}>{prompt}</button>
               ))}
             </div>
           </div>
@@ -328,15 +344,10 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           </div>
         ) : isProcessing ? (
           <div className="canvas-process" data-step={activeProcessStep}>
-            <div className="canvas-process__signal" aria-hidden="true">
-              <span className="canvas-process__orbit canvas-process__orbit--outer" />
-              <span className="canvas-process__orbit canvas-process__orbit--inner" />
-              <span className="canvas-process__core"><span /></span>
-            </div>
             <div className="canvas-process__copy" key={status}>
               <p>{activePrompt}</p>
-              <h2>{content.title}</h2>
-              <span>{activityMessage}</span>
+              <h2>{paperStatusVoices[status]?.title ?? content.title}</h2>
+              <span>{paperStatusVoices[status]?.detail ?? activityMessage}</span>
             </div>
             <div className="canvas-process__progress">
               <div
@@ -362,7 +373,16 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
         ) : (
           <div className="canvas-state" data-settled={status !== "empty"}>
             {status === "empty" ? (
-              <ElectoralExplorationStart onSelect={(prompt) => { setDraft(prompt); onShowChat?.(); }} />
+              <div className="canvas-welcome">
+                <div className="canvas-welcome__paper">
+                  <PaperAvatar mood="presenting" size="hero" interactive={false} followPointer={false} />
+                  <PaperDialogue
+                    label="Paper · Tu guía"
+                    message="Dime qué quieres entender. Yo convierto tu pregunta en una vista hecha para explorarla."
+                  />
+                </div>
+                <ElectoralExplorationStart onSelect={preparePrompt} />
+              </div>
             ) : (
               <div className="canvas-state__copy">
                 <div className="canvas-state__label">
@@ -379,6 +399,14 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           </div>
         )}
       </div>
+      {status !== "empty" ? (
+        <button className="canvas-paper-help" type="button" onClick={askPaperForHelp} aria-label="Pedir ayuda a Paper">
+          <span className="canvas-paper-help__portrait" aria-hidden="true">
+            <PaperAvatar mood={isProcessing ? "thinking" : "idle"} size="md" interactive={false} followPointer={false} />
+          </span>
+          <span className="canvas-paper-help__badge" aria-hidden="true">?</span>
+        </button>
+      ) : null}
     </section>
   );
 }

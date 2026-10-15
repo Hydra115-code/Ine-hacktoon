@@ -1,0 +1,410 @@
+/* Estilos de Paper y estética de Boleta Electoral */
+
+.paper-avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  overflow: visible;
+  touch-action: manipulation;
+}
+
+.paper-avatar-wrapper--sm {
+  width: 52px;
+  height: 52px;
+}
+
+.paper-avatar-wrapper--md {
+  width: 96px;
+  height: 96px;
+}
+
+.paper-avatar-wrapper--lg {
+  width: 160px;
+  height: 160px;
+}
+
+.paper-avatar-wrapper--hero {
+  width: min(100%, 420px);
+  height: 420px;
+  isolation: isolate;
+}
+
+.paper-avatar-wrapper[role="button"] {
+  cursor: pointer;
+}
+
+.paper-avatar-wrapper[role="button"]:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 4px;
+  border-radius: 0.35rem;
+}
+
+.paper-sprite-perspective {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.paper-sprite {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 88%;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 18px 20px rgb(28 27 44 / 0.11));
+}
+
+.paper-sprite__layer,
+.paper-sprite__hand {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.paper-sprite__layer,
+.paper-sprite__hand img {
+  height: auto;
+  max-width: none;
+}
+
+.paper-sprite__sheet,
+.paper-sprite__glasses-art {
+  display: block;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: 300% 300%;
+  image-rendering: auto;
+  backface-visibility: hidden;
+}
+
+.paper-sprite__back {
+  z-index: 1;
+  top: 8%;
+  left: 27.5%;
+  width: 47%;
+  transform-origin: 50% 90%;
+}
+
+.paper-sprite__front {
+  z-index: 2;
+  top: 13%;
+  left: 29%;
+  width: 43%;
+}
+
+.paper-sprite__glasses {
+  z-index: 6;
+  top: 10%;
+  left: 20.5%;
+  width: 59%;
+  aspect-ratio: 1;
+  transform-origin: 50% 55%;
+  filter: drop-shadow(0 4px 3px rgb(28 27 44 / 0.2));
+}
+
+.paper-sprite__glasses-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.paper-sprite__hand {
+  z-index: 5;
+  transform-origin: 50% 75%;
+}
+
+.paper-sprite__hand img {
+  display: block;
+  width: 100%;
+  user-select: none;
+}
+
+.paper-sprite__hand .paper-sprite__sheet {
+  width: 100%;
+}
+
+.paper-sprite__hand--left.paper-sprite__hand--idle {
+  top: 51%;
+  left: 2.5%;
+  width: 34%;
+}
+
+.paper-sprite__hand--right.paper-sprite__hand--idle {
+  top: 51%;
+  right: 2.5%;
+  width: 34%;
+}
+
+.paper-sprite__hand--wave {
+  top: 36%;
+  right: 0;
+  width: 36%;
+  transform-origin: 50% 90%;
+}
+
+.paper-sprite__hand--thinking {
+  top: 43%;
+  left: 1%;
+  width: 36%;
+  transform-origin: 20% 50%;
+}
+
+.paper-sprite__hand--left.paper-sprite__hand--present {
+  top: 47%;
+  left: -1%;
+  width: 39%;
+}
+
+.paper-sprite__hand--right.paper-sprite__hand--present {
+  top: 47%;
+  right: -1%;
+  width: 39%;
+}
+
+.paper-sprite__hand--point {
+  top: 48%;
+  right: -8%;
+  width: 43%;
+  transform-origin: 15% 50%;
+}
+
+.paper-sprite__hand--approve {
+  top: 46%;
+  right: -3%;
+  width: 31%;
+  transform-origin: 45% 85%;
+}
+
+.paper-sprite__hand--left.paper-sprite__hand--surprised {
+  top: 39%;
+  left: -1%;
+  width: 36%;
+}
+
+.paper-sprite__hand--right.paper-sprite__hand--surprised {
+  top: 39%;
+  right: -1%;
+  width: 36%;
+}
+
+.paper-sprite__mirrored {
+  transform: scaleX(-1);
+}
+
+.paper-avatar-wrapper--sm .paper-sprite,
+.paper-avatar-wrapper--md .paper-sprite {
+  filter: drop-shadow(0 5px 6px rgb(28 27 44 / 0.12));
+}
+
+.paper-dialogue {
+  position: relative;
+  z-index: 3;
+  min-height: 106px;
+  padding: 1rem 1.15rem;
+  border: 2px solid color-mix(in srgb, var(--color-text-primary) 82%, transparent);
+  border-radius: 1.5rem 1.5rem 1.5rem 0.5rem;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  box-shadow: 4px 5px 0 color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+}
+
+.paper-dialogue::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: 61%;
+  width: 24px;
+  height: 24px;
+  border-top: 2px solid color-mix(in srgb, var(--color-text-primary) 82%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--color-text-primary) 82%, transparent);
+  border-radius: 5px 0 0;
+  background: var(--color-surface-elevated);
+  transform: rotate(45deg);
+}
+
+.paper-dialogue__label {
+  position: relative;
+  display: block;
+  color: var(--color-brand-primary);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.paper-dialogue__message {
+  position: relative;
+  min-height: 2.9em;
+  margin: 0.45rem 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-display);
+  font-size: clamp(1rem, 1.55vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.32;
+}
+
+.paper-dialogue__typing {
+  position: relative;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.34rem;
+}
+
+.paper-dialogue__typing i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-brand-primary);
+  animation: paper-dialogue-dot 720ms ease-in-out infinite alternate;
+}
+
+.paper-dialogue__typing i:nth-child(2) { animation-delay: 120ms; }
+.paper-dialogue__typing i:nth-child(3) { animation-delay: 240ms; }
+
+.paper-dialogue__caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 0.18rem;
+  background: var(--color-brand-primary);
+  animation: paper-dialogue-caret 540ms steps(1) infinite;
+  vertical-align: -0.08em;
+}
+
+@keyframes paper-dialogue-dot { to { transform: translateY(-4px); opacity: 0.45; } }
+@keyframes paper-dialogue-caret { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-sprite-perspective,
+  .paper-sprite,
+  .paper-sprite__layer,
+  .paper-sprite__hand {
+    animation: none !important;
+  }
+
+  .paper-dialogue__typing i,
+  .paper-dialogue__caret {
+    animation: none;
+  }
+}
+
+/* Globo de diálogo Paper */
+.paper-says {
+  position: relative;
+  background: var(--color-surface-elevated);
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-paper);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.paper-says::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--color-crayon));
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.paper-says__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.paper-says__author {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-brand-primary);
+}
+
+.paper-says__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--color-brand-soft);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: var(--color-brand-primary);
+  font-weight: 600;
+}
+
+.paper-says__title {
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.paper-says__text {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.paper-says__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  background: var(--color-surface-secondary);
+  border-left: 2px solid var(--color-crayon);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+/* Acento manual para etiquetas breves. */
+.crayon-mark {
+  display: inline-block;
+  color: var(--color-crayon);
+  font-weight: 900;
+  font-family: system-ui, sans-serif;
+  transform: rotate(-4deg);
+  user-select: none;
+}
+
+/* Perforación de talón / comprobante de casilla */
+.perforated-ticket {
+  position: relative;
+  background: var(--color-surface-primary);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-subtle);
+}
+
+.perforated-ticket::after {
+  content: "FOLIO CCPC · VERIFICABLE";
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  background: var(--color-surface-page);
+  padding: 0 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}

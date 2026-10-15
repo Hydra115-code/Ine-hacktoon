@@ -20,6 +20,8 @@ export function PromptComposer() {
   const { cancel, generatedInterface, sendPrompt } = useAgentSession();
 
   const connectionRef = useRef<RealtimeConnection | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const initialDraftRef = useRef(draft);
   const baseDraftRef = useRef("");
   const committedSegmentsRef = useRef<string[]>([]);
   const voiceAttemptRef = useRef(0);
@@ -43,7 +45,12 @@ export function PromptComposer() {
   };
 
   useEffect(() => {
+    const focusTimer = initialDraftRef.current.trim()
+      ? window.setTimeout(() => textareaRef.current?.focus(), 180)
+      : null;
+
     return () => {
+      if (focusTimer !== null) window.clearTimeout(focusTimer);
       voiceAttemptRef.current += 1;
       if (connectionRef.current) {
         connectionRef.current.close();
@@ -150,16 +157,21 @@ export function PromptComposer() {
               : "Última vista válida disponible"}</span>
         </div>
       ) : null}
+      <span className="sr-only" id="civic-prompt-guidance">
+        Escribe una pregunta sobre participación ciudadana. Presiona Enter para enviarla o Shift más Enter para agregar una línea.
+      </span>
       <form className="composer" onSubmit={handleSubmit}>
         <label className="sr-only" htmlFor="civic-prompt">
           Pregunta sobre datos públicos
         </label>
         <textarea
+          ref={textareaRef}
           id="civic-prompt"
           name="prompt"
           rows={2}
           maxLength={MAX_PROMPT_LENGTH}
-          placeholder="Pregunta sobre participación, territorio o indicadores…"
+          aria-describedby="civic-prompt-guidance"
+          placeholder="Pregunta sobre participación, territorio o elecciones…"
           value={draft}
           disabled={isBusy}
           onChange={(event) => {

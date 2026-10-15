@@ -18,22 +18,7 @@ function IntentIcon({ focus }: { focus: "period" | "territory" | "evidence" }) {
 
 export function ElectoralExplorationStart({ onSelect }: ElectoralExplorationStartProps) {
   return (
-    <section className="electoral-start" aria-labelledby="electoral-start-title">
-      <header className="electoral-start__header">
-        <p className="electoral-start__eyebrow">Exploración electoral</p>
-        <h2 id="electoral-start-title">Haz una pregunta; la vista se adapta a lo que necesitas entender</h2>
-        <p>
-          Elige un punto de partida o escribe tu propia consulta. La interfaz se construirá únicamente
-          con información disponible en las fuentes conectadas.
-        </p>
-      </header>
-
-      <div className="electoral-start__guide" aria-label="Cómo obtener una respuesta clara">
-        <span><strong>Territorio</strong> ¿Dónde?</span>
-        <span><strong>Periodo</strong> ¿Cuándo?</span>
-        <span><strong>Evidencia</strong> ¿Qué lo respalda?</span>
-      </div>
-
+    <section className="electoral-start" aria-label="Opciones para comenzar">
       <div className="electoral-start__intents" aria-label="Ideas para comenzar">
         {electoralExplorationIntents.map((intent) => (
           <button key={intent.id} type="button" onClick={() => onSelect?.(intent.prompt)}>
@@ -49,11 +34,6 @@ export function ElectoralExplorationStart({ onSelect }: ElectoralExplorationStar
           </button>
         ))}
       </div>
-
-      <p className="electoral-start__trust">
-        <span aria-hidden="true">✓</span>
-        Sin cifras estimadas: si una fuente todavía no está conectada, te lo diremos con claridad.
-      </p>
     </section>
   );
 }

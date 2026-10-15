@@ -10,6 +10,7 @@
   "scripts": {
     "contracts:build": "pnpm --dir packages/contracts build",
     "contracts:verify": "pnpm contracts:build && node --test scripts/contracts.compatibility.test.mjs",
+    "front-01:verify": "node --test scripts/front-01-civic-shell.test.mjs",
     "front-02:verify": "pnpm contracts:verify && pnpm state-machine:verify && pnpm session:verify && pnpm interaction:verify && node --test scripts/front-02-domain-neutrality.test.mjs",
     "front-03:verify": "tsc --ignoreConfig --noEmit --strict --skipLibCheck --types node --module nodenext --moduleResolution nodenext --target ES2022 --allowImportingTsExtensions scripts/front-03-electoral-story.test.ts && node scripts/front-03-electoral-story.test.ts",
     "integration:contracts:verify": "pnpm contracts:build && node --test scripts/integration-contract-roundtrip.test.mjs",
@@ -40,14 +41,16 @@
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.96",
-    "@ine/contracts": "workspace:*",
     "@elevenlabs/client": "^1.25.0",
+    "@ine/contracts": "workspace:*",
+    "@react-three/fiber": "^9.8.1",
     "ai": "7.0.93",
     "echarts": "^6.1.0",
     "motion": "^13.2.0",
     "next": "^16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "three": "^0.186.1",
     "zod": "^3.25.76",
     "zustand": "^5.0.15"
   },
@@ -56,6 +59,7 @@
     "@types/node": "^26.4.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
+    "@types/three": "^0.186.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   }

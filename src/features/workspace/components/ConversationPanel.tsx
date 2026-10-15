@@ -7,9 +7,12 @@ import { isWorkspaceBusy } from "../types/workspace-status";
 import { PromptComposer } from "./PromptComposer";
 import { cleanAnswerText, summarizeAnswer } from "../presentation/summarize-answer";
 
+import { SuggestedQuestions } from "../../civic-ui/components/SuggestedQuestions";
+
 export function ConversationPanel({ onShowResult }: { onShowResult: () => void }) {
   const listRef = useRef<HTMLOListElement>(null);
   const status = useWorkspaceStore((state) => state.experience.status);
+  const setDraft = useWorkspaceStore((state) => state.setDraft);
   const {
     activityMessage,
     conversationTurns,
@@ -19,6 +22,14 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
     isHistoricalView,
   } = useAgentSession();
   const isBusy = isWorkspaceBusy(status);
+  const messageCount = conversationTurns.length;
+  const messageCountLabel = messageCount === 0
+    ? "Sin mensajes todavía"
+    : `${messageCount} ${messageCount === 1 ? "mensaje" : "mensajes"}`;
+  const prepareQuestion = (question: string) => {
+    setDraft(question);
+    window.requestAnimationFrame(() => document.getElementById("civic-prompt")?.focus());
+  };
 
   useEffect(() => {
     const list = listRef.current;
@@ -31,16 +42,18 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
     <section className="conversation" aria-labelledby="conversation-title">
       <header className="conversation__header">
         <div>
-          <p>Consulta ciudadana</p>
+          <p>Consulta ciudadana con Paper</p>
           <h2 id="conversation-title">Pregunta, compara y descubre</h2>
         </div>
-        <span>{conversationTurns.length} mensajes</span>
+        <span>{messageCountLabel}</span>
       </header>
       <div className="conversation__scroll">
         {conversationTurns.length === 0 ? (
           <div className="conversation__empty">
-            <span className="conversation__empty-mark" aria-hidden="true">?</span>
-            <p>Cuéntame qué quieres entender de los datos públicos. Construiré una vista a partir de tu pregunta y podrás ajustarla aquí mismo.</p>
+            <SuggestedQuestions
+              onSelectQuestion={prepareQuestion}
+              title="Tres ideas para empezar"
+            />
           </div>
         ) : (
           <ol ref={listRef} className="conversation__turns" aria-label="Mensajes de esta consulta">
@@ -48,7 +61,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
               const summary = turn.role === "assistant" ? summarizeAnswer(turn.text) : "";
               const fullAnswer = turn.role === "assistant" ? cleanAnswerText(turn.text) : "";
               return <li className="conversation__turn" data-role={turn.role} key={turn.id}>
-                <span className="conversation__speaker">{turn.role === "user" ? "Tú" : "Asistente cívico"}</span>
+                <span className="conversation__speaker">{turn.role === "user" ? "Tú" : "Paper"}</span>
                 {turn.role === "user" ? <p>{turn.text}</p> : (
                   <>
                     {summary ? <p className="conversation__summary">{summary}</p> : null}

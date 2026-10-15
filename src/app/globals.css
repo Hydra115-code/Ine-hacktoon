@@ -7,3 +7,7 @@
 @import "../features/generative-ui/styles/interactions.css";
 @import "../features/generative-ui/styles/renderer.css";
 @import "../features/workspace/styles/workspace.css";
+@import "./landing.css";
+@import "../features/paper/styles/paper.css";
+@import "../features/onboarding/styles/onboarding.css";
+@import "../features/civic-ui/styles/civic-ui.css";
