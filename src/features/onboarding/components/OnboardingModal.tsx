@@ -110,7 +110,7 @@ export function OnboardingModal() {
 
         <main ref={stageRef} className="onboarding-stage">
           <aside className="onboarding-paper" aria-label="Paper te guía">
-            <PaperAvatar mood={guidance.mood} size="hero" interactive={false} use3D />
+            <PaperAvatar mood={guidance.mood} size="hero" interactive={false} />
             <PaperDialogue
               key={paperMessage}
               className="onboarding-paper__speech"

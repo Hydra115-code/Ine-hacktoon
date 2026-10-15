@@ -21,12 +21,17 @@ export function ElectoralExplorationStart({ onSelect }: ElectoralExplorationStar
     <section className="electoral-start" aria-label="Opciones para comenzar">
       <div className="electoral-start__intents" aria-label="Ideas para comenzar">
         {electoralExplorationIntents.map((intent) => (
-          <button key={intent.id} type="button" onClick={() => onSelect?.(intent.prompt)}>
+          <button
+            key={intent.id}
+            type="button"
+            data-focus={intent.focus}
+            aria-label={`${intent.label}: ${intent.title}. ${intent.description}`}
+            onClick={() => onSelect?.(intent.prompt)}
+          >
             <span className="electoral-start__icon"><IntentIcon focus={intent.focus} /></span>
             <span className="electoral-start__card-copy">
               <small>{intent.label}</small>
               <strong>{intent.title}</strong>
-              <span>{intent.description}</span>
             </span>
             <svg className="electoral-start__arrow" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M4 10h11M11 6l4 4-4 4" />

@@ -11,8 +11,6 @@ interface PaperAvatarProps {
   onReact?: (mood: PaperMood) => void;
   className?: string;
   followPointer?: boolean;
-  /** Conservado para no romper las pantallas que antes solicitaban el GLB. */
-  use3D?: boolean;
 }
 
 type HandAsset =

@@ -36,6 +36,7 @@ test("el título de Conversar delega el nombre de producto a la plantilla raíz"
 
 test("el shell móvil conserva navegación y composición accesibles", async () => {
   const appShell = await source("src/features/workspace/components/AppShell.tsx");
+  const header = await source("src/features/workspace/components/WorkspaceHeader.tsx");
   const composer = await source("src/features/workspace/components/PromptComposer.tsx");
   const css = await source("src/features/workspace/styles/workspace.css");
 
@@ -43,6 +44,18 @@ test("el shell móvil conserva navegación y composición accesibles", async () 
   assert.match(appShell, /aria-orientation="horizontal"/u);
   assert.match(appShell, /aria-controls="conversation-pane"/u);
   assert.match(appShell, /aria-controls="result-pane"/u);
+  assert.doesNotMatch(appShell, /SessionAccessGate/u);
+  assert.doesNotMatch(header, /onSignOut|Cerrar sesión/u);
   assert.match(composer, /aria-describedby="civic-prompt-guidance"/u);
   assert.match(css, /\.workspace\s*\{\s*grid-template-rows:\s*auto minmax\(0, 1fr\);/u);
+});
+
+test("Paper se renderiza únicamente con recursos 2D", async () => {
+  const avatar = await source("src/features/paper/components/PaperAvatar.tsx");
+  const packageJson = await source("package.json");
+
+  assert.match(avatar, /\/paper\/paper_front\.png/u);
+  assert.match(avatar, /\/paper\/glasses-expressions\.png/u);
+  assert.doesNotMatch(avatar, /use3D|\.glb|PaperScene/u);
+  assert.doesNotMatch(packageJson, /@react-three\/fiber|@types\/three|"three"/u);
 });
