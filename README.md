@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ***Ine-Hackatoon***
 =======
 # Entrega CCPC: DATA-01, DATA-02 y DATA-03
@@ -82,6 +81,3 @@ Hay celdas pequeñas, incluso LN=1. No se detectaron identificadores personales 
 ## Integridad de la carpeta recibida
 
 `npm run ccpc:verify-delivery` compara los archivos listados con `DELIVERY-MANIFEST.json`; falla si falta alguno o cambian sus bytes. No es una firma digital ni valida archivos añadidos posteriormente. `.gitattributes` preserva los bytes recibidos, con reglas específicas para fixtures y diccionarios. No normalizar masivamente sus finales de línea.
-
-No se incluyó historial `.git` ni se publicó un remoto. El equipo puede hacer su primer commit desde esta raíz después de comprobar la entrega.
->>>>>>> 6c7aac1 (feat(data): integrar fuentes, ETL y consultas CCPC 2009–2024 (DATA-01/02/03))
