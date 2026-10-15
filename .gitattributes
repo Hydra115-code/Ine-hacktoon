@@ -1,0 +1,11 @@
+# Preserve delivered bytes; specific fixture rules follow.
+* -text
+data/ccpc/sample/*.csv text eol=lf
+data/ccpc/sample/*.json text eol=lf
+data/ccpc/sample/*.sha256 text eol=lf
+data/ccpc/sample/dictionary-*.txt -text
+data/ccpc/sample/data02/*.json text eol=lf
+data/ccpc/sample/data02/*.sha256 text eol=lf
+data/ccpc/source-anchors.json text eol=lf
+docs/data03-examples/*/*.json text eol=lf
+docs/data03-examples/*/*.sha256 text eol=lf

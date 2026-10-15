@@ -1,0 +1,201 @@
+{
+  "verified_at_utc": "2026-10-13T15:31:46.581559+00:00",
+  "scope": "DATA-01, entidad, seis cortes",
+  "methods": [
+    "Descarga efectiva desde los seis enlaces INE con SHA-256 fijado en catálogo.",
+    "Inspector TypeScript entregado: todos los bytes y todas las filas.",
+    "Segundo lector Python stdlib de los seis ZIP compartidos, sin importar helpers ETL.",
+    "Comparación exacta de los cuatro conteos por grupo y porcentajes con tolerancia 0.00000051.",
+    "Selección independiente del fixture y regeneración exacta de sus bytes con orden original e inverso."
+  ],
+  "raw_rows": 54872712,
+  "csv_members": 192,
+  "entity_groups": 20755,
+  "execution": {
+    "node": "24.14.1",
+    "npm_test": {
+      "tests": 47,
+      "passed": 47,
+      "failed": 0
+    },
+    "typescript_no_emit_exit_code": 0
+  },
+  "processed_csv_sha256": "fc080268b7e32a932f738b05b59d4fc86897051e3e0e4664d31209901de6f490",
+  "fixture_rows": 150,
+  "fixture_csv_sha256": "e8319aa4f5577a3de5e768df04775812a9f71427d1e2fdfac03a10902484c2e9",
+  "count_mismatches": 0,
+  "fixture_mismatches": 0,
+  "fixture_reproduction": {
+    "method": "Regeneración con helper entregado a partir del agregado completo, y de nuevo con orden inverso.",
+    "complete_groups": 20755,
+    "fixture_groups": 150,
+    "regenerated_bytes_equal": true,
+    "reversed_input_bytes_equal": true,
+    "csv_sha256": "e8319aa4f5577a3de5e768df04775812a9f71427d1e2fdfac03a10902484c2e9"
+  },
+  "years": [
+    {
+      "year": 2009,
+      "raw_rows": 8706843,
+      "entity_groups": 3450,
+      "counts": {
+        "LN": 77481831,
+        "SV": 33316974,
+        "NV": 42298963,
+        "NS": 1865894
+      },
+      "age_min": 18,
+      "age_max": 130,
+      "LN_eq_1_cells": 3,
+      "LN_1_to_4_cells": 8,
+      "missing_values": {
+        "DEF": {
+          "empty": 0,
+          "whitespace_only": 28477,
+          "missing_token": 0,
+          "total_missing": 28477
+        },
+        "DEL": {
+          "empty": 0,
+          "whitespace_only": 28477,
+          "missing_token": 0,
+          "total_missing": 28477
+        }
+      },
+      "archive_sha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "downloaded_at": "2026-10-13T15:16:24.915Z"
+    },
+    {
+      "year": 2012,
+      "raw_rows": 8604456,
+      "entity_groups": 3449,
+      "counts": {
+        "LN": 76490962,
+        "SV": 47383154,
+        "NV": 28939159,
+        "NS": 168649
+      },
+      "age_min": 18,
+      "age_max": 132,
+      "LN_eq_1_cells": 7,
+      "LN_1_to_4_cells": 19,
+      "missing_values": {
+        "DEF": {
+          "empty": 0,
+          "whitespace_only": 15677,
+          "missing_token": 0,
+          "total_missing": 15677
+        },
+        "DEL": {
+          "empty": 0,
+          "whitespace_only": 15677,
+          "missing_token": 0,
+          "total_missing": 15677
+        }
+      },
+      "archive_sha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "downloaded_at": "2026-10-13T15:16:26.135Z"
+    },
+    {
+      "year": 2015,
+      "raw_rows": 9106059,
+      "entity_groups": 3451,
+      "counts": {
+        "LN": 83563462,
+        "SV": 36926612,
+        "NV": 41517874,
+        "NS": 5118976
+      },
+      "age_min": 18,
+      "age_max": 117,
+      "LN_eq_1_cells": 5,
+      "LN_1_to_4_cells": 18,
+      "missing_values": {},
+      "archive_sha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "downloaded_at": "2026-10-13T15:16:27.458Z"
+    },
+    {
+      "year": 2018,
+      "raw_rows": 9251122,
+      "entity_groups": 3450,
+      "counts": {
+        "LN": 89123997,
+        "SV": 51784399,
+        "NV": 31249856,
+        "NS": 6089742
+      },
+      "age_min": 18,
+      "age_max": 137,
+      "LN_eq_1_cells": 2,
+      "LN_1_to_4_cells": 14,
+      "missing_values": {},
+      "archive_sha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "downloaded_at": "2026-10-13T15:16:28.824Z"
+    },
+    {
+      "year": 2021,
+      "raw_rows": 9430502,
+      "entity_groups": 3452,
+      "counts": {
+        "LN": 93532133,
+        "SV": 46389189,
+        "NV": 43099624,
+        "NS": 4043320
+      },
+      "age_min": 18,
+      "age_max": 139,
+      "LN_eq_1_cells": 2,
+      "LN_1_to_4_cells": 7,
+      "missing_values": {},
+      "archive_sha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "downloaded_at": "2026-10-13T15:16:30.246Z"
+    },
+    {
+      "year": 2024,
+      "raw_rows": 9773730,
+      "entity_groups": 3503,
+      "counts": {
+        "LN": 98330348,
+        "SV": 54899228,
+        "NV": 37105466,
+        "NS": 6325654
+      },
+      "age_min": 18,
+      "age_max": 140,
+      "LN_eq_1_cells": 35,
+      "LN_1_to_4_cells": 58,
+      "missing_values": {
+        "DEL": {
+          "empty": 20912,
+          "whitespace_only": 0,
+          "missing_token": 0,
+          "total_missing": 20912
+        }
+      },
+      "archive_sha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "downloaded_at": "2026-10-13T15:16:32.767Z"
+    }
+  ],
+  "privacy": {
+    "direct_identifier_columns_found": [],
+    "absence_of_all_personal_data_certified": false,
+    "full_LN_eq_1_cells": 54,
+    "full_LN_1_to_4_cells": 124,
+    "fixture_LN_eq_1_cells": 4,
+    "fixture_LN_1_to_4_cells": 9,
+    "checklist_item_9": "Parcial: sin identificadores directos; no se certifica anonimato absoluto."
+  },
+  "acceptance": "8 puntos cerrados; noveno parcial con reserva documentada.",
+  "limits": [
+    "Sin integración a backend/Git, conforme al módulo independiente autorizado.",
+    "No amplía DATA-02 a años anteriores ni genera niveles geográficos inferiores.",
+    "Para 2009-2021 la referencia externa nacional confirma un porcentaje redondeado, no conteos exactos.",
+    "La fecha de adquisición histórica de los ZIP compartidos es desconocida."
+  ]
+}

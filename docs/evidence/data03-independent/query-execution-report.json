@@ -1,0 +1,443 @@
+{
+  "status": "PASS",
+  "checkCount": 14,
+  "checks": [
+    "full summary national2024: independent counts, metrics, Zod and actual provenance",
+    "full summary national2018: independent counts, metrics, Zod and actual provenance",
+    "full summary colima2024: independent counts, metrics, Zod and actual provenance",
+    "comparison: independent percentage points and relative percent; requested years untouched",
+    "breakdown sex: independent buckets, counts conserved, actual sources",
+    "breakdown sectionType: independent buckets, counts conserved, actual sources",
+    "support: exact independent AGS source record and provenance",
+    "default: latest year explicit in filters and warning; no sum across elections",
+    "missing historical non-binary: no data, no fabricated zero, source context retained",
+    "comparability: section frame change; small cells; code09 historical labels",
+    "fixture results: independently checked sums and explicit partial warning",
+    "strict invalid filters and dimensions rejected",
+    "all five breakdown dimensions: record/row coverage and counts conservation",
+    "repeated queries deterministic; consumer response mutation cannot change snapshot"
+  ],
+  "expectedSha256": "5eab6eeb22ab9c17024d6b9138768084d70ca43b427da847e349fb992b24abc2",
+  "fullDatasetSha256": "55c2cabcc9197e768b5c6092d277b77f2aa1bf9e9efa91805a9ffec47eea8df1",
+  "fixtureDatasetSha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+  "outputs": {
+    "national2024": {
+      "filters": {
+        "year": 2024
+      },
+      "totals": {
+        "nominalList": 98330348,
+        "voted": 54899228,
+        "didNotVote": 37105466,
+        "unspecified": 6325654,
+        "classified": 92004694,
+        "participationRate": 0.5583141839384114,
+        "abstentionRate": 0.3773551782812769,
+        "unspecifiedRate": 0.06433063778031173,
+        "participationPct": 55.83141839384113,
+        "abstentionPct": 37.73551782812769,
+        "unspecifiedPct": 6.433063778031173,
+        "ccpcParticipationPct": 59.670029444367266,
+        "ccpcAbstentionPct": 40.32997055563274
+      },
+      "matchedRecords": 3503,
+      "matchedSourceRows": 9773730,
+      "sourceIds": [
+        "2024:01",
+        "2024:02",
+        "2024:03",
+        "2024:04",
+        "2024:05",
+        "2024:06",
+        "2024:07",
+        "2024:08",
+        "2024:09",
+        "2024:10",
+        "2024:11",
+        "2024:12",
+        "2024:13",
+        "2024:14",
+        "2024:15",
+        "2024:16",
+        "2024:17",
+        "2024:18",
+        "2024:19",
+        "2024:20",
+        "2024:21",
+        "2024:22",
+        "2024:23",
+        "2024:24",
+        "2024:25",
+        "2024:26",
+        "2024:27",
+        "2024:28",
+        "2024:29",
+        "2024:30",
+        "2024:31",
+        "2024:32"
+      ],
+      "warningCodes": [
+        "NS_EXCLUDED_FROM_CCPC",
+        "SMALL_CELLS"
+      ]
+    },
+    "national2018": {
+      "filters": {
+        "year": 2018
+      },
+      "totals": {
+        "nominalList": 89123997,
+        "voted": 51784399,
+        "didNotVote": 31249856,
+        "unspecified": 6089742,
+        "classified": 83034255,
+        "participationRate": 0.5810376637394303,
+        "abstentionRate": 0.35063346631547504,
+        "unspecifiedRate": 0.06832886994509459,
+        "participationPct": 58.10376637394303,
+        "abstentionPct": 35.0633466315475,
+        "unspecifiedPct": 6.832886994509459,
+        "ccpcParticipationPct": 62.36510341424753,
+        "ccpcAbstentionPct": 37.63489658575247
+      },
+      "matchedRecords": 3450,
+      "matchedSourceRows": 9251122,
+      "sourceIds": [
+        "2018:01",
+        "2018:02",
+        "2018:03",
+        "2018:04",
+        "2018:05",
+        "2018:06",
+        "2018:07",
+        "2018:08",
+        "2018:09",
+        "2018:10",
+        "2018:11",
+        "2018:12",
+        "2018:13",
+        "2018:14",
+        "2018:15",
+        "2018:16",
+        "2018:17",
+        "2018:18",
+        "2018:19",
+        "2018:20",
+        "2018:21",
+        "2018:22",
+        "2018:23",
+        "2018:24",
+        "2018:25",
+        "2018:26",
+        "2018:27",
+        "2018:28",
+        "2018:29",
+        "2018:30",
+        "2018:31",
+        "2018:32"
+      ],
+      "warningCodes": [
+        "NS_EXCLUDED_FROM_CCPC",
+        "SMALL_CELLS"
+      ]
+    },
+    "colima2024": {
+      "filters": {
+        "year": 2024,
+        "entityCodes": [
+          "06"
+        ]
+      },
+      "totals": {
+        "nominalList": 584921,
+        "voted": 321763,
+        "didNotVote": 248259,
+        "unspecified": 14899,
+        "classified": 570022,
+        "participationRate": 0.5500965087593025,
+        "abstentionRate": 0.42443167538864224,
+        "unspecifiedRate": 0.025471815852055234,
+        "participationPct": 55.00965087593025,
+        "abstentionPct": 42.44316753886422,
+        "unspecifiedPct": 2.5471815852055233,
+        "ccpcParticipationPct": 56.44747044850901,
+        "ccpcAbstentionPct": 43.55252955149099
+      },
+      "matchedRecords": 108,
+      "matchedSourceRows": 54817,
+      "sourceIds": [
+        "2024:06"
+      ],
+      "warningCodes": [
+        "NS_EXCLUDED_FROM_CCPC"
+      ]
+    },
+    "comparison2018To2024": {
+      "changes": [
+        {
+          "year": 2024,
+          "baselineYear": 2018,
+          "participationPercentagePoints": -2.272347980101898,
+          "abstentionPercentagePoints": 2.6721711965801873,
+          "ccpcParticipationPercentagePoints": -2.695073969880262,
+          "ccpcAbstentionPercentagePoints": 2.6950739698802693,
+          "participationRelativePercent": -3.9108445491770145
+        }
+      ],
+      "warningCodes": [
+        "CARTOGRAPHIC_FRAMES_DIFFER",
+        "ELECTIONS_NOT_A_PANEL",
+        "ENTITY_LABEL_CHANGED",
+        "NS_EXCLUDED_FROM_CCPC",
+        "SEX_CATEGORIES_CHANGED",
+        "SMALL_CELLS"
+      ],
+      "sourceCount": 64
+    },
+    "sex2024": [
+      {
+        "value": "hombre",
+        "totals": {
+          "nominalList": 47226431,
+          "voted": 24185332,
+          "didNotVote": 19980911,
+          "unspecified": 3060188,
+          "classified": 44166243,
+          "participationRate": 0.5121143285208234,
+          "abstentionRate": 0.4230874655762151,
+          "unspecifiedRate": 0.06479820590296141,
+          "participationPct": 51.21143285208234,
+          "abstentionPct": 42.30874655762151,
+          "unspecifiedPct": 6.479820590296141,
+          "ccpcParticipationPct": 54.7597675446381,
+          "ccpcAbstentionPct": 45.2402324553619
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      },
+      {
+        "value": "mujer",
+        "totals": {
+          "nominalList": 51103812,
+          "voted": 30713817,
+          "didNotVote": 17124532,
+          "unspecified": 3265463,
+          "classified": 47838349,
+          "participationRate": 0.601008335738242,
+          "abstentionRate": 0.3350930455050985,
+          "unspecifiedRate": 0.06389861875665949,
+          "participationPct": 60.1008335738242,
+          "abstentionPct": 33.50930455050985,
+          "unspecifiedPct": 6.389861875665949,
+          "ccpcParticipationPct": 64.20333820466922,
+          "ccpcAbstentionPct": 35.79666179533077
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      },
+      {
+        "value": "no_binario",
+        "totals": {
+          "nominalList": 105,
+          "voted": 79,
+          "didNotVote": 23,
+          "unspecified": 3,
+          "classified": 102,
+          "participationRate": 0.7523809523809524,
+          "abstentionRate": 0.21904761904761905,
+          "unspecifiedRate": 0.02857142857142857,
+          "participationPct": 75.23809523809524,
+          "abstentionPct": 21.904761904761905,
+          "unspecifiedPct": 2.857142857142857,
+          "ccpcParticipationPct": 77.45098039215686,
+          "ccpcAbstentionPct": 22.54901960784314
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      }
+    ],
+    "sectionType2024": [
+      {
+        "value": "urbana",
+        "totals": {
+          "nominalList": 68291361,
+          "voted": 38359938,
+          "didNotVote": 25698484,
+          "unspecified": 4232939,
+          "classified": 64058422,
+          "participationRate": 0.5617099650422841,
+          "abstentionRate": 0.376306514084556,
+          "unspecifiedRate": 0.061983520873159934,
+          "participationPct": 56.17099650422841,
+          "abstentionPct": 37.6306514084556,
+          "unspecifiedPct": 6.198352087315993,
+          "ccpcParticipationPct": 59.882739540477594,
+          "ccpcAbstentionPct": 40.117260459522406
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      },
+      {
+        "value": "mixta",
+        "totals": {
+          "nominalList": 12822465,
+          "voted": 6951093,
+          "didNotVote": 5044957,
+          "unspecified": 826415,
+          "classified": 11996050,
+          "participationRate": 0.5421027080206497,
+          "abstentionRate": 0.39344673586552975,
+          "unspecifiedRate": 0.06445055611382054,
+          "participationPct": 54.210270802064976,
+          "abstentionPct": 39.34467358655297,
+          "unspecifiedPct": 6.445055611382054,
+          "ccpcParticipationPct": 57.9448485126354,
+          "ccpcAbstentionPct": 42.05515148736459
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      },
+      {
+        "value": "rural",
+        "totals": {
+          "nominalList": 17216522,
+          "voted": 9588197,
+          "didNotVote": 6362025,
+          "unspecified": 1266300,
+          "classified": 15950222,
+          "participationRate": 0.5569183485491437,
+          "abstentionRate": 0.3695302105733086,
+          "unspecifiedRate": 0.07355144087754774,
+          "participationPct": 55.69183485491437,
+          "abstentionPct": 36.95302105733086,
+          "unspecifiedPct": 7.355144087754774,
+          "ccpcParticipationPct": 60.11325108829206,
+          "ccpcAbstentionPct": 39.88674891170794
+        },
+        "warningCodes": [
+          "NS_EXCLUDED_FROM_CCPC",
+          "SMALL_CELLS"
+        ]
+      }
+    ],
+    "support": {
+      "query": "getSupportingRecords",
+      "filters": {
+        "year": 2024,
+        "entityCodes": [
+          "01"
+        ],
+        "sexes": [
+          "hombre"
+        ],
+        "ageGroups": [
+          "18-19"
+        ],
+        "sectionTypes": [
+          "urbana"
+        ]
+      },
+      "status": "ok",
+      "evidence": {
+        "dataset": {
+          "schemaVersion": "ccpc-participation/v1",
+          "kind": "full",
+          "years": [
+            2009,
+            2012,
+            2015,
+            2018,
+            2021,
+            2024
+          ],
+          "recordsSha256": "8d06184746e12b21a5166117e37787537a6643a659493f12d9c6efef3fd44e38",
+          "validation": "runtime_schema"
+        },
+        "matchedRecords": 1,
+        "matchedSourceRows": 1025,
+        "recordsSha256": "770c66b88ef7e0caec27c7fe5835e1fc6148299b4ca24dcd64f7b500b13adf7e",
+        "sources": [
+          {
+            "id": "2024:01",
+            "entityCode": "01",
+            "year": 2024,
+            "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+            "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+            "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+            "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+            "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+            "downloadedAt": "2026-10-13T15:16:32.767Z",
+            "rawRows": 91826,
+            "totals": {
+              "nominalList": 1097171,
+              "voted": 626084,
+              "didNotVote": 441222,
+              "unspecified": 29865
+            }
+          }
+        ],
+        "contributions": [
+          {
+            "sourceId": "2024:01",
+            "records": 1,
+            "sourceRows": 1025
+          }
+        ],
+        "catalogSources": [
+          {
+            "year": 2024,
+            "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip"
+          }
+        ]
+      },
+      "warnings": [
+        {
+          "code": "NS_EXCLUDED_FROM_CCPC",
+          "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+        }
+      ],
+      "units": {
+        "rateUnit": "ratio",
+        "percentageUnit": "percent",
+        "comparisonUnit": "percentage_point",
+        "nominalDenominator": "nominalList",
+        "ccpcDenominator": "voted+didNotVote"
+      },
+      "records": [
+        {
+          "entityCode": "01",
+          "entityName": "AGUASCALIENTES",
+          "year": 2024,
+          "sex": "hombre",
+          "ageGroup": "18-19",
+          "sectionType": "urbana",
+          "nominalList": 14908,
+          "voted": 7288,
+          "didNotVote": 7297,
+          "unspecified": 323,
+          "classified": 14585,
+          "participationRate": 0.48886503890528576,
+          "abstentionRate": 0.4894687416152401,
+          "unspecifiedRate": 0.021666219479474107,
+          "participationPct": 48.88650389052857,
+          "abstentionPct": 48.946874161524015,
+          "unspecifiedPct": 2.1666219479474105,
+          "ccpcParticipationPct": 49.969146383270484,
+          "ccpcAbstentionPct": 50.03085361672952,
+          "sourceId": "2024:01",
+          "sourceRows": 1025
+        }
+      ]
+    }
+  }
+}

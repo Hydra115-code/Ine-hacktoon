@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "checkCount": 14,
+  "checks": [
+    "full summary national2024: independent counts, metrics, Zod and actual provenance",
+    "full summary national2018: independent counts, metrics, Zod and actual provenance",
+    "full summary colima2024: independent counts, metrics, Zod and actual provenance",
+    "comparison: independent percentage points and relative percent; requested years untouched",
+    "breakdown sex: independent buckets, counts conserved, actual sources",
+    "breakdown sectionType: independent buckets, counts conserved, actual sources",
+    "support: exact independent AGS source record and provenance",
+    "default: latest year explicit in filters and warning; no sum across elections",
+    "missing historical non-binary: no data, no fabricated zero, source context retained",
+    "comparability: section frame change; small cells; code09 historical labels",
+    "fixture results: independently checked sums and explicit partial warning",
+    "strict invalid filters and dimensions rejected",
+    "all five breakdown dimensions: record/row coverage and counts conservation",
+    "repeated queries deterministic; consumer response mutation cannot change snapshot"
+  ],
+  "report": "C:\\Users\\david\\Documents\\Codex\\2026-10-12\\referenced-chatgpt-conversation-this-is-an\\work\\handoff\\cleanroom\\84981463cf7c44ea932963ca4f764ea5\\data\\ccpc\\processed\\audit-data03\\query-execution-report.json"
+}

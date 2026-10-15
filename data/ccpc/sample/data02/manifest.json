@@ -1,0 +1,18 @@
+{
+  "datasetFile": "participation.json",
+  "datasetSha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+  "kind": "sample",
+  "rawRowCount": 2453655,
+  "recordCount": 150,
+  "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+  "schemaVersion": "ccpc-etl-manifest/v1",
+  "sourceCount": 10,
+  "years": [
+    2009,
+    2012,
+    2015,
+    2018,
+    2021,
+    2024
+  ]
+}
