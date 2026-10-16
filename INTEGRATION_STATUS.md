@@ -112,8 +112,52 @@ scripts/int-02-civic-runtime.test.ts
 - `pnpm build`: aprobado; las rutas financieras F5/F6/F7 ya no aparecen en el build.
 - `git status` de la rama `Back-end`: limpio.
 
+## INT-03 — Harness de participación INE
+
+**Estado: terminada.**
+
+### Cambios realizados
+
+Se creó `/dev/ine-participation-harness` como laboratorio aislado de la navegación pública. El harness:
+
+- muestra título narrativo y resumen ciudadano;
+- compara participación 2009 y 2024 con diferencia en puntos porcentuales;
+- presenta gráfica y tabla accesible con personas que votaron y lista nominal;
+- permite ordenar las columnas desde el encabezado de la tabla;
+- filtra por escenario nacional, Entidad Alfa y Entidad Beta;
+- aplica las ediciones “Quita la gráfica” y “Deja sólo la tabla”;
+- conserva un historial acotado y recupera la vista anterior;
+- anuncia cambios mediante una región `aria-live`;
+- incluye fuente, metodología y advertencias propias;
+- usa controles nativos y mantiene navegación con teclado;
+- responde en móvil y escritorio sin mezclar el harness con las rutas productivas.
+
+Los valores viven únicamente en el harness de desarrollo y se identifican como **datos sintéticos de prueba**. Usan una base ficticia de 100 personas para hacer visible el cálculo y nunca se atribuyen al INE. El fixture contractual productivo de INT-02 continúa sin cifras embebidas.
+
+### Archivos principales
+
+```text
+src/app/dev/ine-participation-harness/page.tsx
+src/app/dev/ine-participation-harness/INEParticipationProbe.tsx
+src/app/dev/ine-participation-harness/participation-harness-model.ts
+src/app/dev/ine-participation-harness/page.module.css
+scripts/int-03-participation-harness.test.ts
+package.json
+```
+
+### Validación
+
+- `pnpm int-03:verify`: 6/6 pruebas aprobadas.
+- `pnpm int-02:verify`: 5/5 regresiones aprobadas.
+- `pnpm quality:verify`: 7/7 pruebas de seguridad y accesibilidad aprobadas.
+- `pnpm typecheck`: aprobado.
+- `pnpm build`: aprobado y la ruta aparece en el manifiesto de producción.
+- Prueba visual en vivo: filtro, ordenamiento disponible, eliminación de gráfica, modo sólo tabla y recuperación aprobados.
+- `/dev/ine-participation-harness`: HTTP 200.
+- Backend `/api/system/status`: HTTP 200 y repositorio sin modificaciones.
+
 ## Siguiente fase
 
-### INT-03 — Harness de participación INE
+### INT-04 — Adaptadores de las cuatro tools cívicas
 
-Crear `/dev/ine-participation-harness` sobre el contrato cívico de INT-02. La primera versión usará datos sintéticos claramente identificados, porque el equipo de Data todavía no entrega CCPC; nunca se presentarán como cifras oficiales. Debe validar gráfica y tabla alternativa, ordenamiento, filtro por entidad, edición conversacional de la vista, recuperación anterior, teclado, fuente, metodología y advertencias.
+Leer, sin modificar, los contratos reales de `get_participation_summary`, `compare_elections`, `get_participation_breakdown` y `get_supporting_records`. En el frontend se documentarán sus payloads y se crearán adaptadores validados para numerador, denominador, porcentaje, periodo, entidad, fuente, metodología, advertencias y respuestas parciales. Ningún campo ausente se completará con cifras inventadas.
