@@ -158,6 +158,62 @@ package.json
 
 ## Siguiente fase
 
-### INT-04 — Adaptadores de las cuatro tools cívicas
+## INT-04 — Adaptadores de las cuatro tools cívicas
 
-Leer, sin modificar, los contratos reales de `get_participation_summary`, `compare_elections`, `get_participation_breakdown` y `get_supporting_records`. En el frontend se documentarán sus payloads y se crearán adaptadores validados para numerador, denominador, porcentaje, periodo, entidad, fuente, metodología, advertencias y respuestas parciales. Ningún campo ausente se completará con cifras inventadas.
+**Estado: terminada.**
+
+### Contrato analizado
+
+Se leyó la rama `Back-end` en el commit `ff192b82032de5d06f12ea68f8e70b1a2f3c09fd`, incluyendo sus esquemas Zod, servicio, puerto de datos y pruebas de:
+
+- `get_participation_summary`;
+- `compare_elections`;
+- `get_participation_breakdown`;
+- `get_supporting_records`.
+
+El backend permaneció estrictamente en modo lectura.
+
+### Cambios realizados
+
+- Se reprodujo únicamente la forma wire necesaria en esquemas Zod propios del frontend.
+- Se añadieron fixtures sintéticos mínimos para las cuatro respuestas.
+- Los fixtures se validan contra el `dist` contractual real del backend.
+- Cada respuesta se adapta a un registro de datos cívico con contexto, procedencia y advertencias.
+- Las cifras se preservan; el adaptador no recalcula ni completa campos ausentes.
+- Se valida coherencia entre personas que votaron, lista nominal y porcentaje.
+- Se valida que resultados por opción sumen el total declarado.
+- Una respuesta parcialmente válida conserva sólo evidencia válida y muestra un mensaje ciudadano.
+- Una respuesta sin evidencia o matemáticamente contradictoria se rechaza sin producir ceros ni series falsas.
+- Cada tool genera una especificación GenUI válida y orientada a su evidencia.
+- Fuente, `queriedAt`, señal de muestra, metodología, derivaciones y cobertura se conservan cuando existen.
+- No se inventa metodología para tools que no la entregan.
+
+### Archivos principales
+
+```text
+CIVIC_TOOL_CONTRACTS.md
+src/features/integration/civic-data/civic-tool-wire.ts
+src/features/integration/civic-data/civic-tool-adapter.ts
+src/features/integration/civic-data/civic-tool-ui.ts
+src/features/integration/civic-data/fixtures/civic-tool-contract-fixtures.ts
+src/features/integration/civic-data/index.ts
+scripts/int-04-civic-tool-adapters.test.ts
+package.json
+```
+
+### Validación
+
+- `pnpm int-04:verify`: 9/9 pruebas aprobadas.
+- Validación directa contra los cuatro esquemas compilados del backend: aprobada.
+- Pruebas reales de las cuatro tools en la rama `Back-end`: 4/4 aprobadas.
+- `pnpm int-03:verify`: 6/6 regresiones aprobadas.
+- `pnpm quality:verify`: 7/7 pruebas aprobadas.
+- `pnpm typecheck`: aprobado.
+- `pnpm build`: aprobado.
+- Repositorio `Back-end`: limpio y sin modificaciones.
+
+## Siguiente fase
+
+### INT-05 — Integración del flujo cívico en `/conversar`
+
+Conectar pregunta, streaming, resultados de tools, adaptadores de INT-04 y renderer en la experiencia principal. Debe cubrir vacío, carga, respuesta parcial, error, reintento, refinamiento de la UI y recuperación, manteniendo Paper como guía compacta y sin exponer diagnósticos internos ni fallbacks financieros.
