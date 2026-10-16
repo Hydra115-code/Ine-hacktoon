@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { clearSessionArchive } from "@/features/agent/session/session-snapshot-storage";
-import { resetWorkspaceStore } from "@/features/workspace/state/workspace-store";
+import { resetWorkspaceStore, useWorkspaceStore } from "@/features/workspace/state/workspace-store";
+import { CivicBrand } from "@/features/workspace/components/CivicBrand";
 
 type AccessState =
   | { kind: "checking" }
   | { kind: "authenticated"; ownerKey: string }
-  | { kind: "sign-in" };
+  | { kind: "sign-in" }
+  | { kind: "unavailable" };
 
 interface SessionStatus {
   authenticated: boolean;
@@ -23,18 +25,18 @@ function isSessionStatus(value: unknown): value is SessionStatus {
     && (!status.authenticated || (typeof status.ownerKey === "string" && /^[a-f0-9]{64}$/u.test(status.ownerKey)));
 }
 
-function createLocalOwnerKey() {
-  return Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-}
-
 export function SessionAccessGate({ children }: {
   children: (session: { ownerKey: string; signOut: () => Promise<void> }) => ReactNode;
 }) {
   const [state, setState] = useState<AccessState>({ kind: "checking" });
   const [demoAvailable, setDemoAvailable] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const requestSequence = useRef(0);
   const currentOwner = useRef<string | undefined>(undefined);
+  const draft = useWorkspaceStore((workspace) => workspace.draft);
 
   const checkSession = useCallback(async () => {
     const sequence = ++requestSequence.current;
@@ -52,14 +54,12 @@ export function SessionAccessGate({ children }: {
         }
         currentOwner.current = body.ownerKey;
         setState({ kind: "authenticated", ownerKey: body.ownerKey });
+        setMessage("");
       } else {
         setState({ kind: "sign-in" });
       }
     } catch {
-      if (sequence !== requestSequence.current) return;
-      const ownerKey = createLocalOwnerKey();
-      currentOwner.current = ownerKey;
-      setState({ kind: "authenticated", ownerKey });
+      if (sequence === requestSequence.current) setState({ kind: "unavailable" });
     }
   }, []);
 
@@ -72,6 +72,7 @@ export function SessionAccessGate({ children }: {
     const onAuthenticationRequired = () => {
       requestSequence.current += 1;
       setState({ kind: "sign-in" });
+      setMessage("Tu sesión expiró. Inicia sesión para continuar con tu consulta.");
     };
     window.addEventListener("focus", onFocus);
     window.addEventListener("ine:authentication-required", onAuthenticationRequired);
@@ -84,31 +85,39 @@ export function SessionAccessGate({ children }: {
     };
   }, [checkSession]);
 
-  const confirmAccess = async () => {
+  const signIn = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setBusy(true);
+    setMessage("");
     try {
-      if (demoAvailable) {
-        const response = await fetch("/api/auth/demo", { method: "POST" });
-        if (!response.ok) throw new Error("La sesión demo no está disponible en este momento.");
-        await checkSession();
-        return;
-      }
-
-      const ownerKey = createLocalOwnerKey();
-      currentOwner.current = ownerKey;
-      setState({ kind: "authenticated", ownerKey });
-    } catch {
-      const ownerKey = createLocalOwnerKey();
-      currentOwner.current = ownerKey;
-      setState({ kind: "authenticated", ownerKey });
+      const response = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error("Revisa el correo y la contraseña e inténtalo de nuevo.");
+      setPassword("");
+      await checkSession();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No fue posible iniciar sesión.");
     } finally {
       setBusy(false);
     }
   };
 
-  useEffect(() => {
-    if (state.kind === "sign-in" && !busy) void confirmAccess();
-  }, [state.kind, busy]);
+  const enterDemo = async () => {
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/auth/demo", { method: "POST" });
+      if (!response.ok) throw new Error("La sesión demo no está disponible. Puedes entrar con tu cuenta.");
+      await checkSession();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No fue posible entrar a la demostración.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const signOut = async () => {
     try {
@@ -120,6 +129,7 @@ export function SessionAccessGate({ children }: {
       resetWorkspaceStore();
       setState({ kind: "sign-in" });
     } catch {
+      setMessage("No fue posible cerrar la sesión. Comprueba la conexión e inténtalo de nuevo.");
       setState({ kind: "sign-in" });
     }
   };
@@ -128,5 +138,32 @@ export function SessionAccessGate({ children }: {
     return children({ ownerKey: state.ownerKey, signOut });
   }
 
-  return null;
+  return (
+    <main className="access-gate" aria-busy={state.kind === "checking"}>
+      <section className="access-gate__card" aria-labelledby="access-title">
+        <CivicBrand context="access" />
+        <p className="canvas__eyebrow">Explorador ciudadano · Prototipo</p>
+        <h1 id="access-title">{state.kind === "checking" ? "Preparando tu acceso" : "Los datos públicos, más cerca"}</h1>
+        <p>Pregunta, compara y descubre patrones en información pública mediante una experiencia que se adapta a cada consulta.</p>
+        {state.kind === "sign-in" ? (
+          <>
+            {demoAvailable ? (
+              <button className="access-gate__primary" disabled={busy} onClick={() => void enterDemo()} type="button">
+                Entrar a demostración
+              </button>
+            ) : null}
+            <form className="access-gate__form" onSubmit={signIn}>
+              <label>Correo electrónico<input autoComplete="username" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
+              <label>Contraseña<input autoComplete="current-password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+              <button disabled={busy} type="submit">Iniciar sesión</button>
+            </form>
+            {draft ? <p className="access-gate__saved">Tu consulta escrita está conservada y podrás revisarla antes de enviarla.</p> : null}
+          </>
+        ) : state.kind === "unavailable" ? (
+          <button className="access-gate__primary" onClick={() => void checkSession()} type="button">Reintentar conexión</button>
+        ) : null}
+        {message ? <p className="access-gate__message" role="alert">{message}</p> : null}
+      </section>
+    </main>
+  );
 }

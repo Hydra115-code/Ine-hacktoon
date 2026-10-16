@@ -43,6 +43,7 @@ const requestSchema = z.object({
   uiEvent: z.unknown().optional(),
   sessionId: z.string().uuid().optional(),
   sessionState: z.unknown().optional(),
+  currentSpecification: z.unknown().optional(),
   submittedAt: z.number().int().nonnegative().max(9_000_000_000_000_000).optional(),
 }).strict();
 
@@ -53,7 +54,7 @@ interface RequestObservation {
 }
 
 type AgentRequestInput =
-  | ({ type: "prompt"; prompt: string; session?: { id: string; state: SessionReference } } & RequestObservation)
+  | ({ type: "prompt"; prompt: string; session?: { id: string; state: SessionReference; initialState: UIPatchState } } & RequestObservation)
   | ({ type: "ui-event"; intent: AgentUIIntent; initialState: UIPatchState } & RequestObservation);
 
 async function parseAgentRequest(request: Request): Promise<AgentRequestInput | null> {
@@ -110,8 +111,15 @@ async function parseAgentRequest(request: Request): Promise<AgentRequestInput | 
   if (!parsedPrompt.success) return null;
   if (parsedRequest.data.sessionId || parsedRequest.data.sessionState) {
     const state = sessionReferenceSchema.safeParse(parsedRequest.data.sessionState);
-    if (!parsedRequest.data.sessionId || !state.success) return null;
-    return { type: "prompt", prompt: parsedPrompt.data, session: { id: parsedRequest.data.sessionId, state: state.data }, ...observation };
+    if (!parsedRequest.data.sessionId || !state.success || parsedRequest.data.currentSpecification === undefined) return null;
+    const initialState = createUIPatchState(parsedRequest.data.currentSpecification, state.data.interfaceRevision);
+    if (!initialState.success) return null;
+    return {
+      type: "prompt",
+      prompt: parsedPrompt.data,
+      session: { id: parsedRequest.data.sessionId, state: state.data, initialState: initialState.state },
+      ...observation,
+    };
   }
   return { type: "prompt", prompt: parsedPrompt.data, ...observation };
 }
@@ -266,6 +274,7 @@ export async function POST(request: NextRequest) {
         sessionId,
         correlationId,
         ...(input.session ? { sessionState: input.session.state } : {}),
+        ...(input.session ? { initialState: input.session.initialState } : {}),
       })
     : streamPlannedAgent({
         accessToken: token,

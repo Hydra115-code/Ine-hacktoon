@@ -811,6 +811,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
             dataRevision: dataStateRef.current.revision,
             dataKeys: Object.keys(dataStateRef.current.data),
           },
+          currentSpecification: patchState.specification,
         },
       });
       return;
@@ -862,7 +863,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     setChangeSummary(undefined);
     setFailure(undefined);
     setSuppressedAnswerId(undefined);
-    setActivityMessage("Listo para analizar tus finanzas");
+    setActivityMessage("Listo para explorar datos públicos");
     setActiveAnalysisId(undefined);
     setSessionTitle(undefined);
     setMessages([]);

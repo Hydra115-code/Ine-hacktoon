@@ -7,7 +7,7 @@ import { CivicBrand } from "./CivicBrand";
 
 import Link from "next/link";
 
-export function WorkspaceHeader() {
+export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void> }) {
   const status = useWorkspaceStore((state) => state.experience.status);
   const reset = useWorkspaceStore((state) => state.reset);
   const { startNewSession } = useAgentSession();
@@ -35,6 +35,7 @@ export function WorkspaceHeader() {
             Nueva consulta
           </button>
         ) : null}
+        {onSignOut ? <button className="session-reset" type="button" onClick={() => void onSignOut()}>Salir</button> : null}
       </div>
     </header>
   );

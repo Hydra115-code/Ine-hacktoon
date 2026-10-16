@@ -212,8 +212,57 @@ package.json
 - `pnpm build`: aprobado.
 - Repositorio `Back-end`: limpio y sin modificaciones.
 
-## Siguiente fase
+## INT-05 — Integración del flujo cívico en `/conversar`
 
-### INT-05 — Integración del flujo cívico en `/conversar`
+**Estado: implementación terminada; cierre E2E pendiente de credenciales locales válidas.**
 
-Conectar pregunta, streaming, resultados de tools, adaptadores de INT-04 y renderer en la experiencia principal. Debe cubrir vacío, carga, respuesta parcial, error, reintento, refinamiento de la UI y recuperación, manteniendo Paper como guía compacta y sin exponer diagnósticos internos ni fallbacks financieros.
+### Cambios realizados
+
+- El primer `DataPatch` con forma cívica se identifica sin depender de nombres internos del backend.
+- Las respuestas compartidas `source_n` se normalizan de vuelta al contrato cívico de INT-04 sin completar cifras ausentes.
+- El primer resultado MCP válido produce una interfaz progresiva pequeña antes de que el planner termine la composición definitiva.
+- Si el planner no entrega una UI válida, la evidencia adaptada se conserva y se cierra como vista segura.
+- Las fuentes ajenas al dominio cívico se ignoran y no activan fallbacks financieros.
+- Los registros de respaldo cuyo identificador técnico fue ocultado por el adaptador común se conservan como evidencia parcial; no se crea un identificador sustituto.
+- Los refinamientos escritos envían la especificación vigente únicamente a la ruta Next y permiten validar los `ui-patch` del backend contra la revisión correcta.
+- La especificación no se reenvía dentro del contrato público hacia el backend.
+- Se restauró `SessionAccessGate`: `/conversar` exige una sesión Supabase real, ofrece demo sólo cuando está configurada y conserva el borrador cuando expira la sesión.
+- Se eliminó el propietario local ficticio que permitía abrir el shell pero garantizaba un 401 al consultar.
+- Se retiró el último mensaje financiero del reinicio de sesión.
+
+### Archivos principales
+
+```text
+src/features/integration/civic-data/civic-stream-fallback.ts
+src/features/integration/civic-data/civic-tool-adapter.ts
+src/features/agent/server/stream-planned-agent.ts
+src/features/agent/components/AgentSessionProvider.tsx
+src/app/api/agent/route.ts
+src/features/auth/components/SessionAccessGate.tsx
+src/features/workspace/components/AppShell.tsx
+src/features/workspace/components/WorkspaceHeader.tsx
+scripts/int-05-civic-conversation-flow.test.ts
+package.json
+```
+
+### Validación
+
+- `pnpm int-05:verify`: 7/7 pruebas aprobadas.
+- `pnpm int-04:verify`: 9/9 regresiones de contrato aprobadas.
+- `pnpm quality:verify`: 7/7 pruebas de seguridad y accesibilidad aprobadas.
+- `pnpm typecheck`: aprobado.
+- `pnpm build`: aprobado; 19 rutas generadas.
+- Prueba visual: el acceso real se presenta correctamente y una sesión ausente ya no abre un workspace incapaz de consultar.
+- Prueba visual del error: una sesión expirada conserva la consulta y presenta un mensaje ciudadano.
+- Backend `Back-end`: limpio y sin modificaciones.
+
+### Pendiente para cerrar la fase al 100 %
+
+La máquina no tiene `INE_DEMO_EMAIL` ni `INE_DEMO_PASSWORD` en `.env.local`; el `AGENT_API_TOKEN` configurado responde `401 authentication_required`. Por ello no se puede completar todavía la prueba autenticada pregunta → tools → UI → refinamiento contra el backend en vivo.
+
+No debe iniciarse otra fase hasta configurar credenciales válidas y ejecutar estas dos solicitudes en la misma sesión:
+
+1. `Compara la participación nacional de 2018 y 2024 y conserva visibles las cifras que sustentan el cambio.`
+2. `Ahora quita la gráfica y conserva únicamente la tabla y la fuente.`
+
+El cierre requiere comprobar que la primera solicitud muestra evidencia progresiva y que la segunda aplica un cambio sobre la revisión vigente sin perder datos ni iniciar una consulta nueva.

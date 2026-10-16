@@ -17,6 +17,7 @@ import {
   createUIPatchState,
   type UIPatchState,
 } from "../../generative-ui/patches/ui-patch-engine";
+import { createCivicStreamFallback } from "../../integration/civic-data/civic-stream-fallback";
 
 const MAX_UI_REPAIR_ATTEMPTS = 1;
 
@@ -34,10 +35,11 @@ interface StreamPlannedAgentBaseOptions {
   sessionId?: string;
   correlationId?: string;
   sessionState?: SessionReference;
+  initialState?: UIPatchState;
 }
 
 type StreamPlannedAgentOptions = StreamPlannedAgentBaseOptions & (
-  | { prompt: string; intent?: never; initialState?: never }
+  | { prompt: string; intent?: never }
   | { prompt?: never; intent: AgentUIIntent; initialState: UIPatchState }
 );
 
@@ -80,6 +82,8 @@ export async function* streamPlannedAgent(
   let repair: ReturnType<typeof createRepairContext> | undefined;
   let patchState: UIPatchState | undefined = options.initialState;
   let hasPartialData = patchState !== undefined;
+  let hasProgressiveCivicFallback = false;
+  let sawUiCompleted = false;
   const dataGuard = new DataRevisionGuard(options.intent ?? options.sessionState);
 
   for (let attempt = 0; attempt <= MAX_UI_REPAIR_ATTEMPTS; attempt += 1) {
@@ -102,6 +106,27 @@ export async function* streamPlannedAgent(
           recoverable: true, hasPartialData, correlationId,
         };
         return;
+      }
+      if (event.type === "data-patch") {
+        yield event;
+        hasPartialData = true;
+        if (!patchState) {
+          const fallback = createCivicStreamFallback(event.patch);
+          if (fallback) {
+            const initial = createUIPatchState(fallback.specification, 0);
+            if (initial.success) {
+              patchState = initial.state;
+              hasProgressiveCivicFallback = true;
+              yield {
+                type: "ui-started",
+                specification: initial.state.specification,
+                data: fallback.data,
+                revision: initial.state.revision,
+              };
+            }
+          }
+        }
+        continue;
       }
       if (event.type === "data-available") dataGuard.available(event.key);
       if (event.type === "ui" || event.type === "ui-started") {
@@ -181,16 +206,29 @@ export async function* streamPlannedAgent(
           };
           return;
         }
+        sawUiCompleted = true;
         yield event;
         continue;
       }
 
       if (repair && event.type === "text-delta") continue;
-      if (event.type === "data-available" || event.type === "data-patch") hasPartialData = true;
+      if (event.type === "data-available") hasPartialData = true;
       yield event;
     }
 
-    if (!invalidUI) return;
+    if (!invalidUI) {
+      if (hasProgressiveCivicFallback && !sawUiCompleted && patchState) {
+        yield { type: "status", stage: "ready", message: "Vista cívica lista" };
+        yield { type: "ui-completed", revision: patchState.revision };
+      }
+      return;
+    }
+
+    if (hasProgressiveCivicFallback && patchState) {
+      yield { type: "status", stage: "ready", message: "Mostrando la evidencia cívica validada" };
+      yield { type: "ui-completed", revision: patchState.revision };
+      return;
+    }
 
     if (attempt === MAX_UI_REPAIR_ATTEMPTS) {
       yield {

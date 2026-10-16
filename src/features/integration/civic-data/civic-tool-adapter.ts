@@ -123,12 +123,24 @@ function recoverPartial(toolName: CivicToolName, input: unknown): DataRegistryVa
       return compactData({ ...base, context: compactData({ ...(optionalParse(civicProcessSchema, input.process) ?? {}), dimension: validDimension(input.dimension), scope: validString(input.scope) }), groups, coverageNote: validString(input.coverageNote) });
     }
     case "get_supporting_records": {
-      const records = validArray(input.records, supportingRecordSchema);
+      const records = recoverSupportingRecords(input.records);
       if (records.length === 0 || !supportingRecordsAreCoherent(records)) return null;
       return compactData({ ...base, context: compactData({ ...(optionalParse(civicProcessSchema, input.process) ?? {}), entity: validString(input.entity), level: validLevel(input.level) }), records });
     }
   }
   throw new Error("Tool cívica no soportada");
+}
+
+const recoverableSupportingRecordSchema = supportingRecordSchema.omit({ recordId: true });
+
+function recoverSupportingRecords(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    const complete = supportingRecordSchema.safeParse(item);
+    if (complete.success) return [complete.data];
+    const recoverable = recoverableSupportingRecordSchema.safeParse(item);
+    return recoverable.success ? [recoverable.data] : [];
+  });
 }
 
 function recoverCommon(toolName: CivicToolName, input: Record<string, unknown>): DataRegistryValue {
@@ -149,7 +161,7 @@ function recoverTurnoutChange(value: unknown) {
   return optionalParse(schema, value);
 }
 
-function supportingRecordsAreCoherent(records: Array<z.infer<typeof supportingRecordSchema>>) {
+function supportingRecordsAreCoherent(records: Array<z.infer<typeof recoverableSupportingRecordSchema>>) {
   const nominalList = records.find((record) => record.field === "nominalList")?.value;
   const totalVotes = records.find((record) => record.field === "totalVotes")?.value;
   const turnout = records.find((record) => record.field === "turnoutPercentage")?.value;
