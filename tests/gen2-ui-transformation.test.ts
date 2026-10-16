@@ -96,6 +96,31 @@ test("GEN2 «deja solo tablas» retira también tarjetas y métricas ajenas", ()
   assert.equal(findById(result.specification.root, "category-table")?.type, "table");
 });
 
+test("GEN2 conserva fuente y aviso de muestra cuando se solicitan explícitamente", () => {
+  const civic: UISpecification = {
+    version: "1",
+    root: { type: "flex", id: "root", direction: "column", children: [
+      { type: "alert", id: "sample-warning", message: "Estos datos son una muestra y no son totales nacionales.", semanticState: "status.warning" },
+      { type: "alert", id: "methodology", message: "Comparación en puntos porcentuales.", semanticState: "status.info" },
+      { type: "visualization", id: "chart", ariaLabel: "Participación", mark: "bar", dataBinding: "source_1.rows", encoding: { x: { field: "year", type: "nominal" }, y: { field: "value", type: "quantitative" } } },
+      { type: "table", id: "table", ariaLabel: "Participación", dataBinding: "source_1.rows", columns: [{ field: "year", label: "Año" }, { field: "value", label: "Participación" }] },
+      { type: "text", id: "source", content: "Fuente: CCPC, Instituto Nacional Electoral.", variant: "caption" },
+    ] },
+  };
+  const result = transformPersistedUi({
+    specification: civic,
+    dataRegistry: { source_1: { rows: [{ year: 2024, value: 0.55 }] } },
+    prompt: "Quita la gráfica y conserva únicamente la tabla, la fuente y el aviso de muestra.",
+  });
+  assert.ok(result);
+  assert.equal(findById(result.specification.root, "chart"), undefined);
+  assert.equal(findById(result.specification.root, "table")?.type, "table");
+  assert.equal(findById(result.specification.root, "source")?.type, "text");
+  assert.equal(findById(result.specification.root, "sample-warning")?.type, "alert");
+  assert.equal(findById(result.specification.root, "methodology"), undefined);
+  assert.doesNotMatch(result.answer, /financier/u);
+});
+
 test("GEN2 deja únicamente el cambio financiero de mayor magnitud usando el registro existente", () => {
   const result = transformPersistedUi({
     specification,

@@ -24,6 +24,7 @@ import {
   type RealtimeTranscriptionSessionService,
 } from "../application/create-realtime-transcription-session.js";
 import { ElevenLabsRealtimeTranscriptionGateway } from "../infrastructure/elevenlabs/elevenlabs-realtime-transcription.js";
+import { SqliteSessionStore } from "../repositories/sqlite-session.repository.js";
 
 const STATUS_PATH = "/api/system/status";
 const AGENT_PATH = "/api/agent";
@@ -44,7 +45,12 @@ export interface SystemApiOptions {
 }
 
 export function createSystemApi(options: SystemApiOptions = {}) {
-  const textAgent = options.textAgent ?? createTextAgentService();
+  const localSessionStore = env.AUTH_MODE === "local_sqlite"
+    ? new SqliteSessionStore(env.SQLITE_DATABASE_PATH)
+    : undefined;
+  const textAgent = options.textAgent ?? createTextAgentService(
+    localSessionStore ? { sessionStore: localSessionStore } : {},
+  );
   const realtimeTranscription = options.realtimeTranscription
     ?? createDefaultRealtimeTranscriptionService();
   const authenticationRateLimiter = options.authenticationRateLimiter ?? new ToolRateLimiter({
@@ -55,7 +61,7 @@ export function createSystemApi(options: SystemApiOptions = {}) {
     maxCalls: env.AGENT_API_RATE_LIMIT_PER_MINUTE,
     windowMs: 60_000,
   });
-  return createServer((request, response) => {
+  const server = createServer((request, response) => {
     void handleRequest(
       request,
       response,
@@ -64,11 +70,14 @@ export function createSystemApi(options: SystemApiOptions = {}) {
       realtimeTranscription,
       authenticationRateLimiter,
       requestRateLimiter,
+      localSessionStore,
     ).catch(() => {
       if (!response.headersSent) setSecurityHeaders(response);
       if (!response.writableEnded) writeError(response, 500, "internal_error", "No fue posible completar la solicitud", true);
     });
   });
+  if (localSessionStore) server.once("close", () => localSessionStore.close());
+  return server;
 }
 
 async function handleRequest(
@@ -79,6 +88,7 @@ async function handleRequest(
   realtimeTranscription: RealtimeTranscriptionSessionService,
   authenticationRateLimiter: ToolRateLimiter,
   requestRateLimiter: ToolRateLimiter,
+  localSessionStore?: SqliteSessionStore,
 ): Promise<void> {
   const securityDecision = applyHttpSecurity(
     request,
@@ -100,10 +110,15 @@ async function handleRequest(
       }
       throw error;
     }
+    const createUserSession = options.createUserSession ?? (
+      env.AUTH_MODE === "local_sqlite"
+        ? createLocalRequestSession
+        : createSupabaseSessionWithAccessToken
+    );
     authenticatedSessionFactory = await createAuthenticatedRequestSessionFactory(
       request,
-      options.apiToken ?? env.AGENT_API_TOKEN,
-      options.createUserSession ?? createSupabaseSessionWithAccessToken,
+      env.AUTH_MODE === "local_sqlite" ? undefined : (options.apiToken ?? env.AGENT_API_TOKEN),
+      createUserSession,
     );
     if (!authenticatedSessionFactory) {
       writeAuthenticationRequired(response);
@@ -142,7 +157,9 @@ async function handleRequest(
     const parsed = z.object({ sessionId: z.string().uuid() }).strict().safeParse(body);
     if (!parsed.success) { writeError(response, 400, "invalid_request", "Solicitud inválida", false); return; }
     const session = await authenticatedSessionFactory!();
-    const result = await readSessionUiSnapshot(session.client, parsed.data.sessionId);
+    const result = localSessionStore
+      ? localSessionStore.readUiSnapshot(session.user.id, parsed.data.sessionId)
+      : await readSessionUiSnapshot(session.client, parsed.data.sessionId);
     if (result.code !== "success") {
       const status = result.code === "session_busy" ? 409
         : result.code === "snapshot_unavailable" ? 503 : 404;
@@ -330,6 +347,16 @@ export async function createAuthenticatedRequestSessionFactory(
   } catch {
     return undefined;
   }
+}
+
+async function createLocalRequestSession(accessToken: string): Promise<AuthenticatedSupabaseSession> {
+  if (!env.AGENT_API_TOKEN || !tokensMatch(accessToken, env.AGENT_API_TOKEN)) {
+    throw new Error("Token interno local inválido");
+  }
+  return {
+    client: {} as AuthenticatedSupabaseSession["client"],
+    user: { id: env.LOCAL_ACTOR_ID },
+  };
 }
 
 function readUserAccessToken(

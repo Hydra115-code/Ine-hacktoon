@@ -12,13 +12,12 @@ export interface RuntimeCapabilities {
 }
 
 export function readRuntimeCapabilities(): RuntimeCapabilities {
-  const hasSupabaseSession = Boolean(
-    env.SUPABASE_URL
-    && env.SUPABASE_PUBLISHABLE_KEY,
-  );
+  const hasSessionRuntime = env.AUTH_MODE === "local_sqlite"
+    ? Boolean(env.AGENT_API_TOKEN && env.SQLITE_DATABASE_PATH)
+    : Boolean(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY);
   return {
-    isAgentReady: Boolean(hasSupabaseSession && env.GEMINI_API_URL && env.GEMINI_API_KEY),
-    isMcpReady: hasSupabaseSession,
+    isAgentReady: Boolean(hasSessionRuntime && env.GEMINI_API_URL && env.GEMINI_API_KEY),
+    isMcpReady: hasSessionRuntime,
   };
 }
 

@@ -8,6 +8,9 @@ const EnvSchema = z.object({
   MCP_TRANSPORT: z.enum(["stdio", "http"]).default("stdio"),
   MCP_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(1_000).default(60),
   MCP_WRITE_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(100).default(6),
+  AUTH_MODE: z.enum(["supabase", "local_sqlite"]).default("supabase"),
+  SQLITE_DATABASE_PATH: z.string().min(1).default(".local/ine-explora.sqlite"),
+  LOCAL_ACTOR_ID: z.string().uuid().default("10000000-0000-4000-8000-000000000001"),
   CCPC_DATA_DIR: z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional()),
   CCPC_DATASET_PATH: z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional()),
 
@@ -72,6 +75,14 @@ const EnvSchema = z.object({
     (value) => value === "" ? undefined : value,
     z.string().min(32).max(512).optional(),
   ),
+}).superRefine((value, context) => {
+  if (value.AUTH_MODE === "local_sqlite" && !value.AGENT_API_TOKEN) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["AGENT_API_TOKEN"],
+      message: "AGENT_API_TOKEN es obligatorio en modo local_sqlite",
+    });
+  }
 });
 
 export type Env = z.infer<typeof EnvSchema>;

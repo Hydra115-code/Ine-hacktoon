@@ -15,7 +15,7 @@ export interface UiTransformationResult {
 
 /**
  * Applies presentation-only follow-ups to the persisted shared UI contract.
- * The function is deliberately pure: it cannot fetch or mutate financial data.
+ * The function is deliberately pure: it cannot fetch or mutate source data.
  */
 export function transformPersistedUi(options: {
   specification: UISpecification;
@@ -27,6 +27,8 @@ export function transformPersistedUi(options: {
   const removeTables = requestsRemoval(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
   const onlyTables = requestsOnly(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
   const onlyCharts = requestsOnly(request, /\bgrafic[a-z]*\b|\bvisualiz[a-z]*\b/u);
+  const preserveSource = /\b(?:fuente|origen|referencia)[a-z]*\b/u.test(request);
+  const preserveSampleNotice = /\b(?:aviso|advertencia|muestra)[a-z]*\b/u.test(request);
   const convertToTable = /\b(?:conviert|convert|transform)[a-z]*\b.{0,80}\btabl[a-z]*\b/u.test(request);
   const sortable = /\b(?:ordenable|ordenar|ordena|sortable)\b/u.test(request);
   const onlyLargestChange = /\b(?:unicamente|solamente|solo)\b.{0,80}\b(?:cambio|variacion|diferencia)\b.{0,40}\b(?:mayor|mas\s+grande|mas\s+importante|principal)\b/u.test(request)
@@ -39,31 +41,36 @@ export function transformPersistedUi(options: {
 
   if (onlyLargestChange) {
     nextRoot = createLargestChangeView(options.specification.root, options.dataRegistry);
-    answer = "Dejé únicamente la evidencia del cambio financiero más grande, sin volver a consultar ni modificar tus datos.";
+    answer = "Dejé únicamente la evidencia del cambio más grande, sin volver a consultar ni modificar los datos.";
     operation = "preserve";
   } else if (convertToTable) {
     nextRoot = mapTree(options.specification.root, (node) => (
       node.type === "visualization" ? visualizationToTable(node) : node
     ));
-    answer = "Convertí la evidencia visual en una tabla ordenable usando exactamente los mismos datos financieros.";
+    answer = "Convertí la evidencia visual en una tabla ordenable usando exactamente los mismos datos.";
     operation = "replace";
   } else if (removeCharts || removeTables || onlyTables || onlyCharts) {
     nextRoot = filterTree(options.specification.root, (node) => {
-      if (onlyTables) return node.type === "table" || isStructuralNode(node);
+      if (onlyTables) {
+        return node.type === "table"
+          || isStructuralNode(node)
+          || (preserveSource && isSourceNotice(node))
+          || (preserveSampleNotice && isSampleNotice(node));
+      }
       if (onlyCharts) return node.type === "visualization" || isStructuralNode(node);
       if ((removeCharts || onlyTables) && node.type === "visualization") return false;
       if ((removeTables || onlyCharts) && node.type === "table") return false;
       return true;
     }, onlyTables || onlyCharts);
     answer = onlyTables
-      ? "Dejé sólo las tablas financieras y conservé sus datos."
+      ? `Dejé únicamente las tablas${preserveSource ? ", la fuente" : ""}${preserveSampleNotice ? " y el aviso de muestra" : ""}, sin cambiar los datos.`
       : onlyCharts
-        ? "Dejé sólo las gráficas financieras y conservé sus datos."
-        : `Quité ${removeCharts ? "las gráficas" : "las tablas"} de la interfaz y conservé el resto del análisis financiero y sus datos.`;
+        ? "Dejé únicamente las gráficas y conservé sus datos."
+        : `Quité ${removeCharts ? "las gráficas" : "las tablas"} de la interfaz y conservé el resto del análisis y sus datos.`;
     operation = onlyTables || onlyCharts ? "preserve" : "remove";
   } else if (reorder) {
     nextRoot = reorderEvidence(options.specification.root, reorder.target, reorder.position);
-    answer = `Reordené ${reorder.target === "table" ? "las tablas" : "las gráficas"} en la interfaz sin modificar los datos financieros.`;
+    answer = `Reordené ${reorder.target === "table" ? "las tablas" : "las gráficas"} en la interfaz sin modificar los datos.`;
     operation = "reorder";
   } else if (sortable) {
     nextRoot = mapTree(options.specification.root, (node) => node.type === "table"
@@ -73,7 +80,7 @@ export function transformPersistedUi(options: {
           sorting: { enabled: true },
         }
       : node);
-    answer = "Habilité el ordenamiento de la tabla sin cambiar los datos financieros mostrados.";
+    answer = "Habilité el ordenamiento de la tabla sin cambiar los datos mostrados.";
     operation = "configure";
   } else {
     return null;
@@ -83,11 +90,11 @@ export function transformPersistedUi(options: {
     nextRoot = {
       type: "section",
       ...(options.specification.root.id ? { id: options.specification.root.id } : {}),
-      ariaLabel: "Vista financiera actualizada",
+      ariaLabel: "Vista actualizada",
       children: [{
         type: "alert",
         id: "gen2-empty-presentation",
-        message: "El elemento solicitado fue retirado. Tus datos financieros siguen disponibles para otra presentación.",
+        message: "El elemento solicitado fue retirado. Los datos siguen disponibles para otra presentación.",
         semanticState: "status.info",
       }],
     };
@@ -98,6 +105,16 @@ export function transformPersistedUi(options: {
     root: nextRoot,
   });
   return { specification: parsed, answer, operation };
+}
+
+function isSourceNotice(node: UINode): boolean {
+  if (node.type !== "text" && node.type !== "alert") return false;
+  return /\b(?:fuente|source|procedencia)\b/u.test(normalize(JSON.stringify(node)));
+}
+
+function isSampleNotice(node: UINode): boolean {
+  if (node.type !== "alert" && node.type !== "text") return false;
+  return /\b(?:muestra|sample)\b/u.test(normalize(JSON.stringify(node)));
 }
 
 function requestsRemoval(request: string, subject: RegExp): boolean {

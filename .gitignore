@@ -4,6 +4,10 @@ packages/*/dist/
 .env
 .env.local
 .env.*.local
+.local/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.log
 .DS_Store
 Thumbs.db
