@@ -3,6 +3,7 @@ import {
   textAgentStreamEventSchema,
   type TextAgentStreamEvent,
 } from "@ine/contracts";
+import { normalizeBackendContractPayload } from "../../integration/contracts/backend-contract-compatibility.ts";
 
 export type AgentApiErrorCode =
   | "authentication_required"
@@ -80,7 +81,7 @@ export function parseCanonicalStreamEvent(
     );
   }
 
-  const parsed = textAgentStreamEventSchema.safeParse(value);
+  const parsed = textAgentStreamEventSchema.safeParse(normalizeBackendContractPayload(value));
   if (!parsed.success) {
     throw new AgentApiError(
       "El Agent API devolvió un evento inválido",

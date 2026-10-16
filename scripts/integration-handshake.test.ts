@@ -6,6 +6,7 @@ import {
   requestSystemStatus,
   SystemStatusRequestError,
 } from "../src/features/system-status/system-status-client.ts";
+import { BRYAN_BACKEND_CONTRACT_FINGERPRINT } from "../src/features/integration/contracts/backend-contract-compatibility.ts";
 
 const statusPayload = {
   version: "1",
@@ -17,7 +18,7 @@ const statusPayload = {
   checkedAt: "2026-09-12T16:00:00.000Z",
 } as const;
 
-test("acepta únicamente el fingerprint contractual canónico y propaga correlación", async () => {
+test("acepta el fingerprint contractual nativo y propaga correlación", async () => {
   let receivedCorrelation: string | null = null;
   const status = await requestSystemStatus("http://127.0.0.1:3101/api/system/status", {
     correlationId: "10000000-0000-4000-8000-000000000001",
@@ -29,6 +30,21 @@ test("acepta únicamente el fingerprint contractual canónico y propaga correlac
 
   assert.equal(status.contractFingerprint, CONTRACT_FINGERPRINT);
   assert.equal(receivedCorrelation, "10000000-0000-4000-8000-000000000001");
+});
+
+test("acepta el fingerprint conocido del backend mediante el adaptador explícito", async () => {
+  const status = await requestSystemStatus("http://127.0.0.1:3101/api/system/status", {
+    fetchImplementation: async () => Response.json({
+      ...statusPayload,
+      contractFingerprint: BRYAN_BACKEND_CONTRACT_FINGERPRINT,
+      status: "degraded",
+      agent: "unavailable",
+      mcp: "unavailable",
+    }),
+  });
+
+  assert.equal(status.contractFingerprint, BRYAN_BACKEND_CONTRACT_FINGERPRINT);
+  assert.equal(status.status, "degraded");
 });
 
 test("rechaza un backend con fingerprint distinto sin reintento", async () => {

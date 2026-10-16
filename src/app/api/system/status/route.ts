@@ -3,6 +3,7 @@ import {
   IntegrationConfigurationError,
   requestBackendSystemStatus,
 } from "@/features/system-status/server/backend-system-status";
+import { SystemStatusRequestError } from "@/features/system-status/system-status-client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,11 +16,21 @@ export async function GET() {
     });
   } catch (error) {
     const isConfigurationError = error instanceof IntegrationConfigurationError;
+    const isStatusError = error instanceof SystemStatusRequestError;
+    const code = isConfigurationError
+      ? "integration_not_configured"
+      : isStatusError
+        ? error.code
+        : "backend_unavailable";
     return Response.json(errorPayloadSchema.parse({
       version: "1",
-      code: isConfigurationError ? "integration_not_configured" : "backend_unavailable",
-      message: isConfigurationError ? "La integración del agente no está configurada" : "El backend no está disponible",
-      recoverable: !isConfigurationError,
+      code,
+      message: isConfigurationError
+        ? "La integración del agente no está configurada"
+        : isStatusError
+          ? error.message
+          : "El backend no está disponible",
+      recoverable: isStatusError ? error.recoverable : !isConfigurationError,
       hasPartialData: false,
       correlationId,
     }), {

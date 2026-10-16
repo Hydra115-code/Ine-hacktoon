@@ -1,13 +1,14 @@
 import {
-  CONTRACT_FINGERPRINT,
   errorPayloadSchema,
   systemStatusSchema,
   type SystemStatus,
 } from "@ine/contracts";
+import { isSupportedBackendContractFingerprint } from "../integration/contracts/backend-contract-compatibility.ts";
 
 export type SystemStatusErrorCode =
   | "backend_unavailable"
   | "contract_fingerprint_mismatch"
+  | "integration_not_configured"
   | "invalid_status"
   | "request_aborted"
   | "request_timeout";
@@ -66,9 +67,12 @@ async function requestSystemStatusOnce(
     const payload = await response.json();
     if (!response.ok) {
       const error = errorPayloadSchema.safeParse(payload);
+      const code = error.success && isSystemStatusErrorCode(error.data.code)
+        ? error.data.code
+        : "backend_unavailable";
       throw new SystemStatusRequestError(
         error.success ? error.data.message : "El backend no está disponible",
-        "backend_unavailable",
+        code,
         error.success ? error.data.recoverable : true,
       );
     }
@@ -76,7 +80,7 @@ async function requestSystemStatusOnce(
     if (!result.success) {
       throw new SystemStatusRequestError("El backend devolvió un estado inválido", "invalid_status", false);
     }
-    if (result.data.contractFingerprint !== CONTRACT_FINGERPRINT) {
+    if (!isSupportedBackendContractFingerprint(result.data.contractFingerprint)) {
       throw new SystemStatusRequestError(
         "El frontend y el backend usan contratos incompatibles",
         "contract_fingerprint_mismatch",
@@ -93,6 +97,17 @@ async function requestSystemStatusOnce(
     clearTimeout(timeout);
     options.signal?.removeEventListener("abort", abortFromCaller);
   }
+}
+
+function isSystemStatusErrorCode(code: string): code is SystemStatusErrorCode {
+  return [
+    "backend_unavailable",
+    "contract_fingerprint_mismatch",
+    "integration_not_configured",
+    "invalid_status",
+    "request_aborted",
+    "request_timeout",
+  ].includes(code);
 }
 
 export class SystemStatusRequestError extends Error {

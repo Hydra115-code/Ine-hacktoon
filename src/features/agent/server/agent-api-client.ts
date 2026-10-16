@@ -16,6 +16,7 @@ import {
 import type { AgentApiConfig } from "./agent-api-config";
 import type { UIPlannerContext, UIRepairContext } from "../planner/ui-planner";
 import type { AgentUIIntent } from "../contracts/agent-ui-intent";
+import { normalizeFrontendContractPayloadForBackend } from "../../integration/contracts/backend-contract-compatibility.ts";
 
 const MAX_STREAM_EVENTS = 500;
 const MAX_STREAM_LINE_LENGTH = 1_000_000;
@@ -170,7 +171,7 @@ export async function* streamAgent({
     response = await fetchImplementation(config.endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify(normalizedRequest),
+      body: JSON.stringify(normalizeFrontendContractPayloadForBackend(normalizedRequest)),
       cache: "no-store",
       signal: combinedSignal,
     });
