@@ -8,14 +8,23 @@ const MAX_GENERIC_FIELDS = 12;
 const MAX_GENERIC_TABLE_COLUMNS = 8;
 const MAX_GENERIC_VISUALIZATIONS = 2;
 const knownLabels: Record<string, string> = {
+  abstention: "Abstención",
   category: "Categoría",
   count: "Cantidad",
+  entity: "Entidad",
+  nominalList: "Lista nominal",
+  participation: "Participación",
   period: "Periodo",
   rate: "Tasa",
   region: "Región",
+  source: "Fuente",
   total: "Total",
   value: "Valor",
+  votes: "Personas que votaron",
+  year: "Año",
 };
+
+const metadataFields = new Set(["methodology", "officialUrl", "source", "sourceUrl"]);
 
 function labelFromKey(key: string) {
   const knownLabel = knownLabels[key];
@@ -49,7 +58,7 @@ function collectMetrics(data: DataRegistryValue) {
   const metrics: UINode[] = [];
 
   for (const [key, value] of Object.entries(data)) {
-    if (!isSafeField(key)) continue;
+    if (!isSafeField(key) || metadataFields.has(key)) continue;
     if (value === null || typeof value !== "object") {
       metrics.push({
         type: "metric",
@@ -103,7 +112,7 @@ function buildCollectionNodes(data: DataRegistryValue) {
       nodes.push({
         type: "visualization",
         id: nodeId("fallback-visualization", visualizationCount),
-        ariaLabel: `Visualización genérica de ${labelFromKey(key)}`,
+        ariaLabel: `Visualización de ${labelFromKey(key)}`,
         mark: "bar",
         dataBinding: key,
         encoding: {

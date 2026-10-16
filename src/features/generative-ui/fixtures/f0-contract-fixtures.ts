@@ -43,8 +43,8 @@ export const personalBankingFixture: ContractFixture = {
           columns: 2,
           gap: "md",
           children: [
-            { type: "metric", id: "balance-metric", label: "Saldo total", valueBinding: "balance", format: "currency", importance: "primary", semanticState: "data.neutral" },
-            { type: "metric", id: "change-metric", label: "Cambio mensual", valueBinding: "monthlyChange", format: "percent", trendBinding: "monthlyChange", semanticState: "data.positive" },
+            { type: "metric", id: "balance-metric", label: "Saldo total", valueBinding: "balance", format: "currency", importance: "primary", semanticState: "evidence.neutral" },
+            { type: "metric", id: "change-metric", label: "Cambio mensual", valueBinding: "monthlyChange", format: "percent", trendBinding: "monthlyChange", semanticState: "trend.increase" },
             { type: "metric", id: "account-metric", label: "Cuenta", valueBinding: "accountNumber", format: "text", importance: "tertiary" },
           ],
         },
@@ -139,7 +139,7 @@ export const financialEducationFixture: ContractFixture = {
                   id: "education-result",
                   gap: "sm",
                   children: [
-                    { type: "metric", id: "projected-savings", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", semanticState: "data.positive" },
+                    { type: "metric", id: "projected-savings", label: "Ahorro proyectado", valueBinding: "projectedSavings", format: "currency", semanticState: "trend.increase" },
                     { type: "progress", id: "goal-progress", label: "Avance estimado de meta", valueBinding: "goalProgress", showValue: true, semanticState: "status.success" },
                     { type: "icon", id: "education-icon", name: "info", label: "Resultado informativo", semanticState: "status.info" },
                   ],

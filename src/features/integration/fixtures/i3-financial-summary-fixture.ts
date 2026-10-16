@@ -22,7 +22,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "primary",
-        semanticState: "data.positive",
+        semanticState: "trend.increase",
       },
       {
         type: "metric",
@@ -32,7 +32,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "secondary",
-        semanticState: "data.negative",
+        semanticState: "trend.decrease",
       },
       {
         type: "metric",
@@ -42,7 +42,7 @@ export const i3FinancialSummarySpecification = uiSpecificationSchema.parse({
         format: "currency",
         valueType: "string",
         importance: "secondary",
-        semanticState: "data.neutral",
+        semanticState: "evidence.neutral",
       },
     ],
   },

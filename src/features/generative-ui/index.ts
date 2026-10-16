@@ -47,3 +47,5 @@ export { uiPatchSchema, type UIPatch } from "./patches/ui-patch-schema";
 export { NodeRenderer } from "./renderer/NodeRenderer";
 export { ErrorNode } from "./renderer/ErrorNode";
 export { UnknownNode } from "./renderer/UnknownNode";
+export { SourceNotice } from "./primitives/content/SourceNotice";
+export { MethodologyNotice } from "./primitives/content/MethodologyNotice";

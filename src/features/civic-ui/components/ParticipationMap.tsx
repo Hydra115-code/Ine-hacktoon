@@ -82,7 +82,7 @@ export function ParticipationMap({
                 {item.name}
               </span>
               <span className="civic-territorial-tile__pct">{item.turnout2024}%</span>
-              <small style={{ fontSize: "0.7rem", color: item.delta >= 0 ? "var(--color-data-positive)" : "var(--color-data-negative)" }}>
+              <small style={{ fontSize: "0.7rem", color: item.delta >= 0 ? "var(--color-trend-increase)" : "var(--color-trend-decrease)" }}>
                 {item.delta >= 0 ? "+" : ""}{item.delta}% vs 2018
               </small>
             </button>

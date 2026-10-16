@@ -70,12 +70,12 @@
 
 .civic-metric-card__delta[data-direction="positive"] {
   background: var(--color-success-ring);
-  color: var(--color-data-positive);
+  color: var(--color-trend-increase);
 }
 
 .civic-metric-card__delta[data-direction="negative"] {
   background: var(--color-error-soft);
-  color: var(--color-data-negative);
+  color: var(--color-trend-decrease);
 }
 
 .civic-metric-card__footnote {

@@ -21,12 +21,15 @@ const localizedDisplayValues: Readonly<Record<string, string>> = {
   active: "Activo",
   inactive: "Inactivo",
   pending: "Pendiente",
-  completed: "Completada",
-  failed: "Fallida",
-  cancelled: "Cancelada",
-  success: "Correcta",
-  positive: "Positiva",
-  negative: "Negativa",
+  completed: "Completo",
+  failed: "No disponible",
+  cancelled: "Cancelado",
+  success: "Validado",
+  increase: "Aumento",
+  decrease: "Disminución",
+  unchanged: "Sin cambio",
+  official: "Fuente oficial",
+  preliminary: "Dato preliminar",
   observed: "Observado",
   simulated: "Simulado",
 };
@@ -35,13 +38,13 @@ export function localizeDisplayValue(value: string) {
   return localizedDisplayValues[value.trim().toLocaleLowerCase("es-MX")] ?? value;
 }
 
-function numericDisplayValue(value: DataValue) {
+function numericDisplayValue(value: DataValue, format: "currency" | "number") {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && decimalAmountPattern.test(value)) {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
   }
-  throw new TypeError("currency requiere un valor numérico válido");
+  throw new TypeError(`${format} requiere un valor numérico válido`);
 }
 
 export function formatDataValue(
@@ -59,12 +62,12 @@ export function formatDataValue(
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
-      .format(numericDisplayValue(value));
+      .format(numericDisplayValue(value, "currency"));
   }
 
   if (format === "number") {
-    if (typeof value !== "number") throw new TypeError("number requiere un número");
-    return new Intl.NumberFormat(options.locale, { maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat(options.locale, { maximumFractionDigits: 2 })
+      .format(numericDisplayValue(value, "number"));
   }
 
   if (format === "percent" || format === "percentage") {

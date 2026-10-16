@@ -7,6 +7,9 @@ export function cleanGeneratedCopy(content: string): string {
     .replace(/(^|\n)[ \t]*\[?OBSERVED\]?[ \t]*:?[ \t]*/giu, "$1")
     .replace(/(^|\n)[ \t]*\[?SIMULATED\]?[ \t]*:?[ \t]*/giu, "$1Escenario simulado: ")
     .replace(/\btransactionType\s*=\s*transfer\b/giu, "transferencias")
+    .replace(/\bnumerator\b/giu, "personas que votaron")
+    .replace(/\bdenominator\b/giu, "lista nominal")
+    .replace(/\bconfidence interval\b/giu, "intervalo de confianza")
     .replace(/\(\s*sin registros adicionales pendientes de paginación,?\s*hasMore\s*:\s*false\s*\)/giu, "con el historial completo")
     .trim();
 }

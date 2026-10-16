@@ -55,7 +55,7 @@ const frontendSpecification = {
         label: "Participación",
         valueBinding: "turnout",
         format: "percent",
-        semanticState: "data.positive",
+        semanticState: "trend.increase",
       },
       {
         id: "participation-chart",
@@ -82,7 +82,7 @@ test("normaliza la semántica entrante antes de validar la UI neutral", () => {
   const parsed = uiSpecificationSchema.parse(normalized);
   const metric = parsed.root.type === "stack" ? parsed.root.children[0] : undefined;
   assert.equal(metric?.type, "metric");
-  if (metric?.type === "metric") assert.equal(metric.semanticState, "data.positive");
+  if (metric?.type === "metric") assert.equal(metric.semanticState, "trend.increase");
 });
 
 test("adapta una edición saliente sin eliminar formatos válidos de métricas", () => {
@@ -100,7 +100,7 @@ test("no permite contaminación de prototipo al normalizar JSON no confiable", (
   assert.equal(Object.getPrototypeOf(normalized), Object.prototype);
   assert.equal(Object.hasOwn(normalized, "__proto__"), true);
   assert.equal(({} as { polluted?: boolean }).polluted, undefined);
-  assert.equal(normalized.semanticState, "data.neutral");
+  assert.equal(normalized.semanticState, "evidence.neutral");
 });
 
 test("el esquema compilado real del backend acepta la edición adaptada", {

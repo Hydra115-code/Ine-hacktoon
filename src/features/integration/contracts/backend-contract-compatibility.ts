@@ -14,17 +14,17 @@ const supportedBackendFingerprints = new Set<string>([
 ]);
 
 const inboundSemanticStates: Readonly<Record<string, string>> = {
-  "financial.positive": "data.positive",
-  "financial.negative": "data.negative",
-  "financial.neutral": "data.neutral",
-  "financial.warning": "data.warning",
+  "financial.positive": "trend.increase",
+  "financial.negative": "trend.decrease",
+  "financial.neutral": "evidence.neutral",
+  "financial.warning": "evidence.caution",
 };
 
 const outboundSemanticStates: Readonly<Record<string, string>> = {
-  "data.positive": "financial.positive",
-  "data.negative": "financial.negative",
-  "data.neutral": "financial.neutral",
-  "data.warning": "financial.warning",
+  "trend.increase": "financial.positive",
+  "trend.decrease": "financial.negative",
+  "evidence.neutral": "financial.neutral",
+  "evidence.caution": "financial.warning",
 };
 
 type AdaptDirection = "from-backend" | "to-backend";

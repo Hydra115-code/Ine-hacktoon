@@ -3,6 +3,6 @@ import { semanticStateClass } from "./content-classes";
 
 type BadgeProps = Omit<BadgeNode, "type">;
 
-export function Badge({ label, semanticState = "data.neutral", emphasis = "soft" }: BadgeProps) {
+export function Badge({ label, semanticState = "evidence.neutral", emphasis = "soft" }: BadgeProps) {
   return <span className={`ui-badge ui-badge--${emphasis} ${semanticStateClass(semanticState)}`}>{label}</span>;
 }

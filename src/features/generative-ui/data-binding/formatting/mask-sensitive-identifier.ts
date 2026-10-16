@@ -2,8 +2,8 @@ import type { DataValue } from "../schemas/data-registry-schema.js";
 
 const sensitiveFieldNames = new Set([
   "account", "accountid", "accountnumber", "card", "cardid", "cardnumber", "clabe",
-  "credential", "credentialid", "cuenta", "cuentaid", "curp", "electorid", "iban",
-  "numerocuenta", "numerotarjeta", "ocr", "pan", "password", "phone", "refreshToken",
+  "credential", "credentialid", "cuenta", "cuentaid", "curp", "electorid", "claveelector", "iban",
+  "numerocuenta", "numerotarjeta", "ocr", "pan", "password", "phone", "refreshToken", "seccionelectoral",
   "secret", "sessiontoken", "tarjeta", "tarjetaid", "token",
 ].map((value) => value.toLocaleLowerCase("en-US")));
 
@@ -19,7 +19,7 @@ export function isSensitiveIdentifierField(path: string): boolean {
   return sensitiveFieldNames.has(normalizedLeaf(path));
 }
 
-/** Returns undefined when the field is not a protected identifier. */
+/** Masks personal, authentication and electoral identifiers; aggregate civic fields remain visible. */
 export function maskSensitiveIdentifier(path: string, value: DataValue): string | undefined {
   if (!isSensitiveIdentifierField(path)) return undefined;
   if (typeof value !== "string" && typeof value !== "number") return "••••";
