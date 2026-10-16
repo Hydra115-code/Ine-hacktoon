@@ -3,27 +3,31 @@ import test from "node:test";
 import { validateToolOutput } from "../src/agent/mcp-client/tool-output-validator.js";
 import { CivicDataService } from "../src/services/civic-data.service.js";
 
-const service = new CivicDataService({ now: () => new Date("2026-10-08T12:00:00.000Z") });
+const service = new CivicDataService({ now: () => new Date("2026-10-15T12:00:00.000Z") });
 
-test("devuelve los registros fuente y explica cómo se calculan los totales", async () => {
-  const output = await service.getSupportingRecords({ year: 2024, office: "presidencia", entity: "Jalisco" });
-  const sources = output.records.filter((record) => record.kind === "dato_fuente");
-  const calculated = output.records.filter((record) => record.kind === "calculado");
-
-  assert.equal(sources.length, 4); // 3 partidos + lista nominal
-  assert.ok(calculated.every((record) => record.derivation));
-  assert.equal(output.records.find((record) => record.field === "totalVotes")?.value, 4_000_000);
-  assert.ok(output.records.every((record) => record.recordId.startsWith("EJEMPLO-2024-PRESIDENCIA-JALISCO")));
+test("devuelve los grupos de la fuente y los archivos oficiales", async () => {
+  const output = await service.getSupportingRecords({ year: 2024, entities: ["Aguascalientes"], sexes: ["hombre"], ageGroups: ["18-19"], sectionTypes: ["urbana"] });
+  assert.equal(output.records.length, 1);
+  assert.deepEqual(
+    { entity: output.records[0]!.entity, voted: output.records[0]!.voted, sourceRows: output.records[0]!.sourceRows },
+    { entity: "Aguascalientes", voted: 7_288, sourceRows: 1_025 },
+  );
+  assert.equal(output.sources[0]!.id, "2024:01");
+  assert.match(output.sources[0]!.url, /^https:\/\/ine\.mx\//u);
+  assert.equal(output.truncated, false);
   assert.doesNotThrow(() => validateToolOutput("get_supporting_records", output));
 });
 
-test("los registros cuadran con el resumen de participación", async () => {
-  const input = { year: 2018, office: "presidencia" as const, entity: "Oaxaca" };
+test("los registros cuadran con el resumen", async () => {
+  const input = { year: 2024 as const, entities: ["Aguascalientes"] };
   const summary = await service.getParticipationSummary(input);
   const support = await service.getSupportingRecords(input);
-  const value = (field: string) => support.records.find((record) => record.field === field)?.value;
+  assert.equal(support.records.reduce((sum, record) => sum + record.voted, 0), summary.totals!.voted);
+  assert.equal(support.records.reduce((sum, record) => sum + record.nominalList, 0), summary.totals!.nominalList);
+});
 
-  assert.equal(value("totalVotes"), summary.participation.totalVotes);
-  assert.equal(value("nominalList"), summary.participation.nominalList);
-  assert.equal(value("turnoutPercentage"), summary.participation.turnoutPercentage);
+test("corta la lista larga y lo indica", async () => {
+  const output = await service.getSupportingRecords({ year: 2024 });
+  assert.ok(output.records.length <= 60);
+  assert.equal(output.truncated, output.totalRecords > 60);
 });

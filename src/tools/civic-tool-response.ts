@@ -7,17 +7,12 @@ import {
   CivicInvalidRequestError,
 } from "../services/civic-data.service.js";
 
-/** Respuesta exitosa de una tool: el resultado como JSON. */
 export function civicToolSuccess(output: unknown) {
   return {
     content: [{ type: "text" as const, text: JSON.stringify(output, null, 2) }],
   };
 }
 
-/**
- * Convierte cualquier error en un mensaje amable. `retryable` le dice al
- * agente si vale la pena volver a intentar (errores recuperables).
- */
 export function civicToolError(toolName: string, error: unknown) {
   logger.error(`Error en herramienta ${toolName}`, {
     errorType: error instanceof Error ? error.name : "UnknownError",

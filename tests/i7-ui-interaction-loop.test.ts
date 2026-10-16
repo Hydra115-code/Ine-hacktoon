@@ -210,7 +210,7 @@ test("un selector de entidad vuelve al Agent, consulta MCP y produce DataPatch/U
   await harness.run(queryRequest(
     SESSION_ID,
     "35000000-0000-4000-8000-000000000020",
-    "Muéstrame los resultados de Jalisco en 2024.",
+    "Muéstrame los resultados de Aguascalientes en 2024.",
   ));
   const initial = harness.sessions.latest();
 
@@ -218,18 +218,18 @@ test("un selector de entidad vuelve al Agent, consulta MCP y produce DataPatch/U
     SESSION_ID,
     "35000000-0000-4000-8000-000000000021",
     initial,
-    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "oaxaca" },
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "tabasco" },
   ));
 
   assertSuccessful(events);
   assert.ok(events.some((event) => event.type === "data-patch"));
   assert.ok(events.some((event) => event.type === "ui-patch"));
-  const requestedEntities = harness.toolCalls.map((call) => call.arguments.entity);
-  assert.ok(requestedEntities.slice(-2).includes("Oaxaca"));
+  const requestedEntities = harness.toolCalls.flatMap((call) => (call.arguments.entities as string[] | undefined) ?? []);
+  assert.ok(requestedEntities.slice(-2).includes("Tabasco"));
   const completed = harness.sessions.latest();
   assert.equal(completed.prompt, undefined);
   assert.equal(completed.interaction?.name, ENTITY_FILTER_EVENT);
-  assert.equal(completed.interaction?.value, "oaxaca");
+  assert.equal(completed.interaction?.value, "tabasco");
   assert.ok(completed.interfaceRevision > initial.interfaceRevision);
   assert.ok(completed.dataRevision > initial.dataRevision);
 
@@ -243,7 +243,7 @@ test("un selector de entidad vuelve al Agent, consulta MCP y produce DataPatch/U
   assert.equal(inspection.success, true);
   if (!inspection.success) return;
   assert.equal(inspection.state.turns.length, 1, "la interacción no debe fingir un prompt escrito");
-  assert.equal(inspection.state.interactionState[ENTITY_FILTER_EVENT], "oaxaca");
+  assert.equal(inspection.state.interactionState[ENTITY_FILTER_EVENT], "tabasco");
   await harness.sessions.release(ACTOR_ID, SESSION_ID, inspectionCorrelationId);
 });
 
@@ -252,7 +252,7 @@ test("una revisión obsoleta se rechaza antes de invocar MCP", async () => {
   await harness.run(queryRequest(
     SESSION_ID,
     "35000000-0000-4000-8000-000000000030",
-    "Muéstrame los resultados de Jalisco en 2024.",
+    "Muéstrame los resultados de Aguascalientes en 2024.",
   ));
   const current = harness.sessions.latest();
   const callsBefore = harness.toolCalls.length;
@@ -260,7 +260,7 @@ test("una revisión obsoleta se rechaza antes de invocar MCP", async () => {
     SESSION_ID,
     "35000000-0000-4000-8000-000000000031",
     current,
-    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "oaxaca" },
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "tabasco" },
     -1,
   ));
 

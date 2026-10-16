@@ -17,8 +17,9 @@ export function registerGetParticipationSummaryTool(
     {
       title: "Resumen de participación",
       description:
-        "Devuelve la participación (lista nominal, votos totales, % de participación y abstención) " +
-        "y los votos por partido de un proceso electoral, a nivel nacional o de una entidad.",
+        "Participación ciudadana de una elección (datos CCPC del INE): lista nominal, votantes, " +
+        "no votantes, no especificados y % de participación oficial y nominal. Filtra por año, " +
+        "entidades, sexo, grupo de edad y tipo de sección. No incluye votos por partido.",
       inputSchema: GetParticipationSummaryInputSchema,
     },
     async (input) => {

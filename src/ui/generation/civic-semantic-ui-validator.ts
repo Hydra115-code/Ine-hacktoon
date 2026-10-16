@@ -6,16 +6,6 @@ import {
 } from "../dsl/ui.schema.js";
 import { latestUiRequest, type SemanticUiIssue } from "./semantic-ui-validator.js";
 
-/**
- * Revisa la INTERFAZ generada antes de mandarla al frontend. Cubre las 3
- * reglas mínimas de BACK-03 que dependen de lo que se dibuja:
- * - La UI incluye tabla o evidencia verificable.
- * - No mezclar niveles territoriales (el total Nacional junto a entidades).
- * - Texto y visualización usan el mismo subconjunto (mismas entidades y años).
- * Si hay problemas, el generador le pide al modelo que corrija la UI; si no
- * lo logra, usa la interfaz de respaldo (civic-ui-fallback.ts).
- */
-
 interface CivicUiValidationInput {
   query: string;
   answer: string;
@@ -25,7 +15,6 @@ interface CivicUiValidationInput {
 
 const NATIONAL = "nacional";
 
-/** Peticiones en las que el usuario pide explícitamente no ver tablas. */
 const TABLE_EXCLUSION_PATTERN =
   /\bsin\s+tablas?\b|\bno\s+(?:me\s+)?(?:muestres|pongas|incluyas|quiero)\s+(?:la\s+|una\s+|ninguna\s+)?tablas?\b|\b(?:s[oó]lo|solamente|nada m[aá]s)\s+(?:la\s+|una\s+|las\s+)?gr[aá]ficas?\b|\bquita\s+(?:la\s+)?tabla\b/iu;
 
@@ -38,17 +27,18 @@ export function validateCivicUi(input: CivicUiValidationInput): SemanticUiIssue[
   const boundSourceIds = new Set(nodes.flatMap(boundSourceId));
   const boundSources = sources.filter((source) => boundSourceIds.has(source.id));
 
-  // 1. Evidencia verificable: al menos una tabla con datos.
   const wantsNoTables = TABLE_EXCLUSION_PATTERN.test(latestUiRequest(input.query));
   const hasTable = nodes.some((node) => node.type === "table" && isNonEmptyCollection(node, sources));
-  if (!hasTable && !wantsNoTables) {
+  const metricPaths = nodes.flatMap((node) => (node.type === "metric" && node.value.path ? [node.value.path] : []));
+  const showsBase = metricPaths.some((path) => /(?:^|\.)voted$/u.test(path))
+    && metricPaths.some((path) => /(?:^|\.)(?:classified|nominalList)$/u.test(path));
+  if (!hasTable && !showsBase && !wantsNoTables) {
     issues.push({
       code: "civic_evidence_required",
-      message: "Incluye una tabla con las cifras usadas (o los registros de get_supporting_records) como evidencia verificable.",
+      message: "Incluye evidencia verificable: una tabla con las cifras usadas (o los registros de get_supporting_records), o al menos las métricas de votaron y su total junto al porcentaje.",
     });
   }
 
-  // 2. No mezclar niveles territoriales dentro de una misma visualización.
   for (const node of nodes) {
     if (node.type !== "chart" && node.type !== "table" && node.type !== "heatmap") continue;
     const rows = resolveRows(node, sources);
@@ -62,7 +52,6 @@ export function validateCivicUi(input: CivicUiValidationInput): SemanticUiIssue[
     }
   }
 
-  // 3. Texto y visualización con el mismo subconjunto.
   const knownTerritories = unique(sources.flatMap((source) => coveredTerritories(source.data)));
   const knownYears = unique(sources.flatMap((source) => coveredYears(source.data)));
   const shownTerritories = new Set(boundSources.flatMap((source) => coveredTerritories(source.data)).map(normalize));
@@ -86,25 +75,32 @@ export function validateCivicUi(input: CivicUiValidationInput): SemanticUiIssue[
   return issues;
 }
 
-// ---------- Qué cubre cada fuente ----------
-
 function coveredTerritories(data: unknown): string[] {
   if (!isRecord(data)) return [];
   const names: string[] = [];
-  if (typeof data.entity === "string") names.push(data.entity);
-  if (typeof data.scope === "string") names.push(data.scope);
+  if (data.level === "nacional") names.push("Nacional");
+  if (isRecord(data.filters) && Array.isArray(data.filters.entities)) {
+    for (const entity of data.filters.entities) {
+      if (isRecord(entity) && typeof entity.name === "string") names.push(entity.name);
+    }
+  }
   if (data.dimension === "entidad" && Array.isArray(data.groups)) {
     for (const group of data.groups) {
       if (isRecord(group) && typeof group.group === "string") names.push(group.group);
     }
   }
-  return names;
+  if (Array.isArray(data.records)) {
+    for (const record of data.records) {
+      if (isRecord(record) && typeof record.entity === "string") names.push(record.entity);
+    }
+  }
+  return unique(names);
 }
 
 function coveredYears(data: unknown): number[] {
   if (!isRecord(data)) return [];
   const years: number[] = [];
-  if (isRecord(data.process) && typeof data.process.year === "number") years.push(data.process.year);
+  if (typeof data.year === "number") years.push(data.year);
   if (Array.isArray(data.elections)) {
     for (const election of data.elections) {
       if (isRecord(election) && typeof election.year === "number") years.push(election.year);
@@ -119,8 +115,6 @@ function territoryNamesOf(row: unknown): string[] {
     .map((key) => row[key])
     .filter((value): value is string => typeof value === "string");
 }
-
-// ---------- Recorrer la interfaz ----------
 
 function collectNodes(root: UiNode): UiNode[] {
   const children = root.type === "tabs"
@@ -173,8 +167,6 @@ function isNonEmptyCollection(
 ): boolean {
   return resolveRows(node, sources).length > 0;
 }
-
-// ---------- Utilidades ----------
 
 function mentions(text: string, name: string): boolean {
   const escaped = normalize(name).replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");

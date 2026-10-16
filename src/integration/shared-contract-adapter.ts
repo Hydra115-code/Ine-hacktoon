@@ -113,6 +113,11 @@ const percentageFinancialFields = new Set([
   "savingsRate",
   "score",
   "turnoutPercentage",
+  "participationPct",
+  "nominalParticipationPct",
+  "unspecifiedPct",
+  "abstentionPct",
+  "nominalSharePct",
 ]);
 const privateFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner|idempotency)(?:_|$)|(?:Id|ID|Uuid|UUID)$|^idempotencyKey$/u;
 const financialValueLabels: Record<string, Record<string, string>> = {

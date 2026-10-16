@@ -15,65 +15,64 @@ import { CivicDataService } from "../src/services/civic-data.service.js";
 import { type UiDataSource } from "../src/ui/dsl/ui.schema.js";
 import { type UiGenerator } from "../src/ui/generation/ui-generator.js";
 
-const service = new CivicDataService({ now: () => new Date("2026-10-08T12:00:00.000Z") });
-const query = "¿Cómo cambió la participación nacional entre 2018 y 2024?";
+const service = new CivicDataService({ now: () => new Date("2026-10-15T12:00:00.000Z") });
+const query = "¿Cómo cambió la participación de los jóvenes de Aguascalientes entre 2018 y 2024?";
+const GROUP = { entities: ["Aguascalientes"], sexes: ["hombre" as const], ageGroups: ["18-19" as const], sectionTypes: ["urbana" as const] };
 
 async function summarySource(): Promise<UiDataSource> {
-  const data = await service.getParticipationSummary({ year: 2024, office: "presidencia", entity: "Nacional" });
-  return { id: "source-1", toolName: "get_participation_summary", data };
+  return { id: "source-1", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, ...GROUP }) };
 }
 
 async function comparisonSource(): Promise<UiDataSource> {
-  const data = await service.compareElections({ office: "presidencia", entity: "Nacional", baseYear: 2018, compareYear: 2024 });
-  return { id: "source-1", toolName: "compare_elections", data };
+  return { id: "source-1", toolName: "compare_elections", data: await service.compareElections({ years: [2018, 2024], ...GROUP }) };
 }
 
 const codes = (issues: { code: string }[]) => issues.map((issue) => issue.code);
 
-// ---------- Reglas una por una ----------
-
 test("acepta una respuesta con cifras de los datos, base y redondeos", async () => {
-  const answer = "En 2024 la participación nacional fue de 61.2 %: 60 millones de votos de una lista nominal de 98,000,000. Partido A obtuvo 50 % de los votos.";
+  const answer = "En 2024 la participación oficial fue de 50 %: votaron 7,288 de 14,585 registros clasificados (lista nominal de 14,908).";
   assert.deepEqual(validateCivicReasoning({ query, answer, dataSources: [await summarySource()] }), []);
 });
 
 test("no inventar datos: rechaza cifras que no salen de las tools", async () => {
-  const answer = "La participación fue de 61.22 % (60 millones de votos de una lista nominal de 98 millones) y Partido A obtuvo 47 % de los votos.";
+  const answer = "La participación oficial fue de 49.97 % (7,288 de 14,585) y la de las mujeres fue de 61 %.";
   assert.deepEqual(codes(validateCivicReasoning({ query, answer, dataSources: [await summarySource()] })), ["unsupported_number"]);
 });
 
 test("no inferir causalidad", async () => {
-  const answer = "Partido A obtuvo 50 % de los votos porque hubo más campañas.";
+  const answer = "Votaron 7,288 personas porque hubo más campañas.";
   assert.ok(codes(validateCivicReasoning({ query, answer, dataSources: [await summarySource()] })).includes("causal_claim"));
 });
 
 test("diferenciar porcentaje y puntos porcentuales", async () => {
   const sources = [await comparisonSource()];
-  const wrong = "La participación bajó 1.7 % entre 2018 y 2024; la lista nominal cambió, así que compara porcentajes.";
-  const right = "La participación bajó 1.7 puntos porcentuales entre 2018 y 2024; la lista nominal cambió, así que compara porcentajes.";
+  const wrong = "La participación oficial bajó 3.61 % entre 2018 y 2024.";
+  const right = "La participación oficial bajó 3.61 puntos porcentuales entre 2018 y 2024.";
   assert.ok(codes(validateCivicReasoning({ query, answer: wrong, dataSources: sources })).includes("points_as_percentage"));
   assert.ok(!codes(validateCivicReasoning({ query, answer: right, dataSources: sources })).includes("points_as_percentage"));
 });
 
 test("no describir datos agregados como personas individuales", async () => {
-  const answer = "Los mexicanos prefieren a Partido A, que tuvo 50 % de los votos.";
+  const answer = "Los jóvenes eligieron no votar: votaron 7,288.";
   assert.ok(codes(validateCivicReasoning({ query, answer, dataSources: [await summarySource()] })).includes("individual_attribution"));
 });
 
 test("conservar numerador y denominador junto a la participación", async () => {
-  const answer = "La participación nacional fue de 61.22 %.";
+  const answer = "La participación oficial fue de 49.97 %.";
   assert.deepEqual(codes(validateCivicReasoning({ query, answer, dataSources: [await summarySource()] })), ["missing_numerator_denominator"]);
 });
 
-test("advertir diferencias metodológicas al comparar procesos", async () => {
-  const answer = "La participación pasó de 62.92 % a 61.22 % y bajó 1.7 puntos porcentuales (56 y 60 millones de votos).";
-  assert.ok(codes(validateCivicReasoning({ query, answer, dataSources: [await comparisonSource()] })).includes("missing_methodology_warning"));
+test("ausencia de datos no es cero", async () => {
+  const empty: UiDataSource = { id: "source-1", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, entities: ["Jalisco"] }) };
+  assert.deepEqual(codes(validateCivicReasoning({ query, answer: "En Jalisco la participación fue de 0 %.", dataSources: [empty] })), ["no_data_as_zero"]);
+  assert.deepEqual(validateCivicReasoning({ query, answer: "No hay datos de Jalisco en 2024 en la muestra.", dataSources: [empty] }), []);
 });
 
-test("conservar fuente: agrega la fuente y el aviso de datos de ejemplo", async () => {
-  const grounded = groundCivicAnswer("Partido A obtuvo 50 % de los votos.", [await summarySource()]);
-  assert.match(grounded, /Datos de ejemplo, no oficiales/u);
-  assert.match(grounded, /Fuente: Datos de ejemplo \(no oficiales\)/u);
+test("conservar fuente y advertir diferencias metodológicas: se agregan solas", async () => {
+  const grounded = groundCivicAnswer("La participación oficial bajó 3.61 puntos porcentuales.", [await comparisonSource()]);
+  assert.match(grounded, /Datos de muestra/u);
+  assert.match(grounded, /Fuente: Conteos Censales de Participación Ciudadana/u);
+  assert.match(grounded, /no prueba causas/u);
 });
 
 test("sin datos (por ejemplo, un saludo) no hay nada que validar", () => {
@@ -81,19 +80,13 @@ test("sin datos (por ejemplo, un saludo) no hay nada que validar", () => {
 });
 
 test("el preparador de datos quita repetidos y pone lo nacional al final", async () => {
-  const national = await summarySource();
-  const state: UiDataSource = {
-    id: "source-2",
-    toolName: "get_participation_summary",
-    data: await service.getParticipationSummary({ year: 2024, office: "presidencia", entity: "Jalisco" }),
-  };
-  const shaped = shapeCivicDataForUi([national, state, { ...national, id: "source-3" }, { id: "x", toolName: "get_accounts", data: {} }]);
+  const national: UiDataSource = { id: "source-1", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024 }) };
+  const state = await summarySource();
+  const shaped = shapeCivicDataForUi([national, { ...state, id: "source-2" }, { ...national, id: "source-3" }, { id: "x", toolName: "get_accounts", data: {} }]);
   assert.deepEqual(shaped.map((source) => source.id), ["source-2", "source-1"]);
 });
 
-// ---------- DoD de BACK-03: rechazar o reparar antes del frontend ----------
-
-function createOrchestrator(answers: string[], maxReasoningRepairs = 1) {
+function createOrchestrator(answers: string[]) {
   const feedbacks: (string | undefined)[] = [];
   const model: ModelGateway = {
     createSession: () => {
@@ -102,13 +95,7 @@ function createOrchestrator(answers: string[], maxReasoningRepairs = 1) {
         next: async (_results, _signal, feedback) => {
           turn += 1;
           if (turn === 1) {
-            return {
-              text: "",
-              toolCalls: [{
-                name: "compare_elections",
-                arguments: { office: "presidencia", entity: "Nacional", baseYear: 2018, compareYear: 2024 },
-              }],
-            };
+            return { text: "", toolCalls: [{ name: "compare_elections", arguments: { years: [2018, 2024], ...GROUP } }] };
           }
           feedbacks.push(feedback);
           return { text: answers[Math.min(turn - 2, answers.length - 1)]!, toolCalls: [] };
@@ -118,27 +105,17 @@ function createOrchestrator(answers: string[], maxReasoningRepairs = 1) {
   };
   const tools: FinancialToolClient = {
     listTools: async () => [
-      { name: "compare_elections", description: "Comparar procesos", inputSchema: { type: "object" } },
+      { name: "compare_elections", description: "Comparar elecciones", inputSchema: { type: "object" } },
       { name: "get_participation_summary", description: "Resumen", inputSchema: { type: "object" } },
     ],
-    callTool: async (call) => {
-      if (call.name === "compare_elections") {
-        return validateToolOutput(call.name, await service.compareElections(CompareElectionsInputSchema.parse(call.arguments)));
-      }
-      return validateToolOutput(call.name, await service.getParticipationSummary(GetParticipationSummaryInputSchema.parse(call.arguments)));
-    },
+    callTool: async (toolCall) => (toolCall.name === "compare_elections"
+      ? validateToolOutput(toolCall.name, await service.compareElections(CompareElectionsInputSchema.parse(toolCall.arguments)))
+      : validateToolOutput(toolCall.name, await service.getParticipationSummary(GetParticipationSummaryInputSchema.parse(toolCall.arguments)))),
   };
   const ui: UiGenerator = {
-    generate: async () => ({
-      version: "1.0",
-      root: { id: "respuesta", type: "text", text: "Respuesta", variant: "body" },
-    }),
+    generate: async () => ({ version: "1.0", root: { id: "respuesta", type: "text", text: "Respuesta", variant: "body" } }),
   };
-  const orchestrator = new AgentOrchestrator(model, tools, ui, {
-    maxToolCalls: 3,
-    maxReasoningRepairs,
-    currentDate: () => "2026-10-08",
-  });
+  const orchestrator = new AgentOrchestrator(model, tools, ui, { maxToolCalls: 3, maxReasoningRepairs: 1, currentDate: () => "2026-10-15" });
   return { orchestrator, feedbacks };
 }
 
@@ -148,8 +125,8 @@ async function collect(orchestrator: AgentOrchestrator): Promise<AgentStreamEven
   return events;
 }
 
-const WRONG = "La participación bajó 1.7 % porque hubo menos interés.";
-const RIGHT = "La participación pasó de 62.92 % a 61.22 %: bajó 1.7 puntos porcentuales (56 y 60 millones de votos). La lista nominal cambió, así que conviene comparar porcentajes, no votos.";
+const WRONG = "La participación oficial bajó 3.61 % porque hubo menos interés.";
+const RIGHT = "La participación oficial pasó de 53.58 % a 49.97 %: bajó 3.61 puntos porcentuales (7,727 de 14,421 y 7,288 de 14,585 registros clasificados).";
 
 test("una respuesta estadísticamente incorrecta se repara antes de llegar al frontend", async () => {
   const { orchestrator, feedbacks } = createOrchestrator([WRONG, RIGHT]);
@@ -157,10 +134,10 @@ test("una respuesta estadísticamente incorrecta se repara antes de llegar al fr
   const completed = events.find((event) => event.type === "completed");
 
   assert.ok(completed && completed.type === "completed");
-  assert.match(completed.response.answer, /1\.7 puntos porcentuales/u);
+  assert.match(completed.response.answer, /3\.61 puntos porcentuales/u);
   assert.match(completed.response.answer, /Fuente:/u);
+  assert.match(completed.response.answer, /no prueba causas/u);
   assert.doesNotMatch(completed.response.answer, /porque/u);
-  // El modelo recibió las instrucciones de reparación.
   assert.match(feedbacks[1] ?? "", /puntos porcentuales/u);
   assert.match(feedbacks[1] ?? "", /causas/u);
 });

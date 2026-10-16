@@ -1,27 +1,12 @@
 import { type UiDataSource } from "../../ui/dsl/ui.schema.js";
 
-/**
- * Revisa la respuesta escrita del agente ANTES de que llegue al frontend.
- * Si encuentra un problema, el orquestador le pide al modelo que la repare;
- * si no se puede reparar, la rechaza. Son reglas fijas: no usan IA.
- *
- * Reglas mínimas de BACK-03 que cubre este archivo:
- * - No inventar datos: cada número debe salir de los datos de las tools.
- * - No inferir causalidad: nada de "porque", "debido a", "provocó"...
- * - Diferenciar porcentaje y puntos porcentuales.
- * - No describir datos agregados como personas individuales.
- * - Conservar numerador y denominador junto al porcentaje de participación.
- * - Advertir diferencias metodológicas al comparar procesos.
- * - Conservar la fuente (esto se agrega solo, ver groundCivicAnswer).
- */
-
 export type CivicReasoningIssueCode =
   | "unsupported_number"
   | "causal_claim"
   | "points_as_percentage"
   | "individual_attribution"
   | "missing_numerator_denominator"
-  | "missing_methodology_warning";
+  | "no_data_as_zero";
 
 export interface CivicReasoningIssue {
   code: CivicReasoningIssueCode;
@@ -41,7 +26,6 @@ interface CivicReasoningInput {
   dataSources: readonly UiDataSource[];
 }
 
-/** Números chicos que pueden aparecer como conteos ("3 entidades", "2 procesos"). */
 const SMALL_COUNT_LIMIT = 12;
 const TOTAL_ENTITIES = 32;
 
@@ -56,7 +40,6 @@ const INDIVIDUAL_ATTRIBUTION_PATTERN =
 
 export function validateCivicReasoning(input: CivicReasoningInput): CivicReasoningIssue[] {
   const civicSources = input.dataSources.filter((source) => isRecord(source.data));
-  // Sin datos (saludo, pregunta de capacidades) no hay cifras que revisar.
   if (civicSources.length === 0) return [];
 
   const issues: CivicReasoningIssue[] = [];
@@ -79,7 +62,13 @@ export function validateCivicReasoning(input: CivicReasoningInput): CivicReasoni
   }
 
   const pointChanges = civicSources
-    .map((source) => readPath(source.data, ["turnoutChange", "points"]))
+    .flatMap((source) => {
+      const changes = readPath(source.data, ["changes"]);
+      return Array.isArray(changes) ? changes : [];
+    })
+    .flatMap((change) => (isRecord(change)
+      ? [change.participationPoints, change.nominalParticipationPoints, change.abstentionPoints]
+      : []))
     .filter((value): value is number => typeof value === "number" && value !== 0);
   if (pointChanges.some((points) => mentionsPointsAsPercentage(answer, points))) {
     issues.push({
@@ -98,36 +87,33 @@ export function validateCivicReasoning(input: CivicReasoningInput): CivicReasoni
   if (mentionsTurnoutPercentage(answer, civicSources) && !mentionsBase(answer, civicSources)) {
     issues.push({
       code: "missing_numerator_denominator",
-      message: "Al dar un porcentaje de participación incluye también los votos totales y la lista nominal (por ejemplo, \"60 millones de votos de una lista nominal de 98 millones\").",
+      message: "Al dar un porcentaje de participación incluye también de dónde sale: cuántas personas votaron y sobre qué total (por ejemplo, \"7,288 de 14,585 registros clasificados\" o \"de una lista nominal de 14,908\").",
     });
   }
 
-  const comparesWithNominalChange = civicSources.some((source) => {
-    const notes = readPath(source.data, ["methodologyNotes"]);
-    return Array.isArray(notes) && notes.some((note) => typeof note === "string" && /lista nominal cambi/iu.test(note));
-  });
-  if (comparesWithNominalChange && !/lista nominal|porcentajes?,? no (?:en )?votos/iu.test(answer)) {
+  const hasEmptyResult = civicSources.some((source) => readPath(source.data, ["status"]) === "no_data");
+  if (hasEmptyResult && /\b0(?:[.,]0+)?\s*(?:%|por\s*ciento)|\bcero\b|\bnadie vot/iu.test(answer)) {
     issues.push({
-      code: "missing_methodology_warning",
-      message: "Entre los procesos comparados cambió la lista nominal: adviértelo y explica que conviene comparar porcentajes, no votos absolutos.",
+      code: "no_data_as_zero",
+      message: "La consulta no encontró datos: eso no significa participación cero. Di que no hay datos para esos filtros.",
     });
   }
 
   return issues;
 }
 
-/**
- * Ajustes que no necesitan al modelo: agrega la fuente y el aviso de datos de
- * ejemplo si la respuesta no los menciona.
- */
 export function groundCivicAnswer(answer: string, dataSources: readonly UiDataSource[]): string {
   const sources = dataSources.filter((source) => isRecord(source.data));
   if (sources.length === 0) return answer;
 
   let grounded = answer.trim();
   const isSample = sources.some((source) => readPath(source.data, ["isSampleData"]) === true);
-  if (isSample && !/datos de ejemplo|no oficial/iu.test(grounded)) {
-    grounded += " (Datos de ejemplo, no oficiales.)";
+  if (isSample && !/muestra|datos de ejemplo|no oficial/iu.test(grounded)) {
+    grounded += " (Datos de muestra: no son totales estatales ni nacionales.)";
+  }
+  const isComparison = sources.some((source) => Array.isArray(readPath(source.data, ["changes"])));
+  if (isComparison && !/mismas personas|panel|universo|no prueba|no demuestra|metodol/iu.test(grounded)) {
+    grounded += " Nota: cada elección tiene su propio universo de votantes, así que la comparación no prueba causas.";
   }
   const sourceNames = unique(sources
     .map((source) => readPath(source.data, ["source", "name"]))
@@ -146,17 +132,13 @@ export function createCivicReasoningRepairPrompt(issues: readonly CivicReasoning
   ].join("\n");
 }
 
-// ---------- Números ----------
-
 interface ExtractedNumber {
   raw: string;
   value: number;
-  /** El número venía seguido de "millones" o "mil". */
   scale: 1 | 1_000 | 1_000_000;
 }
 
 function extractNumbers(text: string): ExtractedNumber[] {
-  // Las fechas ISO (2026-10-08) no son cifras de la respuesta.
   const cleaned = text.replace(/\b\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?\b/gu, " ");
   const pattern = /(?<![\p{L}\d.,])(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:[.,]\d+)?)(?:\s*(millones|millón|mil)\b)?/giu;
   const numbers: ExtractedNumber[] = [];
@@ -179,7 +161,6 @@ function extractNumbers(text: string): ExtractedNumber[] {
 
 function parseSpanishNumber(token: string): number {
   if (/^\d{1,3}(?:,\d{3})+(?:\.\d+)?$/u.test(token)) return Number(token.replace(/,/gu, ""));
-  // "61,22" → decimal con coma
   if (/^\d+,\d{1,2}$/u.test(token)) return Number(token.replace(",", "."));
   return Number(token);
 }
@@ -193,14 +174,12 @@ function collectAllowedNumbers(sources: readonly UiDataSource[], query: string):
     }
     if (Array.isArray(value)) {
       value.forEach(visit);
-      // Cuántos elementos hay (por ejemplo "3 partidos") también es un dato.
       values.push(value.length);
       return;
     }
     if (isRecord(value)) Object.values(value).forEach(visit);
   };
   sources.forEach((source) => visit(source.data));
-  // Lo que escribió el usuario (por ejemplo los años que pidió) también vale.
   extractNumbers(query).forEach((number) => values.push(number.value * number.scale));
   values.push(TOTAL_ENTITIES, 100);
   return values;
@@ -211,7 +190,6 @@ function isSupportedNumber(number: ExtractedNumber, allowed: readonly number[]):
   if (number.scale === 1 && Number.isInteger(number.value) && number.value <= SMALL_COUNT_LIMIT) return true;
   return allowed.some((candidate) => {
     if (number.scale > 1) {
-      // "60 millones" vale si redondea a la cifra real (tolerancia de 1 %).
       return candidate !== 0 && Math.abs(value - candidate) / Math.abs(candidate) <= 0.01;
     }
     if (value === candidate) return true;
@@ -227,7 +205,6 @@ function mentionsPointsAsPercentage(answer: string, points: number): boolean {
     const value = parseSpanishNumber(match[1]!);
     const isSameMagnitude = [0, 1, 2].some((digits) => round(magnitude, digits) === value);
     if (!isSameMagnitude) continue;
-    // Sólo cuenta si se habla de un cambio cerca de esa cifra.
     const start = Math.max(0, (match.index ?? 0) - 60);
     const context = answer.slice(start, (match.index ?? 0) + match[0].length);
     if (CHANGE_VERB_PATTERN.test(context)) return true;
@@ -237,7 +214,10 @@ function mentionsPointsAsPercentage(answer: string, points: number): boolean {
 
 function mentionsTurnoutPercentage(answer: string, sources: readonly UiDataSource[]): boolean {
   if (!/participaci[oó]n/iu.test(answer)) return false;
-  const turnouts = collectFieldValues(sources, "turnoutPercentage");
+  const turnouts = [
+    ...collectFieldValues(sources, "participationPct"),
+    ...collectFieldValues(sources, "nominalParticipationPct"),
+  ];
   return extractNumbers(answer).some((number) => (
     number.scale === 1 && turnouts.some((turnout) => [0, 1, 2].some((digits) => round(turnout, digits) === number.value))
   ));
@@ -247,8 +227,8 @@ function mentionsBase(answer: string, sources: readonly UiDataSource[]): boolean
   if (/lista nominal/iu.test(answer)) return true;
   const bases = [
     ...collectFieldValues(sources, "nominalList"),
-    ...collectFieldValues(sources, "totalVotes"),
-    ...collectFieldValues(sources, "voters"),
+    ...collectFieldValues(sources, "voted"),
+    ...collectFieldValues(sources, "classified"),
   ];
   return extractNumbers(answer).some((number) => {
     const value = number.value * number.scale;
@@ -270,8 +250,6 @@ function collectFieldValues(sources: readonly UiDataSource[], field: string): nu
   sources.forEach((source) => visit(source.data));
   return values;
 }
-
-// ---------- Utilidades ----------
 
 function readPath(value: unknown, path: readonly string[]): unknown {
   let current = value;

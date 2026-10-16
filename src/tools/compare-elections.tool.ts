@@ -17,8 +17,8 @@ export function registerCompareElectionsTool(
     {
       title: "Comparar procesos electorales",
       description:
-        "Compara dos procesos del mismo cargo y territorio (por ejemplo 2018 contra 2024): " +
-        "participación de cada año, cambio en puntos porcentuales y advertencias metodológicas.",
+        "Compara la participación de 2 a 6 elecciones (2009–2024) con los mismos filtros: " +
+        "cifras de cada año, cambio en puntos porcentuales respecto al primer año y advertencias metodológicas.",
       inputSchema: CompareElectionsInputSchema,
     },
     async (input) => {

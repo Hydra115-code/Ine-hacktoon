@@ -11,8 +11,17 @@ import { registerGetParticipationBreakdownTool } from "./tools/get-participation
 import { registerGetSupportingRecordsTool } from "./tools/get-supporting-records.tool.js";
 import { registerCivicResources, CIVIC_RESOURCE_COUNT } from "./resources/civic-resources.js";
 import { CIVIC_TOOL_NAMES } from "./agent/civic-tool-policy.js";
+import { type CivicDataSource } from "./application/ports/civic-data.js";
+import { FixtureCivicDataSource } from "./fixtures/civic-data.fixture.js";
+import { CcpcEngineDataSource } from "./infrastructure/ccpc/ccpc-engine-data-source.js";
 
-// Todas las tools cívicas son de sólo lectura, así que comparten un mismo límite.
+const sharedDataSource: CivicDataSource = env.CCPC_DATA_DIR
+  ? CcpcEngineDataSource.fromOptions({
+    dataDir: env.CCPC_DATA_DIR,
+    ...(env.CCPC_DATASET_PATH ? { datasetPath: env.CCPC_DATASET_PATH } : {}),
+  })
+  : new FixtureCivicDataSource();
+
 const sharedToolRateLimiter = new ToolRateLimiter({
   maxCalls: env.MCP_RATE_LIMIT_PER_MINUTE,
   windowMs: 60_000,
@@ -28,14 +37,13 @@ interface ServerOptions {
   civicDataService?: CivicDataService;
 }
 
-/** Arma el servidor MCP con las 4 tools cívicas y sus recursos de referencia. */
 export function crearServidor(context: ServerContext, options: ServerOptions = {}): McpServer {
   const server = new McpServer({
     name: env.MCP_SERVER_NAME,
     version: env.MCP_SERVER_VERSION,
   });
 
-  const civicDataService = options.civicDataService ?? new CivicDataService();
+  const civicDataService = options.civicDataService ?? new CivicDataService({ dataSource: sharedDataSource });
   const rateLimiter = (options.rateLimiter ?? sharedToolRateLimiter).forScope(context.user.id);
 
   registerGetParticipationSummaryTool(server, civicDataService, rateLimiter);

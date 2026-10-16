@@ -14,7 +14,6 @@ import { registerGetParticipationSummaryTool } from "../src/tools/get-participat
 import { registerGetSupportingRecordsTool } from "../src/tools/get-supporting-records.tool.js";
 import { crearServidor } from "../src/server.js";
 
-/** Levanta un servidor MCP en memoria sólo con las 4 tools cívicas. */
 async function connect(service = new CivicDataService(), maxCalls = 60) {
   const server = new McpServer({ name: "civic-test", version: "0.0.0" });
   const limiter = new ToolRateLimiter({ maxCalls, windowMs: 60_000 });
@@ -36,41 +35,42 @@ test("listTools ofrece exactamente las 4 tools cívicas y ninguna financiera", a
   await client.close();
 });
 
-test("una tool devuelve JSON con datos de ejemplo", async () => {
+test("una tool devuelve JSON con datos de la muestra", async () => {
   const client = await connect();
   const result = await client.callTool({
     name: "get_participation_summary",
-    arguments: { year: 2024, office: "presidencia" },
+    arguments: { year: 2024, entities: ["Aguascalientes"] },
   });
   assert.notEqual(result.isError, true);
   const output = JSON.parse((result.content as Array<{ text: string }>)[0]!.text);
-  assert.equal(output.entity, "Nacional");
+  assert.equal(output.scope, "Aguascalientes");
   assert.equal(output.isSampleData, true);
   await client.close();
 });
 
-test("sin datos: error amable que no se reintenta", async () => {
+test("entidad desconocida: error amable que no se reintenta", async () => {
   const client = await connect();
   const result = await client.callTool({
     name: "compare_elections",
-    arguments: { office: "presidencia", baseYear: 2012, compareYear: 2024 },
+    arguments: { years: [2018, 2024], entities: ["Atlantis"] },
   });
   assert.equal(result.isError, true);
-  assert.match((result.content as Array<{ text: string }>)[0]!.text, /Prueba con otro año/u);
-  assert.deepEqual(readToolErrorDetails(result._meta), { code: "not_found", retryable: false });
+  assert.match((result.content as Array<{ text: string }>)[0]!.text, /No reconozco la entidad/u);
+  assert.deepEqual(readToolErrorDetails(result._meta), { code: "invalid_input", retryable: false });
   await client.close();
 });
 
 test("timeout: si la fuente tarda demasiado, corta y permite reintentar", async () => {
   const slowSource: CivicDataSource = {
-    findProcessResult: () => new Promise(() => {}),
-    listProcessResults: () => new Promise(() => {}),
-    listDemographicTurnout: () => new Promise(() => {}),
+    getParticipationSummary: () => new Promise(() => {}),
+    compareElections: () => new Promise(() => {}),
+    getParticipationBreakdown: () => new Promise(() => {}),
+    getSupportingRecords: () => new Promise(() => {}),
   };
   const client = await connect(new CivicDataService({ dataSource: slowSource, timeoutMs: 20 }));
   const result = await client.callTool({
     name: "get_supporting_records",
-    arguments: { year: 2024, office: "presidencia" },
+    arguments: { year: 2024 },
   });
   assert.equal(result.isError, true);
   assert.deepEqual(readToolErrorDetails(result._meta), { code: "temporarily_unavailable", retryable: true });
@@ -79,7 +79,7 @@ test("timeout: si la fuente tarda demasiado, corta y permite reintentar", async 
 
 test("rate limit: al pasar el límite responde que se intente más tarde", async () => {
   const client = await connect(new CivicDataService(), 1);
-  const args = { year: 2024, office: "presidencia", dimension: "sexo" };
+  const args = { year: 2024, dimension: "sexo" };
   const first = await client.callTool({ name: "get_participation_breakdown", arguments: args });
   const second = await client.callTool({ name: "get_participation_breakdown", arguments: args });
   assert.notEqual(first.isError, true);

@@ -34,9 +34,9 @@ const QUERIED_AT = "2026-10-08T12:00:00.000Z";
 export const SUMMARY_TOOL = "get_participation_summary";
 const ENTITIES = [
   { value: "nacional", label: "Nacional" },
-  { value: "jalisco", label: "Jalisco" },
-  { value: "nuevo-leon", label: "Nuevo León" },
-  { value: "oaxaca", label: "Oaxaca" },
+  { value: "aguascalientes", label: "Aguascalientes" },
+  { value: "tabasco", label: "Tabasco" },
+  { value: "veracruz", label: "Veracruz" },
 ] as const;
 
 export interface RecordedToolCall {
@@ -44,10 +44,6 @@ export interface RecordedToolCall {
   arguments: Record<string, unknown>;
 }
 
-/**
- * Arma el servicio de texto completo (sesiones, streaming, patches) con un
- * modelo falso y la tool cívica de ejemplo, para probar el motor sin Gemini.
- */
 export class CivicHarness {
   readonly sessions = new RecordingSessionStore();
   readonly toolCalls: RecordedToolCall[] = [];
@@ -165,7 +161,7 @@ function callsForQuery(query: string): AgentToolCall[] {
     ?? "Nacional";
   const call = (name: string): AgentToolCall => ({
     name: SUMMARY_TOOL,
-    arguments: { year: 2024, office: "presidencia", entity: name },
+    arguments: name === "Nacional" ? { year: 2024 } : { year: 2024, entities: [name] },
   });
   return entity === "Nacional" ? [call("Nacional")] : [call(entity), call("Nacional")];
 }
@@ -173,10 +169,11 @@ function callsForQuery(query: string): AgentToolCall[] {
 function answerFor(results: AgentToolResult[]): string {
   const output = results[0]?.output as GetParticipationSummaryOutput | undefined;
   if (!output) throw new Error(`No se recibió el resultado de ${SUMMARY_TOOL}`);
-  const [top] = [...output.results].sort((left, right) => right.votes - left.votes);
-  const { totalVotes, nominalList, turnoutPercentage } = output.participation;
-  return `En ${output.entity}, ${top!.party} obtuvo ${top!.percentage} % de los votos y la participación fue de ${turnoutPercentage} % `
-    + `(${totalVotes.toLocaleString("en-US")} votos de una lista nominal de ${nominalList.toLocaleString("en-US")}; datos de ejemplo).`;
+  if (!output.totals) return `No hay datos de participación para ${output.scope} en ${output.year}.`;
+  const { voted, classified, nominalList, participationPct } = output.totals;
+  return `En ${output.scope}, la participación oficial fue de ${participationPct} % en ${output.year} `
+    + `(${voted.toLocaleString("en-US")} de ${classified.toLocaleString("en-US")} registros clasificados; `
+    + `lista nominal de ${nominalList.toLocaleString("en-US")}; datos de muestra).`;
 }
 
 const civicUiGenerator: UiGenerator = {
@@ -184,16 +181,14 @@ const civicUiGenerator: UiGenerator = {
     const source = input.dataSources.find((candidate) => candidate.toolName === SUMMARY_TOOL);
     if (!source) throw new Error("El escenario no produjo datos para la interfaz");
     const chart = {
-      id: "results-chart",
+      id: "composition-chart",
       type: "chart" as const,
-      title: "Votos por partido",
+      title: "Cómo se reparte la lista nominal",
       chartType: "bar" as const,
-      data: { sourceId: source.id, path: "results" },
-      categoryKey: "party",
-      series: [{ key: "votes", label: "Votos" }],
+      data: { sourceId: source.id, path: "composition" },
+      categoryKey: "category",
+      series: [{ key: "count", label: "Personas" }],
     };
-    // Una petición explícita de gráfica produce una vista mínima; el resto
-    // usa la vista completa con filtro de entidad, participación y tabla.
     const document: UiDocument = /gr[aá]fica/iu.test(latestRequest(input.query))
       ? { version: "1.0", root: chart }
       : {
@@ -201,7 +196,7 @@ const civicUiGenerator: UiGenerator = {
         root: {
           id: "election-results",
           type: "card",
-          title: "Resultados electorales",
+          title: "Participación ciudadana",
           children: [
             {
               id: "entity-filter",
@@ -217,19 +212,19 @@ const civicUiGenerator: UiGenerator = {
               id: "turnout",
               type: "metric",
               label: "Participación",
-              value: { sourceId: source.id, path: "participation.turnoutPercentage" },
+              value: { sourceId: source.id, path: "totals.participationPct" },
               format: "percentage",
             },
             chart,
             {
               id: "results-table",
               type: "table",
-              title: "Detalle por partido",
-              data: { sourceId: source.id, path: "results" },
+              title: "Detalle de la lista nominal",
+              data: { sourceId: source.id, path: "composition" },
               columns: [
-                { key: "party", label: "Partido" },
-                { key: "votes", label: "Votos" },
-                { key: "percentage", label: "Porcentaje" },
+                { key: "category", label: "Categoría" },
+                { key: "count", label: "Personas" },
+                { key: "nominalSharePct", label: "% de la lista nominal" },
               ],
               maxRows: 10,
             },

@@ -6,52 +6,61 @@ import { validateCivicUi } from "../src/ui/generation/civic-semantic-ui-validato
 import { createCivicUiFallback } from "../src/ui/generation/civic-ui-fallback.js";
 import { GeminiUiGenerator } from "../src/ui/generation/gemini-ui-generator.js";
 
-const service = new CivicDataService({ now: () => new Date("2026-10-08T12:00:00.000Z") });
+const service = new CivicDataService({ now: () => new Date("2026-10-15T12:00:00.000Z") });
 const codes = (issues: { code: string }[]) => issues.map((issue) => issue.code);
 
 async function sources(): Promise<UiDataSource[]> {
   return [
-    { id: "jalisco", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, office: "presidencia", entity: "Jalisco" }) },
-    { id: "nacional", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, office: "presidencia", entity: "Nacional" }) },
+    { id: "aguascalientes", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, entities: ["Aguascalientes"] }) },
+    { id: "nacional", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024 }) },
   ];
 }
 
 const chartOf = (sourceId: string) => ({
   id: `grafica-${sourceId}`,
   type: "chart" as const,
-  title: "Votos por partido",
+  title: "Cómo se reparte la lista nominal",
   chartType: "bar" as const,
-  data: { sourceId, path: "results" },
-  categoryKey: "party",
-  series: [{ key: "votes", label: "Votos" }],
+  data: { sourceId, path: "composition" },
+  categoryKey: "category",
+  series: [{ key: "count", label: "Personas" }],
 });
 
 const tableOf = (sourceId: string) => ({
   id: `tabla-${sourceId}`,
   type: "table" as const,
-  title: "Detalle por partido",
-  data: { sourceId, path: "results" },
-  columns: [{ key: "party", label: "Partido" }, { key: "votes", label: "Votos" }],
-  maxRows: 10,
+  title: "Detalle",
+  data: { sourceId, path: "composition" },
+  columns: [{ key: "category", label: "Categoría" }, { key: "count", label: "Personas" }],
+  maxRows: 3,
 });
 
 function stack(...children: UiDocument["root"][]): UiDocument {
   return { version: "1.0", root: { id: "raiz", type: "stack", direction: "vertical", children } };
 }
 
+const QUERY = "¿Cómo fue la participación en Aguascalientes en 2024?";
+const ANSWER = "En Aguascalientes, la participación oficial de 2024 en la muestra fue alta.";
+
 test("la UI incluye tabla o evidencia verificable", async () => {
   const data = await sources();
-  const query = "¿Cómo votó Jalisco en 2024?";
-  const answer = "En Jalisco, Partido A obtuvo 40 % de los votos en 2024.";
-  assert.deepEqual(codes(validateCivicUi({ query, answer, document: stack(chartOf("jalisco")), dataSources: data })), ["civic_evidence_required"]);
-  assert.deepEqual(validateCivicUi({ query, answer, document: stack(chartOf("jalisco"), tableOf("jalisco")), dataSources: data }), []);
+  assert.deepEqual(codes(validateCivicUi({ query: QUERY, answer: ANSWER, document: stack(chartOf("aguascalientes")), dataSources: data })), ["civic_evidence_required"]);
+  assert.deepEqual(validateCivicUi({ query: QUERY, answer: ANSWER, document: stack(chartOf("aguascalientes"), tableOf("aguascalientes")), dataSources: data }), []);
+});
+
+test("también cuenta como evidencia mostrar votaron y su total", async () => {
+  const data = await sources();
+  const metrics = stack(
+    { id: "votaron", type: "metric", label: "Votaron", value: { sourceId: "aguascalientes", path: "totals.voted" }, format: "number" },
+    { id: "total", type: "metric", label: "Votaron + no votaron", value: { sourceId: "aguascalientes", path: "totals.classified" }, format: "number" },
+  );
+  assert.deepEqual(validateCivicUi({ query: QUERY, answer: ANSWER, document: metrics, dataSources: data }), []);
 });
 
 test("si el usuario pide no ver tablas, no se exige la tabla", async () => {
   const data = await sources();
-  const answer = "En Jalisco, Partido A obtuvo 40 % de los votos en 2024.";
-  for (const query of ["Muéstrame Jalisco 2024 sin tabla", "Deja sólo la gráfica de Jalisco 2024"]) {
-    assert.deepEqual(validateCivicUi({ query, answer, document: stack(chartOf("jalisco")), dataSources: data }), [], query);
+  for (const query of ["Muéstrame Aguascalientes 2024 sin tabla", "Deja sólo la gráfica de Aguascalientes 2024"]) {
+    assert.deepEqual(validateCivicUi({ query, answer: ANSWER, document: stack(chartOf("aguascalientes")), dataSources: data }), [], query);
   }
 });
 
@@ -65,8 +74,8 @@ test("no mezclar niveles territoriales en una misma visualización", () => {
       dimension: "entidad",
       scope: "Nacional",
       groups: [
-        { group: "Nacional", voters: 60_000_000, nominalList: 98_000_000, turnoutPercentage: 61.22 },
-        { group: "Jalisco", voters: 4_000_000, nominalList: 6_500_000, turnoutPercentage: 61.54 },
+        { group: "Nacional", voted: 600, classified: 1_000, participationPct: 60 },
+        { group: "Tabasco", voted: 50, classified: 100, participationPct: 50 },
       ],
     },
   }];
@@ -75,7 +84,7 @@ test("no mezclar niveles territoriales en una misma visualización", () => {
     type: "table",
     title: "Participación",
     data: { sourceId: "mezcla", path: "groups" },
-    columns: [{ key: "group", label: "Territorio" }, { key: "turnoutPercentage", label: "Participación" }],
+    columns: [{ key: "group", label: "Territorio" }, { key: "participationPct", label: "Participación" }],
     maxRows: 10,
   });
   assert.ok(codes(validateCivicUi({ query: "Compara", answer: "Participación por entidad.", document, dataSources: mixed })).includes("civic_mixed_levels"));
@@ -83,38 +92,42 @@ test("no mezclar niveles territoriales en una misma visualización", () => {
 
 test("texto y visualización usan el mismo subconjunto", async () => {
   const data = await sources();
-  const query = "Compara Jalisco con el total nacional en 2024";
-  const answer = "En Jalisco la participación fue de 61.54 % y a nivel Nacional de 61.22 %.";
-  // La respuesta menciona Nacional, pero la UI sólo muestra Jalisco.
-  const onlyJalisco = stack(chartOf("jalisco"), tableOf("jalisco"));
-  assert.deepEqual(codes(validateCivicUi({ query, answer, document: onlyJalisco, dataSources: data })), ["civic_subset_mismatch"]);
-  // Mostrando ambos (cada uno en su visualización) ya coincide.
-  const both = stack(tableOf("jalisco"), tableOf("nacional"));
+  const query = "Compara Aguascalientes con el total nacional en 2024";
+  const answer = "En Aguascalientes la participación oficial fue mayor que a nivel Nacional en la muestra.";
+  const onlyState = stack(chartOf("aguascalientes"), tableOf("aguascalientes"));
+  assert.deepEqual(codes(validateCivicUi({ query, answer, document: onlyState, dataSources: data })), ["civic_subset_mismatch"]);
+  const both = stack(tableOf("aguascalientes"), tableOf("nacional"));
   assert.deepEqual(validateCivicUi({ query, answer, document: both, dataSources: data }), []);
-  // Un año que no está en los datos mostrados también cuenta.
-  const wrongYear = "En 2018 la participación en Jalisco fue alta.";
+
   const comparison: UiDataSource = {
     id: "comparacion",
     toolName: "compare_elections",
-    data: await service.compareElections({ office: "presidencia", entity: "Jalisco", baseYear: 2018, compareYear: 2024 }),
+    data: await service.compareElections({ years: [2018, 2024], entities: ["Aguascalientes"] }),
   };
-  assert.ok(codes(validateCivicUi({ query, answer: wrongYear, document: onlyJalisco, dataSources: [...data, comparison] })).includes("civic_subset_mismatch"));
+  const wrongYear = "En 2018 la participación oficial en Aguascalientes fue distinta.";
+  assert.ok(codes(validateCivicUi({ query, answer: wrongYear, document: onlyState, dataSources: [...data, comparison] })).includes("civic_subset_mismatch"));
 });
 
 test("la interfaz de respaldo es válida y cumple las reglas con cada tool", async () => {
   const all: UiDataSource[] = [
-    { id: "resumen", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, office: "presidencia", entity: "Oaxaca" }) },
-    { id: "comparacion", toolName: "compare_elections", data: await service.compareElections({ office: "presidencia", entity: "Oaxaca", baseYear: 2018, compareYear: 2024 }) },
-    { id: "desglose", toolName: "get_participation_breakdown", data: await service.getParticipationBreakdown({ year: 2024, office: "presidencia", dimension: "entidad", entity: "Nacional" }) },
-    { id: "respaldo", toolName: "get_supporting_records", data: await service.getSupportingRecords({ year: 2024, office: "presidencia", entity: "Oaxaca" }) },
+    { id: "resumen", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, entities: ["Veracruz"] }) },
+    { id: "comparacion", toolName: "compare_elections", data: await service.compareElections({ years: [2018, 2021, 2024], entities: ["Aguascalientes"] }) },
+    { id: "desglose", toolName: "get_participation_breakdown", data: await service.getParticipationBreakdown({ year: 2024, dimension: "entidad" }) },
+    { id: "respaldo", toolName: "get_supporting_records", data: await service.getSupportingRecords({ year: 2024, entities: ["Tabasco"] }) },
+    { id: "vacio", toolName: "get_participation_summary", data: await service.getParticipationSummary({ year: 2024, entities: ["Jalisco"] }) },
   ];
   for (const source of all) {
     const fallback = createCivicUiFallback([source]);
     assert.ok(fallback, source.toolName);
     const document = parseUiDocument(fallback, [source]);
-    assert.deepEqual(validateCivicUi({ query: "Muéstrame los datos", answer: "Datos electorales.", document, dataSources: [source] }), [], source.toolName);
-    assert.match(JSON.stringify(document), /Datos de ejemplo/u);
-    assert.match(JSON.stringify(document), /Fuente:/u);
+    const text = JSON.stringify(document);
+    if (source.id === "vacio") {
+      assert.match(text, /no significa participación cero/u);
+      continue;
+    }
+    assert.deepEqual(validateCivicUi({ query: "Muéstrame los datos", answer: "Datos electorales.", document, dataSources: [source] }), [], source.id);
+    assert.match(text, /Datos de muestra/u);
+    assert.match(text, /Fuente:/u);
   }
   assert.equal(createCivicUiFallback([]), undefined);
 });
@@ -138,17 +151,17 @@ function geminiReturning(documents: unknown[]) {
 
 test("si la UI generada no tiene evidencia, se pide corregir y se acepta la corrección", async () => {
   const data = await sources();
-  const { generator, calls } = geminiReturning([stack(chartOf("jalisco")), stack(chartOf("jalisco"), tableOf("jalisco"))]);
-  const ui = await generator.generate({ query: "¿Cómo votó Jalisco en 2024?", answer: "En Jalisco, Partido A obtuvo 40 % de los votos en 2024.", dataSources: data });
+  const { generator, calls } = geminiReturning([stack(chartOf("aguascalientes")), stack(chartOf("aguascalientes"), tableOf("aguascalientes"))]);
+  const ui = await generator.generate({ query: QUERY, answer: ANSWER, dataSources: data });
   assert.equal(calls(), 2);
-  assert.match(JSON.stringify(ui), /tabla-jalisco/u);
+  assert.match(JSON.stringify(ui), /tabla-aguascalientes/u);
 });
 
 test("si nunca la corrige, se usa la interfaz cívica de respaldo", async () => {
   const data = await sources();
-  const { generator, calls } = geminiReturning([stack(chartOf("jalisco"))]);
-  const ui = await generator.generate({ query: "¿Cómo votó Jalisco en 2024?", answer: "En Jalisco, Partido A obtuvo 40 % de los votos en 2024.", dataSources: data });
+  const { generator, calls } = geminiReturning([stack(chartOf("aguascalientes"))]);
+  const ui = await generator.generate({ query: QUERY, answer: ANSWER, dataSources: data });
   assert.equal(calls(), 3);
   assert.equal(ui.root.id, "respuesta-civica");
-  assert.match(JSON.stringify(ui), /Datos de ejemplo/u);
+  assert.match(JSON.stringify(ui), /Datos de muestra/u);
 });

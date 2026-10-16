@@ -1,6 +1,5 @@
 import { type AgentToolCall, type AgentToolDefinition } from "./schemas/agent.schema.js";
 
-/** Tools de sólo lectura que el agente cívico puede usar. */
 export const CIVIC_TOOL_NAMES = [
   "get_participation_summary",
   "compare_elections",

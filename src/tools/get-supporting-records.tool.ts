@@ -17,8 +17,8 @@ export function registerGetSupportingRecordsTool(
     {
       title: "Registros de respaldo",
       description:
-        "Devuelve los registros fuente que respaldan las cifras de un proceso (votos, lista nominal) " +
-        "y cómo se calculan los totales y porcentajes, para mostrar evidencia verificable.",
+        "Devuelve los grupos de la fuente que respaldan las cifras (año, entidad, sexo, edad, tipo de sección " +
+        "y sus conteos) y los archivos oficiales del INE de donde salen, para mostrar evidencia verificable.",
       inputSchema: GetSupportingRecordsInputSchema,
     },
     async (input) => {

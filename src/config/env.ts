@@ -8,6 +8,8 @@ const EnvSchema = z.object({
   MCP_TRANSPORT: z.enum(["stdio", "http"]).default("stdio"),
   MCP_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(1_000).default(60),
   MCP_WRITE_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(100).default(6),
+  CCPC_DATA_DIR: z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional()),
+  CCPC_DATASET_PATH: z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional()),
 
   SUPABASE_URL: z.string().url("SUPABASE_URL debe ser una URL válida").optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),

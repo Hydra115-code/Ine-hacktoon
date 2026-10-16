@@ -3,13 +3,6 @@ import { CIVIC_TOOL_NAMES } from "../civic-tool-policy.js";
 
 const CIVIC_TOOLS = new Set<string>(CIVIC_TOOL_NAMES);
 
-/**
- * Prepara los datos de las tools para la interfaz:
- * - deja sólo resultados de tools cívicas con datos válidos;
- * - quita resultados repetidos (la misma consulta hecha dos veces);
- * - pone primero los datos de entidades y al final los nacionales, para que
- *   la interfaz no los mezcle como si fueran del mismo nivel.
- */
 export function shapeCivicDataForUi(dataSources: readonly UiDataSource[]): UiDataSource[] {
   const seen = new Set<string>();
   const shaped: UiDataSource[] = [];

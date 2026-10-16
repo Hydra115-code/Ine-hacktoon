@@ -17,8 +17,8 @@ export function registerGetParticipationBreakdownTool(
     {
       title: "Desglose de participación",
       description:
-        "Divide la participación de un proceso por entidad, por sexo o por grupo de edad, " +
-        "con lista nominal, votantes y % de participación de cada grupo.",
+        "Divide la participación de una elección por entidad, sexo, grupo de edad o tipo de sección " +
+        "(urbana, mixta, rural), con lista nominal, votantes y % de participación de cada grupo.",
       inputSchema: GetParticipationBreakdownInputSchema,
     },
     async (input) => {

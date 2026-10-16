@@ -1,15 +1,5 @@
 import { type UiDataSource, type UiDocument, type UiNode } from "../dsl/ui.schema.js";
 
-/**
- * Interfaz de respaldo SIN IA: se arma con reglas fijas a partir de los datos
- * de las tools cívicas. Se usa cuando el modelo no logra generar una interfaz
- * válida, y sirve de base si el equipo decide no usar un modelo para la UI.
- *
- * Siempre cumple las reglas mínimas: tabla como evidencia, fuente visible,
- * aviso de datos de ejemplo y cada fuente en su propia tarjeta (sin mezclar
- * el total Nacional con entidades).
- */
-
 const MAX_SOURCES = 4;
 
 export function createCivicUiFallback(dataSources: readonly UiDataSource[]): UiDocument | undefined {
@@ -26,7 +16,7 @@ export function createCivicUiFallback(dataSources: readonly UiDataSource[]): UiD
       id: "aviso-datos-ejemplo",
       type: "alert",
       severity: "warning",
-      text: "Datos de ejemplo: estas cifras no son resultados oficiales.",
+      text: "Datos de muestra: estas cifras no son totales estatales ni nacionales.",
     });
   }
   children.push(...cards);
@@ -45,67 +35,67 @@ function cardFor(source: UiDataSource, index: number): UiNode | undefined {
   const data = source.data as Record<string, unknown>;
   const id = (suffix: string) => `fuente-${index + 1}-${suffix}`;
   const ref = (path: string) => ({ sourceId: source.id, path });
+  const scope = String(data.scope ?? "");
+  const notes = warningNotes(data, id);
+
+  if (data.status === "no_data") {
+    return {
+      id: id("tarjeta"),
+      type: "card",
+      title: `Sin datos — ${scope}`,
+      children: [{ id: id("sin-datos"), type: "alert", severity: "info", text: "No hay datos para estos filtros. La ausencia de datos no significa participación cero." }],
+    };
+  }
 
   switch (source.toolName) {
-    case "get_participation_summary": {
-      const process = isRecord(data.process) ? data.process : {};
+    case "get_participation_summary":
       return {
         id: id("tarjeta"),
         type: "card",
-        title: `Participación ${String(process.year ?? "")} — ${String(data.entity ?? "")}`.trim(),
+        title: `Participación ${String(data.year ?? "")} — ${scope}`,
         children: [
           {
             id: id("metricas"),
             type: "grid",
             columnCount: 3,
             children: [
-              { id: id("participacion"), type: "metric", label: "Participación", value: ref("participation.turnoutPercentage"), format: "percentage" },
-              { id: id("votos"), type: "metric", label: "Votos totales", value: ref("participation.totalVotes"), format: "number" },
-              { id: id("lista"), type: "metric", label: "Lista nominal", value: ref("participation.nominalList"), format: "number" },
+              { id: id("participacion"), type: "metric", label: "Participación oficial CCPC", value: ref("totals.participationPct"), format: "percentage" },
+              { id: id("votaron"), type: "metric", label: "Votaron", value: ref("totals.voted"), format: "number" },
+              { id: id("clasificados"), type: "metric", label: "Votaron + no votaron", value: ref("totals.classified"), format: "number" },
+              { id: id("nominal"), type: "metric", label: "Participación nominal", value: ref("totals.nominalParticipationPct"), format: "percentage" },
+              { id: id("lista"), type: "metric", label: "Lista nominal", value: ref("totals.nominalList"), format: "number" },
+              { id: id("no-especificado"), type: "metric", label: "No especificado", value: ref("totals.unspecified"), format: "number" },
             ],
-          },
-          {
-            id: id("grafica"),
-            type: "chart",
-            title: "Votos por partido",
-            chartType: "bar",
-            data: ref("results"),
-            categoryKey: "party",
-            series: [{ key: "votes", label: "Votos" }],
           },
           {
             id: id("tabla"),
             type: "table",
-            title: "Detalle por partido",
-            data: ref("results"),
+            title: "Cómo se reparte la lista nominal",
+            data: ref("composition"),
             columns: [
-              { key: "party", label: "Partido" },
-              { key: "votes", label: "Votos" },
-              { key: "percentage", label: "Porcentaje" },
+              { key: "category", label: "Categoría" },
+              { key: "count", label: "Personas" },
+              { key: "nominalSharePct", label: "% de la lista nominal" },
             ],
-            maxRows: 30,
+            maxRows: 3,
           },
+          ...notes,
         ],
       };
-    }
-    case "compare_elections": {
-      const notes = Array.isArray(data.methodologyNotes)
-        ? data.methodologyNotes.filter((note): note is string => typeof note === "string")
-        : [];
+    case "compare_elections":
       return {
         id: id("tarjeta"),
         type: "card",
-        title: `Comparación de participación — ${String(data.entity ?? "")}`.trim(),
+        title: `Participación por año — ${scope}`,
         children: [
-          { id: id("cambio"), type: "metric", label: "Cambio de participación (puntos porcentuales)", value: ref("turnoutChange.points"), format: "number" },
           {
             id: id("grafica"),
             type: "chart",
-            title: "Participación por año",
-            chartType: "bar",
+            title: "Participación oficial CCPC por año (%)",
+            chartType: "line",
             data: ref("elections"),
             categoryKey: "year",
-            series: [{ key: "turnoutPercentage", label: "Participación" }],
+            series: [{ key: "participationPct", label: "Participación (%)" }],
           },
           {
             id: id("tabla"),
@@ -114,32 +104,46 @@ function cardFor(source: UiDataSource, index: number): UiNode | undefined {
             data: ref("elections"),
             columns: [
               { key: "year", label: "Año" },
-              { key: "totalVotes", label: "Votos totales" },
+              { key: "voted", label: "Votaron" },
+              { key: "classified", label: "Votaron + no votaron" },
+              { key: "participationPct", label: "Participación oficial (%)" },
               { key: "nominalList", label: "Lista nominal" },
-              { key: "turnoutPercentage", label: "Participación" },
+              { key: "nominalParticipationPct", label: "Participación nominal (%)" },
             ],
-            maxRows: 10,
+            maxRows: 6,
           },
-          ...notes.map((note, noteIndex): UiNode => ({ id: id(`nota-${noteIndex + 1}`), type: "alert", severity: "info", text: note })),
+          {
+            id: id("cambios"),
+            type: "table",
+            title: "Cambio respecto al primer año (puntos porcentuales)",
+            data: ref("changes"),
+            columns: [
+              { key: "year", label: "Año" },
+              { key: "baselineYear", label: "Comparado con" },
+              { key: "participationPoints", label: "Participación oficial (pp)" },
+              { key: "nominalParticipationPoints", label: "Participación nominal (pp)" },
+            ],
+            maxRows: 5,
+          },
+          ...notes,
         ],
       };
-    }
     case "get_participation_breakdown": {
-      const labels: Record<string, string> = { entidad: "Entidad", sexo: "Sexo", grupo_edad: "Grupo de edad" };
+      const labels: Record<string, string> = { entidad: "Entidad", sexo: "Sexo", grupo_edad: "Grupo de edad", tipo_seccion: "Tipo de sección" };
       const label = labels[String(data.dimension)] ?? "Grupo";
       return {
         id: id("tarjeta"),
         type: "card",
-        title: `Participación por ${label.toLowerCase()} — ${String(data.scope ?? "")}`.trim(),
+        title: `Participación ${String(data.year ?? "")} por ${label.toLowerCase()} — ${scope}`,
         children: [
           {
             id: id("grafica"),
             type: "chart",
-            title: `Participación por ${label.toLowerCase()}`,
+            title: `Participación oficial CCPC por ${label.toLowerCase()} (%)`,
             chartType: "bar",
             data: ref("groups"),
             categoryKey: "group",
-            series: [{ key: "turnoutPercentage", label: "Participación" }],
+            series: [{ key: "participationPct", label: "Participación (%)" }],
           },
           {
             id: id("tabla"),
@@ -148,15 +152,17 @@ function cardFor(source: UiDataSource, index: number): UiNode | undefined {
             data: ref("groups"),
             columns: [
               { key: "group", label },
-              { key: "voters", label: "Votantes" },
+              { key: "voted", label: "Votaron" },
+              { key: "classified", label: "Votaron + no votaron" },
+              { key: "participationPct", label: "Participación oficial (%)" },
               { key: "nominalList", label: "Lista nominal" },
-              { key: "turnoutPercentage", label: "Participación" },
             ],
             maxRows: 40,
           },
           ...(typeof data.coverageNote === "string"
             ? [{ id: id("cobertura"), type: "alert" as const, severity: "info" as const, text: data.coverageNote }]
             : []),
+          ...notes,
         ],
       };
     }
@@ -164,24 +170,41 @@ function cardFor(source: UiDataSource, index: number): UiNode | undefined {
       return {
         id: id("tarjeta"),
         type: "card",
-        title: `Registros de respaldo — ${String(data.entity ?? "")}`.trim(),
-        children: [{
-          id: id("tabla"),
-          type: "table",
-          title: "Cifras y cómo se obtienen",
-          data: ref("records"),
-          columns: [
-            { key: "label", label: "Cifra" },
-            { key: "value", label: "Valor" },
-            { key: "kind", label: "Tipo" },
-            { key: "derivation", label: "Cálculo" },
-          ],
-          maxRows: 60,
-        }],
+        title: `Registros de respaldo ${String(data.year ?? "")} — ${scope}`,
+        children: [
+          {
+            id: id("tabla"),
+            type: "table",
+            title: "Grupos de la fuente",
+            data: ref("records"),
+            columns: [
+              { key: "entity", label: "Entidad" },
+              { key: "sex", label: "Sexo" },
+              { key: "ageGroup", label: "Edad" },
+              { key: "sectionType", label: "Tipo de sección" },
+              { key: "nominalList", label: "Lista nominal" },
+              { key: "voted", label: "Votaron" },
+              { key: "didNotVote", label: "No votaron" },
+              { key: "unspecified", label: "No especificado" },
+            ],
+            maxRows: 60,
+          },
+          ...notes,
+        ],
       };
     default:
       return undefined;
   }
+}
+
+function warningNotes(data: Record<string, unknown>, id: (suffix: string) => string): UiNode[] {
+  const shown = new Set(["NS_EXCLUDED_FROM_CCPC", "ELECTIONS_NOT_A_PANEL", "CARTOGRAPHIC_FRAMES_DIFFER", "SMALL_CELLS", "NON_BINARY_UNAVAILABLE", "DEFAULT_YEAR_SELECTED"]);
+  const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+  return warnings.flatMap((warning, index): UiNode[] => (
+    isRecord(warning) && typeof warning.code === "string" && shown.has(warning.code) && typeof warning.message === "string"
+      ? [{ id: id(`aviso-${index + 1}`), type: "alert", severity: "info", text: warning.message }]
+      : []
+  ));
 }
 
 function unique<T>(values: readonly T[]): T[] {

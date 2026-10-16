@@ -80,7 +80,7 @@ test("cerrar el consumidor HTTP aborta la ejecución activa del agente", async (
       correlationId: CORRELATION_ID,
       provider: "google",
       responseMode: "text",
-      query: "¿Cuál fue la participación en Jalisco?",
+      query: "¿Cuál fue la participación en Aguascalientes?",
     })),
     signal: controller.signal,
   });

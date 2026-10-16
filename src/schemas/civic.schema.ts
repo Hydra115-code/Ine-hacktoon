@@ -1,155 +1,160 @@
 import { z } from "zod";
+import {
+  CCPC_AGE_GROUPS,
+  CCPC_SECTION_TYPES,
+  CCPC_SEXES,
+  CCPC_YEARS,
+} from "../application/ports/civic-data.js";
 
-/**
- * Contratos (entradas y salidas) de las 4 tools cívicas. Zod revisa que los
- * datos tengan la forma correcta antes y después de cada consulta.
- * Por ahora sólo se consultan los niveles nacional y estatal.
- */
-
-export const ELECTION_OFFICES = ["presidencia", "senadurias", "diputaciones"] as const;
-export const BREAKDOWN_DIMENSIONS = ["entidad", "sexo", "grupo_edad"] as const;
+export const BREAKDOWN_DIMENSIONS = ["entidad", "sexo", "grupo_edad", "tipo_seccion"] as const;
+export type BreakdownDimension = typeof BREAKDOWN_DIMENSIONS[number];
 
 const YearSchema = z
-  .number()
-  .int()
-  .min(1991)
-  .max(2030)
-  .describe("Año del proceso electoral, por ejemplo 2024");
+  .union([z.literal(2009), z.literal(2012), z.literal(2015), z.literal(2018), z.literal(2021), z.literal(2024)])
+  .describe(`Año de la elección: ${CCPC_YEARS.join(", ")}`);
 
-const OfficeSchema = z
-  .enum(ELECTION_OFFICES)
-  .describe("Cargo elegido: presidencia, senadurias o diputaciones");
+const OptionalYearSchema = YearSchema.optional().describe("Año de la elección; si se omite, se usa el más reciente (2024)");
 
-const EntitySchema = z
-  .string()
-  .trim()
-  .min(2)
-  .max(60)
-  .default("Nacional")
-  .describe("\"Nacional\" o el nombre de una entidad federativa, por ejemplo \"Jalisco\"");
+const FilterShape = {
+  entities: z
+    .array(z.string().trim().min(1).max(60))
+    .min(1)
+    .max(32)
+    .optional()
+    .describe("Entidades por nombre (\"Jalisco\") o clave INE (\"14\"); si se omite, se usan todas las entidades disponibles"),
+  sexes: z.array(z.enum(CCPC_SEXES)).min(1).max(3).optional().describe("hombre, mujer o no_binario (no_binario sólo existe en 2024)"),
+  ageGroups: z.array(z.enum(CCPC_AGE_GROUPS)).min(1).max(18).optional().describe("Grupos de edad, por ejemplo 18-19, 20-24 o 100+"),
+  sectionTypes: z.array(z.enum(CCPC_SECTION_TYPES)).min(1).max(3).optional().describe("Tipo de sección: urbana, mixta o rural"),
+};
 
-const PercentageSchema = z.number().min(0).max(100);
+const PercentageSchema = z.number().min(0).max(100).nullable();
 const CountSchema = z.number().int().nonnegative();
-const LevelSchema = z.enum(["nacional", "estatal"]);
+const PointsSchema = z.number().min(-100).max(100).nullable();
 
-const SourceSchema = z.object({
-  name: z.string().min(1),
-  url: z.string().url().optional(),
-  note: z.string().optional(),
+const TotalsShape = {
+  nominalList: CountSchema,
+  voted: CountSchema,
+  didNotVote: CountSchema,
+  unspecified: CountSchema,
+  classified: CountSchema,
+  participationPct: PercentageSchema,
+  nominalParticipationPct: PercentageSchema,
+  abstentionPct: PercentageSchema,
+  unspecifiedPct: PercentageSchema,
+};
+const TotalsSchema = z.object(TotalsShape);
+
+const AppliedFiltersSchema = z.object({
+  year: z.number().int().optional(),
+  entities: z.array(z.object({ code: z.string(), name: z.string() })),
+  sexes: z.array(z.enum(CCPC_SEXES)).optional(),
+  ageGroups: z.array(z.enum(CCPC_AGE_GROUPS)).optional(),
+  sectionTypes: z.array(z.enum(CCPC_SECTION_TYPES)).optional(),
 });
 
-/** Campos que llevan todas las salidas: tipo de dato, fuente y hora de consulta. */
 const BaseOutputSchema = z.object({
   dataType: z.literal("OBSERVED"),
   isSampleData: z.boolean(),
-  source: SourceSchema,
-  metadata: z.object({ queriedAt: z.string().datetime() }),
+  status: z.enum(["ok", "no_data"]),
+  level: z.enum(["nacional", "estatal"]),
+  scope: z.string().min(1),
+  filters: AppliedFiltersSchema,
+  source: z.object({
+    name: z.string().min(1),
+    urls: z.array(z.string().url()),
+    note: z.string().optional(),
+  }),
+  warnings: z.array(z.object({ code: z.string().min(1), message: z.string().min(1) })),
+  metadata: z.object({
+    queriedAt: z.string().datetime(),
+    recordsSha256: z.string().min(1),
+    matchedRecords: CountSchema,
+  }),
 });
 
-const ProcessSchema = z.object({ year: z.number().int(), office: z.enum(ELECTION_OFFICES) });
-
-const PartyResultSchema = z.object({
-  party: z.string().min(1).max(80),
-  votes: CountSchema,
-  percentage: PercentageSchema,
-});
-
-const ParticipationSchema = z.object({
-  nominalList: z.number().int().positive(),
-  totalVotes: CountSchema,
-  turnoutPercentage: PercentageSchema,
-  abstentionPercentage: PercentageSchema,
-});
-
-// ---------- get_participation_summary ----------
-
-export const GetParticipationSummaryInputSchema = z.object({
-  year: YearSchema,
-  office: OfficeSchema,
-  entity: EntitySchema,
-});
+export const GetParticipationSummaryInputSchema = z.object({ year: OptionalYearSchema, ...FilterShape });
 
 export const GetParticipationSummaryOutputSchema = BaseOutputSchema.extend({
-  process: ProcessSchema,
-  level: LevelSchema,
-  entity: z.string().min(1),
-  results: z.array(PartyResultSchema).min(1).max(30),
-  participation: ParticipationSchema,
-});
-
-// ---------- compare_elections ----------
-
-// Que los dos años sean distintos se revisa en el servicio, porque el servidor
-// MCP necesita que la entrada sea un objeto Zod simple.
-export const CompareElectionsInputSchema = z.object({
-  office: OfficeSchema,
-  entity: EntitySchema,
-  baseYear: YearSchema.describe("Año del proceso de referencia, por ejemplo 2018"),
-  compareYear: YearSchema.describe("Año del proceso a comparar, por ejemplo 2024"),
-});
-
-const ElectionSnapshotSchema = z.object({
   year: z.number().int(),
-  nominalList: z.number().int().positive(),
-  totalVotes: CountSchema,
-  turnoutPercentage: PercentageSchema,
-  results: z.array(PartyResultSchema).min(1).max(30),
+  totals: TotalsSchema.nullable(),
+  composition: z.array(z.object({
+    category: z.enum(["Votaron", "No votaron", "No especificado"]),
+    count: CountSchema,
+    nominalSharePct: PercentageSchema,
+  })).max(3),
+});
+
+export const CompareElectionsInputSchema = z.object({
+  years: z.array(YearSchema).min(2).max(6).describe("De 2 a 6 años de elección distintos, por ejemplo [2018, 2024]"),
+  ...FilterShape,
 });
 
 export const CompareElectionsOutputSchema = BaseOutputSchema.extend({
-  office: z.enum(ELECTION_OFFICES),
-  level: LevelSchema,
-  entity: z.string().min(1),
-  elections: z.array(ElectionSnapshotSchema).length(2),
-  turnoutChange: z.object({
-    fromYear: z.number().int(),
-    toYear: z.number().int(),
-    /** Diferencia en puntos porcentuales (no es un porcentaje de cambio). */
-    points: z.number().min(-100).max(100),
-  }),
-  methodologyNotes: z.array(z.string().min(1)).max(10),
+  years: z.array(z.number().int()).min(2).max(6),
+  baselineYear: z.number().int(),
+  elections: z.array(z.object({
+    year: z.number().int(),
+    hasData: z.boolean(),
+    nominalList: CountSchema.nullable(),
+    voted: CountSchema.nullable(),
+    didNotVote: CountSchema.nullable(),
+    unspecified: CountSchema.nullable(),
+    classified: CountSchema.nullable(),
+    participationPct: PercentageSchema,
+    nominalParticipationPct: PercentageSchema,
+    abstentionPct: PercentageSchema,
+    unspecifiedPct: PercentageSchema,
+  })).min(2).max(6),
+  changes: z.array(z.object({
+    year: z.number().int(),
+    baselineYear: z.number().int(),
+    participationPoints: PointsSchema,
+    nominalParticipationPoints: PointsSchema,
+    abstentionPoints: PointsSchema,
+  })).min(1).max(5),
+  methodologyNotes: z.array(z.string().min(1)).max(12),
 });
 
-// ---------- get_participation_breakdown ----------
-
 export const GetParticipationBreakdownInputSchema = z.object({
-  year: YearSchema,
-  office: OfficeSchema,
-  dimension: z
-    .enum(BREAKDOWN_DIMENSIONS)
-    .describe("Cómo dividir la participación: entidad, sexo o grupo_edad"),
-  entity: EntitySchema.describe("Territorio para sexo o grupo_edad; se ignora con dimension=entidad"),
+  year: OptionalYearSchema,
+  dimension: z.enum(BREAKDOWN_DIMENSIONS).describe("Cómo dividir la participación: entidad, sexo, grupo_edad o tipo_seccion"),
+  ...FilterShape,
 });
 
 export const GetParticipationBreakdownOutputSchema = BaseOutputSchema.extend({
-  process: ProcessSchema,
+  year: z.number().int(),
   dimension: z.enum(BREAKDOWN_DIMENSIONS),
-  scope: z.string().min(1),
-  groups: z.array(z.object({
-    group: z.string().min(1),
-    nominalList: z.number().int().positive(),
-    voters: CountSchema,
-    turnoutPercentage: PercentageSchema,
-  })).min(1).max(40),
+  groups: z.array(z.object({ group: z.string().min(1), value: z.string().min(1), ...TotalsShape })).max(40),
   coverageNote: z.string().optional(),
 });
 
-// ---------- get_supporting_records ----------
+export const MAX_SUPPORTING_RECORDS = 60;
 
-export const GetSupportingRecordsInputSchema = GetParticipationSummaryInputSchema;
+export const GetSupportingRecordsInputSchema = z.object({ year: OptionalYearSchema, ...FilterShape });
 
 export const GetSupportingRecordsOutputSchema = BaseOutputSchema.extend({
-  process: ProcessSchema,
-  level: LevelSchema,
-  entity: z.string().min(1),
+  year: z.number().int(),
   records: z.array(z.object({
-    recordId: z.string().min(1),
-    field: z.string().min(1),
-    label: z.string().min(1),
-    value: z.number(),
-    kind: z.enum(["dato_fuente", "calculado"]),
-    derivation: z.string().optional(),
-  })).min(1).max(60),
+    entity: z.string().min(1),
+    entityCode: z.string().min(1),
+    year: z.number().int(),
+    sex: z.enum(CCPC_SEXES),
+    ageGroup: z.enum(CCPC_AGE_GROUPS),
+    sectionType: z.enum(CCPC_SECTION_TYPES),
+    ...TotalsShape,
+    sourceId: z.string().min(1),
+    // Filas del archivo original, no personas.
+    sourceRows: z.number().int().positive(),
+  })).max(MAX_SUPPORTING_RECORDS),
+  totalRecords: CountSchema,
+  truncated: z.boolean(),
+  sources: z.array(z.object({
+    id: z.string().min(1),
+    year: z.number().int(),
+    entity: z.string().min(1),
+    url: z.string().url(),
+    archiveSha256: z.string().min(1),
+  })),
 });
 
 export type GetParticipationSummaryInput = z.infer<typeof GetParticipationSummaryInputSchema>;

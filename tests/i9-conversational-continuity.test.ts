@@ -38,7 +38,7 @@ test("L9 elimina sólo el nodo solicitado; reordenar exige reemplazo seguro", ()
 test("L9 tres mensajes recuperan contexto de la misma sesión y encadenan revisiones", async () => {
   const harness = new CivicHarness();
   const sessionId = "48000000-0000-4000-8000-000000000001";
-  const prompts = ["Muéstrame los resultados de Jalisco en 2024.", "Ahora compáralos con Oaxaca.", "Explica la participación en Oaxaca."];
+  const prompts = ["Muéstrame los resultados de Aguascalientes en 2024.", "Ahora compáralos con Tabasco.", "Explica la participación en Tabasco."];
   let previous;
   for (const [index, prompt] of prompts.entries()) {
     const events = await harness.run(queryRequest(sessionId, `49000000-0000-4000-8000-00000000000${index + 1}`, prompt, previous));
@@ -56,7 +56,7 @@ test("L9 tres mensajes recuperan contexto de la misma sesión y encadenan revisi
     assert.equal(previous.interfaceRevision, revision);
   }
   assert.equal(harness.sessions.completions.length, 3);
-  assert.match(harness.modelQueries.at(-1)!, /Jalisco/);
-  assert.match(harness.modelQueries.at(-1)!, /compáralos con Oaxaca/);
+  assert.match(harness.modelQueries.at(-1)!, /Aguascalientes/);
+  assert.match(harness.modelQueries.at(-1)!, /compáralos con Tabasco/);
   assert.ok(harness.toolCalls.every((call) => call.name === "get_participation_summary"));
 });

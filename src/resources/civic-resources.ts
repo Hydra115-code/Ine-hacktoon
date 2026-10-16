@@ -1,13 +1,8 @@
 import { type McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { CIVIC_TOOL_NAMES } from "../agent/civic-tool-policy.js";
-import { BREAKDOWN_DIMENSIONS, ELECTION_OFFICES } from "../schemas/civic.schema.js";
-
-/**
- * Recursos MCP: documentos de referencia de sólo lectura que el agente puede
- * consultar para explicar bien las cifras (qué significa cada métrica y qué
- * cubren los datos).
- */
+import { CCPC_YEARS } from "../application/ports/civic-data.js";
+import { BREAKDOWN_DIMENSIONS } from "../schemas/civic.schema.js";
 
 const MetricDefinitionSchema = z.object({
   name: z.string().min(1),
@@ -28,7 +23,7 @@ const CivicResourceContentSchema = z.discriminatedUnion("kind", [
     schemaVersion: z.literal("1.0"),
     kind: z.literal("coverage"),
     levels: z.array(z.string().min(1)).min(1),
-    offices: z.array(z.string().min(1)).min(1),
+    years: z.array(z.number().int()).min(1),
     breakdownDimensions: z.array(z.string().min(1)).min(1),
     notIncluded: z.array(z.string().min(1)),
     rules: z.array(z.string().min(1)),
@@ -45,11 +40,13 @@ interface ResourceDefinition {
   content: CivicResourceContent;
 }
 
+const ALL_TOOLS = [...CIVIC_TOOL_NAMES];
+
 const RESOURCE_DEFINITIONS: ResourceDefinition[] = [
   {
     name: "civic-metric-definitions",
     uri: "civic://metric-definitions",
-    title: "Definiciones de métricas electorales",
+    title: "Definiciones de métricas de participación (CCPC)",
     description: "Qué significa y cómo se calcula cada cifra que devuelven las tools cívicas.",
     content: CivicResourceContentSchema.parse({
       schemaVersion: "1.0",
@@ -57,49 +54,65 @@ const RESOURCE_DEFINITIONS: ResourceDefinition[] = [
       definitions: [
         {
           name: "nominalList",
-          label: "Lista nominal",
-          description: "Personas inscritas que pueden votar en ese proceso y territorio.",
+          label: "Lista nominal (LN)",
+          description: "Personas en la lista nominal de las casillas catalogadas para ese grupo.",
           calculation: "Dato de la fuente.",
           unit: "count",
-          sourceTools: ["get_participation_summary", "compare_elections", "get_participation_breakdown", "get_supporting_records"],
+          sourceTools: ALL_TOOLS,
         },
         {
-          name: "totalVotes",
-          label: "Votos totales",
-          description: "Votos emitidos en el proceso.",
-          calculation: "Suma de los votos de cada partido.",
+          name: "voted",
+          label: "Votaron (SV)",
+          description: "Registros con marca de voto.",
+          calculation: "Dato de la fuente.",
           unit: "count",
-          sourceTools: ["get_participation_summary", "compare_elections", "get_supporting_records"],
+          sourceTools: ALL_TOOLS,
         },
         {
-          name: "turnoutPercentage",
-          label: "Participación",
+          name: "didNotVote",
+          label: "No votaron (NV)",
+          description: "Registros sin marca de voto.",
+          calculation: "Dato de la fuente.",
+          unit: "count",
+          sourceTools: ALL_TOOLS,
+        },
+        {
+          name: "unspecified",
+          label: "No especificado (NS)",
+          description: "Registros con participación no especificada. No es abstención.",
+          calculation: "Dato de la fuente.",
+          unit: "count",
+          sourceTools: ALL_TOOLS,
+        },
+        {
+          name: "participationPct",
+          label: "Participación oficial CCPC",
+          description: "Proporción que votó entre quienes tienen marca clasificada (sin contar NS).",
+          calculation: "100 × SV ÷ (SV + NV)",
+          unit: "percentage",
+          sourceTools: ALL_TOOLS,
+        },
+        {
+          name: "nominalParticipationPct",
+          label: "Participación nominal",
           description: "Proporción de la lista nominal que votó.",
-          calculation: "100 × votos totales ÷ lista nominal",
+          calculation: "100 × SV ÷ LN",
           unit: "percentage",
-          sourceTools: ["get_participation_summary", "compare_elections", "get_participation_breakdown", "get_supporting_records"],
+          sourceTools: ALL_TOOLS,
         },
         {
-          name: "abstentionPercentage",
-          label: "Abstención",
-          description: "Proporción de la lista nominal que no votó.",
-          calculation: "100 − participación",
+          name: "abstentionPct",
+          label: "Abstención oficial CCPC",
+          description: "Proporción que no votó entre quienes tienen marca clasificada.",
+          calculation: "100 × NV ÷ (SV + NV)",
           unit: "percentage",
-          sourceTools: ["get_participation_summary"],
+          sourceTools: ALL_TOOLS,
         },
         {
-          name: "percentage",
-          label: "Porcentaje de votos",
-          description: "Proporción de los votos totales que obtuvo cada partido.",
-          calculation: "100 × votos del partido ÷ votos totales",
-          unit: "percentage",
-          sourceTools: ["get_participation_summary", "compare_elections"],
-        },
-        {
-          name: "turnoutChange.points",
+          name: "changes.participationPoints",
           label: "Cambio de participación",
           description: "Diferencia entre dos participaciones. Se expresa en puntos porcentuales: de 61 % a 58 % son −3 puntos, no −3 %.",
-          calculation: "participación del año posterior − participación del año anterior",
+          calculation: "participación del año posterior − participación del año base",
           unit: "percentage_points",
           sourceTools: ["compare_elections"],
         },
@@ -109,21 +122,25 @@ const RESOURCE_DEFINITIONS: ResourceDefinition[] = [
   {
     name: "civic-coverage",
     uri: "civic://coverage",
-    title: "Cobertura de los datos",
-    description: "Qué niveles, cargos y desgloses están disponibles y qué reglas seguir al presentarlos.",
+    title: "Cobertura de los datos CCPC",
+    description: "Qué años, niveles y desgloses están disponibles y qué reglas seguir al presentarlos.",
     content: CivicResourceContentSchema.parse({
       schemaVersion: "1.0",
       kind: "coverage",
-      levels: ["Nacional", "Entidad federativa"],
-      offices: [...ELECTION_OFFICES],
+      levels: ["Entidad federativa", "Nacional (suma de entidades)"],
+      years: [...CCPC_YEARS],
       breakdownDimensions: [...BREAKDOWN_DIMENSIONS],
-      notIncluded: ["Municipio", "Distrito", "Sección", "Datos personales de votantes"],
+      notIncluded: ["Votos por partido o candidatura", "Municipio", "Distrito", "Sección", "Datos personales de votantes"],
       rules: [
         "Citar siempre la fuente de cada cifra.",
+        "Primero se suman conteos y después se calculan porcentajes; no promediar porcentajes.",
+        "No especificado (NS) no es abstención y no se suma a quienes no votaron.",
+        "Ausencia de datos no es cero: un resultado sin datos se presenta como sin datos.",
         "No comparar un estado contra el total nacional como si fueran equivalentes.",
         "Mostrar el numerador y el denominador junto a cada porcentaje.",
+        "Las elecciones no son un panel de las mismas personas: una comparación no prueba causas.",
         "No describir datos agregados como si fueran decisiones de personas individuales.",
-        "Los datos de ejemplo no deben presentarse como resultados oficiales.",
+        "Los datos de muestra no deben presentarse como totales estatales o nacionales.",
       ],
     }),
   },

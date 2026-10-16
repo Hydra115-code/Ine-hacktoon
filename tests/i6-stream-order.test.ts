@@ -35,7 +35,7 @@ test("GEN4 mantiene feedback inmediato y no publica UI falsa con planificador le
   const request = queryRequest(
     "33000000-0000-4000-8000-000000000002",
     "44000000-0000-4000-8000-000000000002",
-    "¿Cómo votó Jalisco en la elección presidencial de 2024?",
+    "¿Cómo votó Aguascalientes en la elección presidencial de 2024?",
   );
   const startedAt = performance.now();
   const observed: Array<{ type: string; atMs: number }> = [];
@@ -61,7 +61,7 @@ test("GEN4 publica una sola vista final al consultar nuevos datos en el mismo hi
   const events = await harness.run(queryRequest(
     sessionId,
     "44000000-0000-4000-8000-000000000004",
-    "¿Y cuál fue la participación en Oaxaca?",
+    "¿Y cuál fue la participación en Tabasco?",
     previous,
   ));
   const replacements = events.filter((event) => event.type === "ui-started");

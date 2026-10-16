@@ -6,7 +6,6 @@ import {
   GetSupportingRecordsOutputSchema,
 } from "../../schemas/civic.schema.js";
 
-/** Contrato de salida de cada tool: si una salida no lo cumple, se rechaza. */
 const TOOL_OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
   get_participation_summary: GetParticipationSummaryOutputSchema,
   compare_elections: CompareElectionsOutputSchema,
