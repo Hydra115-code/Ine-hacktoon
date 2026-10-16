@@ -45,7 +45,8 @@ test("el shell móvil conserva navegación y composición accesibles", async () 
   assert.match(appShell, /aria-controls="conversation-pane"/u);
   assert.match(appShell, /aria-controls="result-pane"/u);
   assert.doesNotMatch(appShell, /SessionAccessGate/u);
-  assert.doesNotMatch(header, /onSignOut|Cerrar sesión/u);
+  assert.doesNotMatch(appShell, /<WorkspaceHeader\s+onSignOut/u);
+  assert.match(header, /\{onSignOut \? .*Salir.*: null\}/u);
   assert.match(composer, /aria-describedby="civic-prompt-guidance"/u);
   assert.match(css, /\.workspace\s*\{\s*grid-template-rows:\s*auto minmax\(0, 1fr\);/u);
 });
@@ -58,4 +59,15 @@ test("Paper se renderiza únicamente con recursos 2D", async () => {
   assert.match(avatar, /\/paper\/glasses-expressions\.png/u);
   assert.doesNotMatch(avatar, /use3D|\.glb|PaperScene/u);
   assert.doesNotMatch(packageJson, /@react-three\/fiber|@types\/three|"three"/u);
+});
+
+test("Paper usa una sola mano articulada para todos sus estados", async () => {
+  const avatar = await source("src/features/paper/components/PaperAvatar.tsx");
+  const css = await source("src/features/paper/styles/paper.css");
+
+  assert.equal(avatar.match(/<PaperHand\b/gu)?.length, 1);
+  assert.match(avatar, /hand:\s*\{/u);
+  assert.doesNotMatch(avatar, /pose\.left|pose\.right|paper-sprite__hand--left/u);
+  assert.match(css, /paper-sprite__hand--active/u);
+  assert.doesNotMatch(css, /paper-sprite__hand--left|paper-sprite__hand--right/u);
 });

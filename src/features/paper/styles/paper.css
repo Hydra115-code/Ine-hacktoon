@@ -127,68 +127,77 @@
   width: 100%;
 }
 
-.paper-sprite__hand--left.paper-sprite__hand--idle {
-  top: 51%;
-  left: 2.5%;
-  width: 34%;
-}
-
-.paper-sprite__hand--right.paper-sprite__hand--idle {
-  top: 51%;
-  right: 2.5%;
-  width: 34%;
+.paper-sprite__hand--active.paper-sprite__hand--idle {
+  top: 56%;
+  right: 12%;
+  width: 18%;
 }
 
 .paper-sprite__hand--wave {
-  top: 36%;
-  right: 0;
-  width: 36%;
+  top: 43%;
+  right: 10%;
+  width: 20%;
   transform-origin: 50% 90%;
 }
 
 .paper-sprite__hand--thinking {
-  top: 43%;
-  left: 1%;
-  width: 36%;
+  top: 48%;
+  right: 10%;
+  width: 20%;
   transform-origin: 20% 50%;
 }
 
-.paper-sprite__hand--left.paper-sprite__hand--present {
-  top: 47%;
-  left: -1%;
-  width: 39%;
-}
-
-.paper-sprite__hand--right.paper-sprite__hand--present {
-  top: 47%;
-  right: -1%;
-  width: 39%;
+.paper-sprite__hand--active.paper-sprite__hand--present {
+  top: 53%;
+  right: 9%;
+  width: 22%;
 }
 
 .paper-sprite__hand--point {
-  top: 48%;
-  right: -8%;
-  width: 43%;
+  top: 53%;
+  right: 5%;
+  width: 24%;
   transform-origin: 15% 50%;
 }
 
 .paper-sprite__hand--approve {
-  top: 46%;
-  right: -3%;
-  width: 31%;
+  top: 52%;
+  right: 11%;
+  width: 18%;
   transform-origin: 45% 85%;
 }
 
-.paper-sprite__hand--left.paper-sprite__hand--surprised {
-  top: 39%;
-  left: -1%;
-  width: 36%;
+.paper-sprite__hand--active.paper-sprite__hand--surprised {
+  top: 45%;
+  right: 10%;
+  width: 20%;
 }
 
-.paper-sprite__hand--right.paper-sprite__hand--surprised {
-  top: 39%;
-  right: -1%;
-  width: 36%;
+/* La pose decide el costado: así cada asset conserva una anatomía natural. */
+.paper-sprite__hand--side-left {
+  right: auto;
+  left: 10%;
+}
+
+.paper-sprite__hand--side-right {
+  right: 10%;
+  left: auto;
+}
+
+.paper-sprite__hand--point.paper-sprite__hand--side-right {
+  right: 5%;
+}
+
+.paper-sprite__hand--present.paper-sprite__hand--side-right {
+  right: 9%;
+}
+
+.paper-sprite__hand--idle.paper-sprite__hand--side-right {
+  right: 12%;
+}
+
+.paper-sprite__hand--approve.paper-sprite__hand--side-right {
+  right: 11%;
 }
 
 .paper-sprite__mirrored {
