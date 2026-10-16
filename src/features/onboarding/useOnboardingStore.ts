@@ -52,7 +52,9 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
     set({
       hasHydrated: true,
       hasCompleted: savedStatus === "completed",
-      isOpen: savedStatus === null,
+      // El recorrido es opcional y sólo se abre desde la acción "Recorrido".
+      // Una pregunta escrita en el landing debe continuar directamente al espacio de conversación.
+      isOpen: false,
     });
   },
 

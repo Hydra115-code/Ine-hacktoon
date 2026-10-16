@@ -36,6 +36,7 @@ interface HandPose {
   sprite?: HandSheetCell;
   placement: string;
   mirror?: boolean;
+  flipVertical?: boolean;
 }
 
 interface PaperPose {
@@ -71,7 +72,9 @@ const PAPER_POSES: Record<PaperMood, PaperPose> = {
   },
   pointing: {
     left: { asset: "hand_left_idle", placement: "idle" },
-    right: { asset: "hand_point_open", placement: "point" },
+    // En el costado derecho de la pantalla vemos la mano izquierda de Paper.
+    // El recurso base apunta correctamente, pero debe invertir su anatomía vertical.
+    right: { asset: "hand_point_open", placement: "point", flipVertical: true },
   },
   approving: {
     left: { asset: "hand_left_idle", placement: "idle" },
@@ -191,7 +194,7 @@ function PaperHand({ pose, side, mood, reducedMotion }: {
           width={568}
           height={549}
           draggable={false}
-          className={pose.mirror ? "paper-sprite__mirrored" : undefined}
+          className={pose.mirror ? "paper-sprite__mirrored" : pose.flipVertical ? "paper-sprite__flipped-vertical" : undefined}
         />
       )}
     </motion.div>

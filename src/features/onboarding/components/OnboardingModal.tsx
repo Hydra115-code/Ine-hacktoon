@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PaperAvatar } from "../../paper/components/PaperAvatar";
 import { PaperDialogue } from "../../paper/components/PaperDialogue";
 import type { PaperMood } from "../../paper/paper-mood";
+import { CivicBrand } from "../../workspace/components/CivicBrand";
 import { useWorkspaceStore } from "../../workspace/state/workspace-store";
 import { MEXICAN_STATES, ONBOARDING_PROFILES } from "../onboarding-types";
 import { useOnboardingStore } from "../useOnboardingStore";
@@ -47,7 +49,9 @@ export function OnboardingModal() {
   const paperMessage = state.step === 5
     ? `Ya te tengo una primera misión. Está pensada para ti, en ${state.selectedState}.`
     : guidance.message;
-  const progress = `${(state.step / STEP_LABELS.length) * 100}%`;
+  const completedSteps = state.step - 1;
+  const progressStepCount = STEP_LABELS.length - 1;
+  const progress = `${(completedSteps / progressStepCount) * 100}%`;
   const mission = useMemo(
     () => `${profile.suggestedPrompt.replace(/[?]$/, "")} Enfoca el análisis en ${state.selectedState} y compáralo con el promedio nacional.`,
     [profile.suggestedPrompt, state.selectedState],
@@ -60,6 +64,20 @@ export function OnboardingModal() {
     if (!dialog) return;
     if (state.isOpen && !dialog.open) dialog.showModal();
     if (!state.isOpen && dialog.open) dialog.close();
+  }, [state.isOpen]);
+
+  useEffect(() => {
+    if (!state.isOpen) return;
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
   }, [state.isOpen]);
 
   useEffect(() => {
@@ -90,8 +108,14 @@ export function OnboardingModal() {
       }}
     >
       <div className="onboarding-experience" data-step={state.step} data-paper-speaking={paperSpeaking}>
-        <header className="onboarding-topbar">
-          <div className="onboarding-wordmark"><strong>INE</strong><small>Explora con Paper</small></div>
+        <header className="workspace-header onboarding-topbar">
+          <div className="workspace-header__identity">
+            <Link href="/" className="workspace-header__brand-link" aria-label="Ir al inicio de INE Explora">
+              <CivicBrand />
+            </Link>
+            <span className="workspace-header__divider" aria-hidden="true" />
+            <span className="workspace-header__product">Recorrido con Paper</span>
+          </div>
           <button type="button" className="onboarding-close-btn" onClick={state.closeOnboarding}>
             Saltar por ahora <span aria-hidden="true">↗</span>
           </button>
@@ -101,9 +125,9 @@ export function OnboardingModal() {
           className="onboarding-progress"
           role="progressbar"
           aria-label="Progreso del recorrido guiado por Paper"
-          aria-valuemin={1}
-          aria-valuemax={STEP_LABELS.length}
-          aria-valuenow={state.step}
+          aria-valuemin={0}
+          aria-valuemax={progressStepCount}
+          aria-valuenow={completedSteps}
         >
           <div className="onboarding-progress__track"><span style={{ width: progress }} /></div>
         </div>

@@ -195,6 +195,10 @@
   transform: scaleX(-1);
 }
 
+.paper-sprite__flipped-vertical {
+  transform: scaleY(-1);
+}
+
 .paper-avatar-wrapper--sm .paper-sprite,
 .paper-avatar-wrapper--md .paper-sprite {
   filter: drop-shadow(0 5px 6px rgb(28 27 44 / 0.12));

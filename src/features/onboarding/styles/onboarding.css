@@ -16,24 +16,18 @@
 .onboarding-dialog::backdrop { background: rgb(20 18 30 / 72%); }
 
 .onboarding-experience {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   background-color: var(--color-surface-page);
+  overflow: hidden;
 }
 
 .onboarding-topbar {
   min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(1.1rem, 3vw, 3rem);
-  border-bottom: 1px solid var(--color-border-subtle);
 }
-
-.onboarding-wordmark { display: flex; align-items: center; gap: 0.65rem; }
-.onboarding-wordmark strong { font-family: var(--font-family-display); }
-.onboarding-wordmark small { padding-left: 0.65rem; border-left: 1px solid var(--color-border-subtle); color: var(--color-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 
 .onboarding-close-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem; border: 0; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer; }
 .onboarding-close-btn:focus-visible,
@@ -48,7 +42,7 @@
 .onboarding-progress__track span { display: block; height: 100%; background: var(--color-brand-primary); transition: width 350ms var(--ease-standard); }
 
 .onboarding-stage { min-height: 0; display: grid; grid-template-columns: minmax(320px, 0.82fr) minmax(520px, 1.3fr); overflow: auto; }
-.onboarding-paper { position: relative; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem clamp(1.25rem, 3vw, 3rem); border-right: 1px solid var(--color-border-subtle); overflow: hidden; }
+.onboarding-paper { position: relative; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem clamp(1.25rem, 3vw, 3rem); border-right: 1px solid var(--color-border-subtle); overflow: hidden; }
 .onboarding-paper .paper-avatar-wrapper { z-index: 1; width: min(100%, 370px); height: min(42vh, 370px); }
 .onboarding-paper .paper-avatar-wrapper--hero::before { display: none; }
 
@@ -138,7 +132,6 @@
 }
 
 @media (max-width: 620px) {
-  .onboarding-wordmark small { display: none; }
   .onboarding-close-btn { font-size: 0; }
   .onboarding-close-btn span { font-size: 1rem; }
   .onboarding-paper { min-height: 255px; }

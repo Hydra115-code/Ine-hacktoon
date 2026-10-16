@@ -9,11 +9,13 @@ export function PublicNav() {
   const openOnboarding = useOnboardingStore((state) => state.openOnboarding);
 
   return (
-    <header className="workspace-header public-nav">
+    <header className="workspace-header public-nav" aria-label="Navegación principal de INE Explora">
       <div className="workspace-header__identity">
         <Link href="/" className="workspace-header__brand-link" aria-label="Ir al inicio de INE Explora">
           <CivicBrand />
         </Link>
+        <span className="workspace-header__divider" aria-hidden="true" />
+        <span className="workspace-header__product">Participación ciudadana</span>
       </div>
 
       <div className="workspace-header__session">

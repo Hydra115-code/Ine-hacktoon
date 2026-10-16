@@ -71,16 +71,12 @@ test("la continuidad escrita envía y valida la especificación vigente sólo en
   assert.match(planner, /let patchState: UIPatchState \| undefined = options\.initialState/u);
 });
 
-test("la conversación exige una sesión real y conserva la consulta cuando expira", () => {
+test("la conversación pública usa un propietario local estable sin interponer el acceso de Supabase", () => {
   const shell = readFileSync(new URL("../src/features/workspace/components/AppShell.tsx", import.meta.url), "utf8");
-  const gate = readFileSync(new URL("../src/features/auth/components/SessionAccessGate.tsx", import.meta.url), "utf8");
-  assert.match(shell, /<SessionAccessGate>/u);
-  assert.match(shell, /<AgentSessionProvider key=\{ownerKey\} ownerKey=\{ownerKey\}>/u);
+  assert.match(shell, /const PUBLIC_WORKSPACE_OWNER_KEY = "[a-f0-9]{64}"/u);
+  assert.match(shell, /<AgentSessionProvider ownerKey=\{PUBLIC_WORKSPACE_OWNER_KEY\}>/u);
+  assert.doesNotMatch(shell, /SessionAccessGate/u);
   assert.doesNotMatch(shell, /LOCAL_UI_OWNER_KEY/u);
-  assert.match(gate, /fetch\("\/api\/auth\/session"/u);
-  assert.match(gate, /Tu sesión expiró\. Inicia sesión para continuar/u);
-  assert.match(gate, /Tu consulta escrita está conservada/u);
-  assert.doesNotMatch(gate, /createLocalOwnerKey/u);
 });
 
 test("el flujo progresivo emite una vista validada y la cierra si el planner no entrega otra", () => {

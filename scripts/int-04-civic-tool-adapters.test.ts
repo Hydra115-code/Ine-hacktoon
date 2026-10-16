@@ -11,6 +11,7 @@ import { uiSpecificationSchema } from "@ine/contracts";
 
 const backendSchemaDist = process.env.INE_BACKEND_CIVIC_SCHEMA_DIST
   ?? resolve(import.meta.dirname, "../../back-end/dist/schemas/civic.schema.js");
+const backendServiceDist = resolve(backendSchemaDist, "../../services/civic-data.service.js");
 
 test("los cuatro fixtures cumplen los esquemas frontend", () => {
   assert.deepEqual([...civicToolNames], [
@@ -24,18 +25,33 @@ test("los cuatro fixtures cumplen los esquemas frontend", () => {
   }
 });
 
-test("los fixtures también cumplen el dist real de la rama Back-end", {
-  skip: !existsSync(backendSchemaDist),
+test("el servicio compilado del backend emite las cuatro respuestas conforme a su contrato", {
+  skip: !existsSync(backendSchemaDist) || !existsSync(backendServiceDist),
 }, async () => {
   const backend = await import(pathToFileURL(backendSchemaDist).href) as Record<string, { parse(value: unknown): unknown }>;
+  const serviceModule = await import(pathToFileURL(backendServiceDist).href) as {
+    CivicDataService: new () => {
+      getParticipationSummary(input: unknown): Promise<unknown>;
+      compareElections(input: unknown): Promise<unknown>;
+      getParticipationBreakdown(input: unknown): Promise<unknown>;
+      getSupportingRecords(input: unknown): Promise<unknown>;
+    };
+  };
   const schemas = {
     get_participation_summary: backend.GetParticipationSummaryOutputSchema,
     compare_elections: backend.CompareElectionsOutputSchema,
     get_participation_breakdown: backend.GetParticipationBreakdownOutputSchema,
     get_supporting_records: backend.GetSupportingRecordsOutputSchema,
   };
+  const service = new serviceModule.CivicDataService();
+  const outputs = {
+    get_participation_summary: await service.getParticipationSummary({ year: 2024 }),
+    compare_elections: await service.compareElections({ years: [2018, 2024] }),
+    get_participation_breakdown: await service.getParticipationBreakdown({ year: 2024, dimension: "sexo" }),
+    get_supporting_records: await service.getSupportingRecords({ year: 2024 }),
+  };
   for (const toolName of civicToolNames) {
-    assert.doesNotThrow(() => schemas[toolName].parse(civicToolContractFixtures[toolName]), toolName);
+    assert.doesNotThrow(() => schemas[toolName].parse(outputs[toolName]), toolName);
   }
 });
 

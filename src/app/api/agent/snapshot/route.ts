@@ -10,12 +10,13 @@ import { refreshSupabaseSession, SupabaseAuthenticationError, type SupabaseUserS
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store" };
+const usesLocalServiceSession = process.env.AGENT_SESSION_MODE === "local_service";
 
 export async function POST(request: NextRequest) {
   const cookies = readSessionCookies(request);
-  let accessToken = cookies.accessToken;
+  let accessToken = usesLocalServiceSession ? undefined : cookies.accessToken;
   let refreshedSession: SupabaseUserSession | undefined;
-  if (cookies.refreshToken && (!accessToken || accessTokenNeedsRefresh(accessToken))) {
+  if (!usesLocalServiceSession && cookies.refreshToken && (!accessToken || accessTokenNeedsRefresh(accessToken))) {
     try {
       refreshedSession = await refreshSupabaseSession(cookies.refreshToken);
       accessToken = refreshedSession.accessToken;
@@ -23,7 +24,9 @@ export async function POST(request: NextRequest) {
       return refreshFailure(error);
     }
   }
-  if (!accessToken) return Response.json({ code: "authentication_required" }, { status: 401, headers });
+  if (!usesLocalServiceSession && !accessToken) {
+    return Response.json({ code: "authentication_required" }, { status: 401, headers });
+  }
   const config = readAgentApiConfig();
   if (!config) return Response.json({ code: "snapshot_unavailable" }, { status: 503, headers });
   const body = await request.text();
@@ -35,14 +38,17 @@ export async function POST(request: NextRequest) {
     const endpoint = new URL(config.endpoint);
     endpoint.pathname = endpoint.pathname.replace(/\/$/u, "") + "/snapshot";
     endpoint.search = "";
-    const fetchSnapshot = (token: string) => fetch(endpoint, {
+    const fetchSnapshot = (token?: string) => fetch(endpoint, {
       method: "POST", cache: "no-store",
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        ...((token ?? config.token) ? { Authorization: `Bearer ${token ?? config.token}` } : {}),
+      },
       body: JSON.stringify(input),
     });
     let upstream = await fetchSnapshot(accessToken);
-    if (upstream.status === 401 && cookies.refreshToken && !refreshedSession) {
+    if (!usesLocalServiceSession && upstream.status === 401 && cookies.refreshToken && !refreshedSession) {
       try {
         refreshedSession = await refreshSupabaseSession(cookies.refreshToken);
         upstream = await fetchSnapshot(refreshedSession.accessToken);

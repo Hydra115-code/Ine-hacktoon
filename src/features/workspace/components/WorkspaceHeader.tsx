@@ -20,12 +20,12 @@ export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void>
           <CivicBrand />
         </Link>
         <span className="workspace-header__divider" aria-hidden="true" />
-        <Link href="/" className="session-reset workspace-header__home">
-          ← Inicio
-        </Link>
         <span className="workspace-header__product">Conversar con Paper</span>
       </div>
       <div className="workspace-header__session">
+        <Link href="/" className="session-reset workspace-header__home">
+          ← Inicio
+        </Link>
         <ThemeToggle />
         {hasStarted ? (
           <button className="session-reset" type="button" onClick={() => {

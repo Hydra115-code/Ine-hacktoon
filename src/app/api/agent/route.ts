@@ -37,6 +37,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+const usesLocalServiceSession = process.env.AGENT_SESSION_MODE === "local_service";
 
 const requestSchema = z.object({
   messages: z.array(z.unknown()).min(1).max(40).optional(),
@@ -226,9 +227,9 @@ export async function POST(request: NextRequest) {
   const sessionId = input.type === "prompt" ? (input.session?.id ?? crypto.randomUUID()) : input.intent.sessionId;
   const correlationId = input.type === "prompt" ? crypto.randomUUID() : input.intent.correlationId;
   const cookies = readSessionCookies(request);
-  let accessToken = cookies.accessToken;
+  let accessToken = usesLocalServiceSession ? undefined : cookies.accessToken;
   let refreshedSession: SupabaseUserSession | undefined;
-  if (cookies.refreshToken && (!accessToken || accessTokenNeedsRefresh(accessToken))) {
+  if (!usesLocalServiceSession && cookies.refreshToken && (!accessToken || accessTokenNeedsRefresh(accessToken))) {
     try {
       refreshedSession = await refreshSupabaseSession(cookies.refreshToken);
       accessToken = refreshedSession.accessToken;
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
       return response;
     }
   }
-  if (!accessToken) {
+  if (!usesLocalServiceSession && !accessToken) {
     return routeError(401, "authentication_required", "Autenticación requerida", correlationId);
   }
 
@@ -265,9 +266,9 @@ export async function POST(request: NextRequest) {
     requestBytes: input.requestBytes,
   });
 
-  const createAgentStream = (token: string) => input.type === "prompt"
+  const createAgentStream = (token?: string) => input.type === "prompt"
     ? streamPlannedAgent({
-        accessToken: token,
+        ...(token ? { accessToken: token } : {}),
         provider,
         prompt: input.prompt,
         signal: request.signal,
@@ -277,7 +278,7 @@ export async function POST(request: NextRequest) {
         ...(input.session ? { initialState: input.session.initialState } : {}),
       })
     : streamPlannedAgent({
-        accessToken: token,
+        ...(token ? { accessToken: token } : {}),
         provider,
         intent: input.intent,
         initialState: input.initialState,
@@ -289,7 +290,7 @@ export async function POST(request: NextRequest) {
   let preparedStream: AsyncGenerator<ValidatedAgentEvent> | undefined;
   let firstEvent: IteratorResult<ValidatedAgentEvent> | undefined;
   let preparationError: unknown;
-  if (input.type === "prompt" && cookies.refreshToken && !refreshedSession) {
+  if (!usesLocalServiceSession && input.type === "prompt" && cookies.refreshToken && !refreshedSession) {
     preparedStream = createAgentStream(accessToken);
     try {
       firstEvent = await preparedStream.next();
