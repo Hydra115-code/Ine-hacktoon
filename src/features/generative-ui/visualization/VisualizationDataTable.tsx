@@ -50,6 +50,12 @@ function formatAccessibleValue(value: DataValue | undefined, column: AccessibleC
   return "Dato no textual";
 }
 
+function accessibleCellAlignment(column: AccessibleColumn) {
+  return column.format === "number" || column.format === "percent" || column.format === "currency"
+    ? "ui-visualization__data-cell--numeric"
+    : "ui-visualization__data-cell--text";
+}
+
 export function VisualizationDataTable({ rows, spec }: VisualizationDataTableProps) {
   const columns = getAccessibleColumns(spec);
   const visibleRows = rows.slice(0, MAX_ACCESSIBLE_ROWS);
@@ -66,13 +72,13 @@ export function VisualizationDataTable({ rows, spec }: VisualizationDataTablePro
         <table>
           <caption className="sr-only">Datos utilizados para {spec.ariaLabel}</caption>
           <thead>
-            <tr>{columns.map((column) => <th key={column.field} scope="col">{column.label}</th>)}</tr>
+            <tr>{columns.map((column) => <th className={accessibleCellAlignment(column)} key={column.field} scope="col">{column.label}</th>)}</tr>
           </thead>
           <tbody>
             {visibleRows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {columns.map((column) => (
-                  <td key={column.field}>{formatAccessibleValue(readDataField(row, column.field), column, row)}</td>
+                  <td className={accessibleCellAlignment(column)} key={column.field}>{formatAccessibleValue(readDataField(row, column.field), column, row)}</td>
                 ))}
               </tr>
             ))}

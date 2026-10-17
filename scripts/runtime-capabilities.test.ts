@@ -10,8 +10,8 @@ import {
   nodeCapabilityMatrix,
 } from "../src/features/generative-ui/runtime/node-capability-matrix.ts";
 
-test("la matriz tiene una entrada única para los 33 nodos contractuales", () => {
-  assert.equal(nodeCapabilityMatrix.length, 33);
+test("la matriz tiene una entrada única para los 42 nodos contractuales", () => {
+  assert.equal(nodeCapabilityMatrix.length, 42);
   assert.equal(knownNodeTypes.size, nodeCapabilityMatrix.length);
   assert.equal(nodeCapabilityMatrix.every((item) => item.component.length > 0), true);
 });

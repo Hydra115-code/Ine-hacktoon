@@ -7,6 +7,7 @@ import {
   civicToolOutputSchemas,
   compareElectionsOutputSchema,
   electionSnapshotSchema,
+  legacyParticipationGroupSchema,
   participationBreakdownOutputSchema,
   participationGroupSchema,
   participationSchema,
@@ -66,25 +67,82 @@ function normalizeComplete(toolName: CivicToolName, value: z.infer<(typeof civic
   switch (toolName) {
     case "get_participation_summary": {
       const parsed = participationSummaryOutputSchema.parse(value);
-      return { ...common, context: { ...parsed.process, entity: parsed.entity, level: parsed.level }, participation: parsed.participation, results: parsed.results };
+      if ("process" in parsed) {
+        return { ...common, context: { ...parsed.process, entity: parsed.entity, level: parsed.level }, participation: parsed.participation, results: parsed.results };
+      }
+      return compactData({
+        ...common,
+        context: { year: parsed.year, level: parsed.level, scope: parsed.scope, status: parsed.status, filters: parsed.filters },
+        totals: parsed.totals ?? undefined,
+        composition: parsed.composition,
+      });
     }
     case "compare_elections": {
       const parsed = compareElectionsOutputSchema.parse(value);
-      return { ...common, context: { office: parsed.office, entity: parsed.entity, level: parsed.level }, elections: parsed.elections, turnoutChange: parsed.turnoutChange, methodologyNotes: parsed.methodologyNotes };
+      if ("office" in parsed) {
+        return { ...common, context: { office: parsed.office, entity: parsed.entity, level: parsed.level }, elections: parsed.elections, turnoutChange: parsed.turnoutChange, methodologyNotes: parsed.methodologyNotes };
+      }
+      const baseline = parsed.elections.find((election) => election.year === parsed.baselineYear);
+      const current = [...parsed.elections].reverse().find((election) => election.hasData);
+      const currentChange = current
+        ? parsed.changes.find((change) => change.year === current.year && change.baselineYear === parsed.baselineYear)
+        : undefined;
+      return {
+        ...common,
+        context: { years: parsed.years, baselineYear: parsed.baselineYear, level: parsed.level, scope: parsed.scope, status: parsed.status, filters: parsed.filters },
+        elections: parsed.elections,
+        changes: parsed.changes,
+        ...(baseline && current ? {
+          comparison: {
+            previousPeriod: baseline.year,
+            currentPeriod: current.year,
+            previousValue: baseline.participationPct,
+            currentValue: current.participationPct,
+            difference: currentChange?.participationPoints ?? null,
+          },
+        } : {}),
+        methodologyNotes: parsed.methodologyNotes,
+      };
     }
     case "get_participation_breakdown": {
       const parsed = participationBreakdownOutputSchema.parse(value);
-      return compactData({ ...common, context: { ...parsed.process, dimension: parsed.dimension, scope: parsed.scope }, groups: parsed.groups, coverageNote: parsed.coverageNote });
+      if ("process" in parsed) {
+        return compactData({ ...common, context: { ...parsed.process, dimension: parsed.dimension, scope: parsed.scope }, groups: parsed.groups, coverageNote: parsed.coverageNote });
+      }
+      return compactData({
+        ...common,
+        context: {
+          year: parsed.year,
+          dimension: parsed.dimension,
+          scope: parsed.scope,
+          level: parsed.level,
+          status: parsed.status,
+          filters: parsed.filters,
+        },
+        groups: parsed.groups,
+        coverageNote: parsed.coverageNote,
+      });
     }
     case "get_supporting_records": {
       const parsed = supportingRecordsOutputSchema.parse(value);
-      return { ...common, context: { ...parsed.process, entity: parsed.entity, level: parsed.level }, records: parsed.records };
+      if ("process" in parsed) {
+        return { ...common, context: { ...parsed.process, entity: parsed.entity, level: parsed.level }, records: parsed.records };
+      }
+      return {
+        ...common,
+        context: { year: parsed.year, level: parsed.level, scope: parsed.scope, status: parsed.status, filters: parsed.filters },
+        records: parsed.records,
+        recordSummary: { totalRecords: parsed.totalRecords, truncated: parsed.truncated },
+        sources: parsed.sources,
+      };
     }
   }
   throw new Error("Tool cívica no soportada");
 }
 
-function commonData(toolName: CivicToolName, value: { dataType: "OBSERVED"; isSampleData: boolean; source: z.infer<typeof civicSourceSchema>; metadata: z.infer<typeof civicMetadataSchema> }): DataRegistryValue {
+function commonData(toolName: CivicToolName, value: { dataType: "OBSERVED"; isSampleData: boolean; source: z.infer<typeof civicSourceSchema>; metadata: z.infer<typeof civicMetadataSchema>; warnings?: Array<{ code: string; message: string }> }): DataRegistryValue {
+  const sourceWarnings = value.warnings?.map((warning) => warning.message) ?? [];
+  const sampleWarning = "La fuente marcó esta respuesta como datos de ejemplo; no debe presentarse como resultado oficial.";
   return {
     provenance: {
       toolName,
@@ -92,10 +150,16 @@ function commonData(toolName: CivicToolName, value: { dataType: "OBSERVED"; isSa
       isSampleData: value.isSampleData,
       queriedAt: value.metadata.queriedAt,
       source: value.source,
+      ...(value.metadata.recordsSha256 ? { recordsSha256: value.metadata.recordsSha256 } : {}),
+      ...(value.metadata.matchedRecords !== undefined ? { matchedRecords: value.metadata.matchedRecords } : {}),
     },
-    warnings: value.isSampleData
-      ? ["La fuente marcó esta respuesta como datos de ejemplo; no debe presentarse como resultado oficial."]
-      : [],
+    warnings: [...new Set(value.isSampleData ? [sampleWarning, ...sourceWarnings] : sourceWarnings)],
+    quality: {
+      status: value.isSampleData ? "sample" : "complete",
+      label: value.isSampleData ? "Muestra de desarrollo; revisa la cobertura antes de interpretar" : "Datos observados de la fuente declarada",
+      ...(value.metadata.matchedRecords !== undefined ? { recordCount: value.metadata.matchedRecords } : {}),
+      updatedAt: value.metadata.queriedAt,
+    },
   };
 }
 
@@ -118,9 +182,25 @@ function recoverPartial(toolName: CivicToolName, input: unknown): DataRegistryVa
       return compactData({ ...base, context: compactData({ office: validOffice(input.office), entity: validString(input.entity), level: validLevel(input.level) }), elections, turnoutChange: recoverTurnoutChange(input.turnoutChange), methodologyNotes });
     }
     case "get_participation_breakdown": {
-      const groups = validArray(input.groups, participationGroupSchema);
+      const groups = [
+        ...validArray(input.groups, participationGroupSchema),
+        ...validArray(input.groups, legacyParticipationGroupSchema),
+      ];
       if (groups.length === 0) return null;
-      return compactData({ ...base, context: compactData({ ...(optionalParse(civicProcessSchema, input.process) ?? {}), dimension: validDimension(input.dimension), scope: validString(input.scope) }), groups, coverageNote: validString(input.coverageNote) });
+      const year = typeof input.year === "number" && Number.isInteger(input.year) ? input.year : undefined;
+      return compactData({
+        ...base,
+        context: compactData({
+          ...(optionalParse(civicProcessSchema, input.process) ?? {}),
+          year,
+          dimension: validDimension(input.dimension),
+          scope: validString(input.scope),
+          level: validLevel(input.level),
+          status: input.status === "ok" || input.status === "no_data" ? input.status : undefined,
+        }),
+        groups,
+        coverageNote: validString(input.coverageNote),
+      });
     }
     case "get_supporting_records": {
       const records = recoverSupportingRecords(input.records);
@@ -200,7 +280,7 @@ function validLevel(value: unknown) {
 }
 
 function validDimension(value: unknown) {
-  return value === "entidad" || value === "sexo" || value === "grupo_edad" ? value : undefined;
+  return value === "entidad" || value === "sexo" || value === "grupo_edad" || value === "tipo_seccion" ? value : undefined;
 }
 
 function compactData(input: Record<string, unknown>): DataRegistryValue {

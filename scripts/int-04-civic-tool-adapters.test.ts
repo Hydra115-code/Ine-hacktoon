@@ -82,8 +82,12 @@ test("las cuatro respuestas producen árboles GenUI válidos y verificables", ()
     assert.doesNotThrow(() => uiSpecificationSchema.parse(specification), toolName);
     const serialized = JSON.stringify(specification);
     assert.match(serialized, /Fuente/u, toolName);
-    if (toolName === "compare_elections" || toolName === "get_participation_breakdown") {
-      assert.match(serialized, /visualization/u, toolName);
+    if (toolName === "compare_elections") {
+      assert.match(serialized, /participationTimeline/u, toolName);
+      assert.match(serialized, /table/u, toolName);
+    }
+    if (toolName === "get_participation_breakdown") {
+      assert.match(serialized, /demographicBreakdown/u, toolName);
       assert.match(serialized, /table/u, toolName);
     }
     if (toolName === "get_supporting_records") assert.doesNotMatch(serialized, /visualization/u, toolName);

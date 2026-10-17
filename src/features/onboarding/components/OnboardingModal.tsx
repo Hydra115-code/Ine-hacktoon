@@ -13,6 +13,14 @@ import { useOnboardingStore } from "../useOnboardingStore";
 
 const STEP_LABELS = ["Hola", "Tu mirada", "Tu territorio", "La interfaz", "Tu misión"];
 
+function normalizeTerritorySearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .toLocaleLowerCase("es-MX")
+    .trim();
+}
+
 const PAPER_GUIDANCE: Record<number, { message: string; mood: PaperMood }> = {
   1: {
     message: "Hola, soy Paper. Yo pongo los datos en claro; tú pones la curiosidad.",
@@ -43,6 +51,7 @@ export function OnboardingModal() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const state = useOnboardingStore();
   const [paperSpeaking, setPaperSpeaking] = useState(false);
+  const [stateQuery, setStateQuery] = useState("");
   const setDraft = useWorkspaceStore((store) => store.setDraft);
   const profile = ONBOARDING_PROFILES.find((item) => item.id === state.profileId) ?? ONBOARDING_PROFILES[0];
   const guidance = PAPER_GUIDANCE[state.step];
@@ -56,6 +65,11 @@ export function OnboardingModal() {
     () => `${profile.suggestedPrompt.replace(/[?]$/, "")} Enfoca el análisis en ${state.selectedState} y compáralo con el promedio nacional.`,
     [profile.suggestedPrompt, state.selectedState],
   );
+  const filteredStates = useMemo(() => {
+    const query = normalizeTerritorySearch(stateQuery);
+    if (!query) return MEXICAN_STATES;
+    return MEXICAN_STATES.filter((name) => normalizeTerritorySearch(name).includes(query));
+  }, [stateQuery]);
 
   useEffect(() => state.hydrateOnboarding(), [state.hydrateOnboarding]);
 
@@ -173,9 +187,51 @@ export function OnboardingModal() {
                 <span className="onboarding-kicker">Del país a tu comunidad</span>
                 <h2 id="onboarding-step-title" ref={titleRef} tabIndex={-1}>Elige un territorio.</h2>
                 <p className="onboarding-lead">Lo usaré como referencia frente al promedio nacional.</p>
-                <label htmlFor="onboarding-state">Quiero explorar</label>
-                <div className="onboarding-state-control"><select id="onboarding-state" value={state.selectedState} onChange={(event) => state.setSelectedState(event.target.value)}>{MEXICAN_STATES.map((name) => <option key={name}>{name}</option>)}</select></div>
-                <p className="onboarding-territory-count"><strong>32</strong> entidades listas para comparar.</p>
+                <label htmlFor="onboarding-state-search">Busca y elige una entidad</label>
+                <div className="onboarding-state-control">
+                  <div className="onboarding-state-search">
+                    <span aria-hidden="true">⌕</span>
+                    <input
+                      id="onboarding-state-search"
+                      type="search"
+                      value={stateQuery}
+                      placeholder="Escribe el nombre del estado"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-controls="onboarding-state-options"
+                      aria-expanded={filteredStates.length > 0}
+                      onChange={(event) => setStateQuery(event.target.value)}
+                    />
+                  </div>
+                  <div id="onboarding-state-options" className="onboarding-state-options" role="listbox" aria-label="Entidades federativas">
+                    {filteredStates.map((name) => {
+                      const selected = state.selectedState === name;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          role="option"
+                          className={filteredStates.length === 1 ? "onboarding-state-option--only" : undefined}
+                          aria-selected={selected}
+                          data-selected={selected}
+                          onClick={() => state.setSelectedState(name)}
+                        >
+                          <span>{name}</span>
+                          {selected ? <span aria-hidden="true">✓</span> : null}
+                        </button>
+                      );
+                    })}
+                    {filteredStates.length === 0 ? (
+                      <p role="status">No encontramos una entidad con ese nombre.</p>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="onboarding-territory-count" aria-live="polite">
+                  <strong>{state.selectedState}</strong>
+                  {stateQuery
+                    ? `${filteredStates.length} ${filteredStates.length === 1 ? "coincidencia" : "coincidencias"}`
+                    : "Entidad seleccionada · 32 disponibles"}
+                </p>
               </div>
             )}
 

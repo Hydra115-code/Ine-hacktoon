@@ -1,0 +1,28 @@
+.page {
+  min-height: 100dvh;
+  padding: clamp(1rem, 4vw, 3rem);
+  color: var(--color-text-primary);
+  background: radial-gradient(circle at 92% 4%, var(--color-civic-accent-soft), transparent 28rem), var(--color-surface-page);
+}
+
+.header,
+.canvas { width: min(100%, 78rem); margin-inline: auto; }
+
+.header {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.header p,
+.header h1 { margin: 0; }
+.header p { color: var(--color-brand-primary); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+.header h1 { max-width: 21ch; font-family: var(--font-family-display); font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: 0.98; }
+.header span { width: fit-content; padding: 0.45rem 0.7rem; color: var(--color-evidence-caution); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); border: 1px solid currentColor; transform: rotate(-1deg); }
+
+.canvas { overflow: hidden; background: var(--color-surface-primary); border: 1px solid var(--color-border-strong); box-shadow: var(--shadow-hard); }
+
+@media (max-width: 40rem) {
+  .page { padding: 1rem; }
+  .header h1 { font-size: 2.35rem; }
+}

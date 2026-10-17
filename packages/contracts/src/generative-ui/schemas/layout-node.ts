@@ -41,6 +41,18 @@ import {
   type LogicNode,
 } from "./logic-node.js";
 import { optionalNodeIdField, type IdentifiableNode } from "./node-id.js";
+import {
+  civicInsightNodeSchema,
+  comparisonMatrixNodeSchema,
+  dataQualityBadgeNodeSchema,
+  demographicBreakdownNodeSchema,
+  electionDeltaNodeSchema,
+  evidenceSummaryNodeSchema,
+  mexicoChoroplethNodeSchema,
+  participationTimelineNodeSchema,
+  territoryRankingNodeSchema,
+  type CivicNode,
+} from "./civic-node.js";
 
 export const MAX_LAYOUT_DEPTH = 12;
 export const MAX_LAYOUT_CHILDREN = 24;
@@ -164,7 +176,7 @@ export interface ConditionalUINode {
   else?: UINode;
 }
 export type LogicUINode = RepeatUINode | ConditionalUINode;
-export type UINode = LayoutNode | ContentNode | VisualizationNode | TableNode | InteractionNode | LogicUINode;
+export type UINode = LayoutNode | ContentNode | CivicNode | VisualizationNode | TableNode | InteractionNode | LogicUINode;
 
 const nodeValueSchema = z.string().min(1).max(48).regex(/^[a-zA-Z0-9_-]+$/);
 const nodeLabelSchema = z.string().trim().min(1).max(120);
@@ -313,6 +325,15 @@ export const uiNodeSchema = z.lazy(() =>
     progressNodeSchema,
     iconNodeSchema,
     listNodeSchema,
+    electionDeltaNodeSchema,
+    territoryRankingNodeSchema,
+    participationTimelineNodeSchema,
+    dataQualityBadgeNodeSchema,
+    demographicBreakdownNodeSchema,
+    comparisonMatrixNodeSchema,
+    evidenceSummaryNodeSchema,
+    civicInsightNodeSchema,
+    mexicoChoroplethNodeSchema,
     visualizationNodeBaseSchema,
     tableNodeBaseSchema,
     buttonNodeSchema,
@@ -461,7 +482,20 @@ function validateScopedBindings(node: UINode, scopedDepth: number, context: z.Re
     if (node.comparisonBinding) bindings.push(node.comparisonBinding);
   } else if (node.type === "progress") {
     bindings.push(node.valueBinding);
-  } else if (node.type === "visualization" || node.type === "table" || node.type === "repeat") {
+  } else if (
+    node.type === "visualization"
+    || node.type === "table"
+    || node.type === "repeat"
+    || node.type === "electionDelta"
+    || node.type === "territoryRanking"
+    || node.type === "participationTimeline"
+    || node.type === "dataQualityBadge"
+    || node.type === "demographicBreakdown"
+    || node.type === "comparisonMatrix"
+    || node.type === "evidenceSummary"
+    || node.type === "civicInsight"
+    || node.type === "mexicoChoropleth"
+  ) {
     bindings.push(node.dataBinding);
   } else if (node.type === "conditional") {
     bindings.push(node.condition.binding);

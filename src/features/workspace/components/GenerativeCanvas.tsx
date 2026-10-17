@@ -139,7 +139,8 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   const hasBoundData = Object.keys(generatedInterface?.data ?? {}).length > 0;
   const guidanceOnly = status === "ready" && !failure && !errorMessage
     && isGuidanceOnly(generatedInterface?.specification, hasBoundData);
-  const hasBlockingFailure = status === "error" || Boolean(failure) || Boolean(errorMessage);
+  const hasAnyFailure = status === "error" || Boolean(failure) || Boolean(errorMessage);
+  const hasBlockingFailure = hasAnyFailure && !generatedInterface;
   const processPaperMood = status === "retrieving_data"
     ? "pointing"
     : status === "generating_ui" || status === "updating"
@@ -151,6 +152,14 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     : failureCode.includes("mcp") || failureCode.includes("network") || failureCode.includes("connection")
       ? "No pude consultar la fuente en este momento. Tus preguntas siguen aquí y puedes intentarlo nuevamente."
       : "No pude completar esta consulta de forma segura. Puedes ajustar la pregunta o intentarlo de nuevo.";
+  const preservedFailureTitle = failure?.title
+    ?? (status === "cancelled" ? "Consulta cancelada" : status === "partial" ? "Resultado parcial conservado" : "Paper no pudo completar el cambio");
+  const preservedFailureMessage = failure?.message
+    ?? (status === "cancelled"
+      ? "La consulta se detuvo. La última vista válida permanece disponible."
+      : status === "partial"
+        ? "Conservamos la información validada que sí alcanzó a llegar."
+        : paperErrorMessage);
 
   const preparePrompt = (prompt: string) => {
     setIsPaperHelpOpen(false);
@@ -173,9 +182,9 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   }, [isPaperHelpOpen]);
 
   useEffect(() => {
-    if (!failure) return;
+    if (!failure && !errorMessage && status !== "partial" && status !== "cancelled") return;
     requestAnimationFrame(() => failureRef.current?.focus({ preventScroll: true }));
-  }, [failure]);
+  }, [errorMessage, failure, status]);
 
   useEffect(() => {
     const revision = generatedInterface?.revision;
@@ -273,9 +282,14 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             ) : null}
             {failure || errorMessage || status === "partial" || status === "cancelled" ? (
               <div ref={failureRef} className="canvas-result__degradation" data-kind={status === "cancelled" ? "cancelled" : status === "partial" ? "partial" : "error"} role="alert" tabIndex={-1}>
-                <div>
-                  <strong>{failure?.title ?? "Resultado parcial conservado"}</strong>
-                  <p>{failure?.message ?? errorMessage ?? "La consulta fue cancelada antes de completarse."}</p>
+                <div className="canvas-result__degradation-copy">
+                  <div className="canvas-result__degradation-paper" aria-hidden="true">
+                    <PaperAvatar mood={status === "partial" ? "thinking" : "surprised"} size="sm" interactive={false} followPointer={false} />
+                  </div>
+                  <div>
+                    <strong>{preservedFailureTitle}</strong>
+                    <p>{preservedFailureMessage}</p>
+                  </div>
                 </div>
                 <div className="canvas-result__degradation-actions">
                   {failure?.canContinue ? (
@@ -286,7 +300,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                   {(failure?.canRetry ?? canRetry) ? <button type="button" onClick={retryLastRequest}>Reintentar</button> : null}
                   {failure?.code.includes("revision_conflict") ? (
                     <button type="button" disabled={isRecoveringSnapshot} onClick={recoverSnapshot}>
-                      {isRecoveringSnapshot ? "Sincronizando…" : "Sincronizar UI y datos"}
+                      {isRecoveringSnapshot ? "Recuperando…" : "Recuperar vista"}
                     </button>
                   ) : null}
                 </div>
@@ -430,7 +444,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 </div>
                 {activePrompt ? <p className="canvas-state__prompt">{activePrompt}</p> : null}
                 <h2>{failure?.title ?? content.title}</h2>
-                <p>{failure?.message ?? errorMessage ?? content.detail}</p>
+                <p>{failure?.message ?? (errorMessage ? paperErrorMessage : content.detail)}</p>
                 {(failure?.canRetry ?? canRetry) ? (
                   <button className="canvas-state__retry" type="button" onClick={retryLastRequest}>Reintentar</button>
                 ) : null}

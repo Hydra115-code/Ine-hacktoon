@@ -2,6 +2,7 @@
 @import "../shared/design-system/index.css";
 @import "../features/generative-ui/styles/layout-primitives.css";
 @import "../features/generative-ui/styles/content-primitives.css";
+@import "../features/generative-ui/styles/civic-primitives.css";
 @import "../features/generative-ui/styles/visualization.css";
 @import "../features/generative-ui/styles/table.css";
 @import "../features/generative-ui/styles/interactions.css";

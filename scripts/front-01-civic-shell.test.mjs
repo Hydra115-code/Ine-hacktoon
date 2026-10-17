@@ -71,3 +71,35 @@ test("Paper usa una sola mano articulada para todos sus estados", async () => {
   assert.match(css, /paper-sprite__hand--active/u);
   assert.doesNotMatch(css, /paper-sprite__hand--left|paper-sprite__hand--right/u);
 });
+
+test("el cierre de QA de FE-0 conserva tablas legibles y búsqueda compacta de entidades", async () => {
+  const onboarding = await source("src/features/onboarding/components/OnboardingModal.tsx");
+  const onboardingCss = await source("src/features/onboarding/styles/onboarding.css");
+  const tableCss = await source("src/features/generative-ui/styles/table.css");
+  const workspaceCss = await source("src/features/workspace/styles/workspace.css");
+
+  assert.match(onboarding, /type="search"/u);
+  assert.match(onboarding, /role="combobox"/u);
+  assert.match(onboarding, /normalizeTerritorySearch/u);
+  assert.match(onboarding, /role="listbox"/u);
+  assert.match(onboardingCss, /\.onboarding-state-options/u);
+  assert.doesNotMatch(onboardingCss, /font-size:\s*clamp\(1\.8rem,\s*4vw,\s*3\.3rem\)/u);
+  assert.match(tableCss, /text-align:\s*justify/u);
+  assert.match(workspaceCss, /\.canvas-guidance[^}]+font-size:\s*clamp\(1\.125rem/u);
+});
+
+test("el catálogo GenUI existente comparte la identidad editorial de INE Explora", async () => {
+  const contentCss = await source("src/features/generative-ui/styles/content-primitives.css");
+  const layoutCss = await source("src/features/generative-ui/styles/layout-primitives.css");
+  const tableCss = await source("src/features/generative-ui/styles/table.css");
+  const visualizationCss = await source("src/features/generative-ui/styles/visualization.css");
+  const interactionsCss = await source("src/features/generative-ui/styles/interactions.css");
+
+  assert.match(contentCss, /--ui-editorial-shadow/u);
+  assert.match(contentCss, /\.ui-metric[^}]+border-top:\s*3px solid/u);
+  assert.match(contentCss, /\.ui-evidence-notice--source strong/u);
+  assert.match(layoutCss, /\.ui-section--surface-elevated[^}]+border-top:\s*3px solid/u);
+  assert.match(tableCss, /\.ui-table__viewport[^}]+var\(--ui-editorial-shadow/u);
+  assert.match(visualizationCss, /\.ui-visualization[^}]+var\(--ui-editorial-shadow-accent/u);
+  assert.match(interactionsCss, /\.ui-control-button--primary[^}]+box-shadow/u);
+});

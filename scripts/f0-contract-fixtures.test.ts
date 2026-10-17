@@ -5,10 +5,15 @@ import {
   f0ContractFixtures,
   personalBankingPatchSequence,
 } from "../src/features/generative-ui/fixtures/f0-contract-fixtures.ts";
+import { f1CivicCatalogSpecification } from "../src/features/generative-ui/fixtures/f1-civic-catalog-fixture.ts";
+import { f3MexicoMapSpecification } from "../src/features/generative-ui/fixtures/f3-mexico-map-fixture.ts";
 
 const expectedNodeTypes = new Set([
   "container", "section", "stack", "grid", "flex", "split", "scrollable", "divider", "tabs", "accordion",
   "text", "heading", "metric", "badge", "alert", "progress", "icon", "list",
+  "electionDelta", "territoryRanking", "participationTimeline", "dataQualityBadge",
+  "demographicBreakdown", "comparisonMatrix", "evidenceSummary", "civicInsight",
+  "mexicoChoropleth",
   "visualization", "table",
   "button", "input", "numberInput", "select", "multiSelect", "slider", "datePicker", "dateRange",
   "checkbox", "switch", "radioGroup",
@@ -58,6 +63,12 @@ test("el catálogo de fixtures cubre cada tipo de nodo contractual", () => {
     for (const type of collectNodeTypes(fixture.specification.root as unknown as Record<string, unknown>)) {
       renderedTypes.add(type);
     }
+  }
+  for (const type of collectNodeTypes(f1CivicCatalogSpecification.root as unknown as Record<string, unknown>)) {
+    renderedTypes.add(type);
+  }
+  for (const type of collectNodeTypes(f3MexicoMapSpecification.root as unknown as Record<string, unknown>)) {
+    renderedTypes.add(type);
   }
   assert.deepEqual([...renderedTypes].sort(), [...expectedNodeTypes].sort());
 });

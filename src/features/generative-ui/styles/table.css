@@ -18,6 +18,11 @@
   background: var(--color-surface-primary);
   border: var(--border-strong);
   border-radius: var(--radius-sm);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-civic-accent) 14%, transparent);
+}
+
+.ui-table__toolbar input:focus {
+  border-color: var(--color-brand-primary);
 }
 
 .ui-table__toolbar input::placeholder {
@@ -28,8 +33,10 @@
   position: relative;
   max-width: 100%;
   overflow: auto;
-  border: var(--border-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-brand-primary);
   border-radius: var(--radius-md);
+  box-shadow: var(--ui-editorial-shadow, var(--shadow-hard));
   scrollbar-width: thin;
 }
 
@@ -49,10 +56,12 @@
 
 .ui-table caption {
   padding: var(--space-3) var(--space-4);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-caption);
   text-align: start;
-  background: var(--color-surface-secondary);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.025em;
+  background: color-mix(in srgb, var(--color-brand-soft) 52%, var(--color-surface-secondary));
   border-bottom: var(--border-subtle);
 }
 
@@ -68,7 +77,7 @@
 }
 
 .ui-table th {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.035em;
@@ -105,7 +114,7 @@
 }
 
 .ui-table tbody tr:hover {
-  background: var(--color-surface-secondary);
+  background: color-mix(in srgb, var(--color-civic-accent-soft) 58%, var(--color-surface-secondary));
 }
 
 .ui-table tbody tr {
@@ -117,6 +126,12 @@
 }
 
 .ui-table__cell--start { text-align: start; }
+.ui-table tbody .ui-table__cell--start {
+  text-align: justify;
+  text-align-last: start;
+  text-justify: inter-word;
+  hyphens: auto;
+}
 .ui-table__cell--center { text-align: center; }
 .ui-table__cell--end { text-align: end; font-variant-numeric: tabular-nums; }
 
@@ -147,7 +162,7 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   border: 1px solid currentColor;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
 }
 
 .ui-table__status--success { color: var(--color-status-success); }
@@ -199,12 +214,14 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-medium);
   background: var(--color-surface-primary);
-  border: var(--border-subtle);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
 }
 
 .ui-table__pagination button:hover:not(:disabled) {
-  border-color: var(--color-border-strong);
+  color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  box-shadow: 2px 2px 0 var(--color-brand-soft);
 }
 
 .ui-table__pagination button:disabled {

@@ -17,20 +17,43 @@
   border-radius: var(--radius-lg);
 }
 
+.ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node {
+  margin-block-start: var(--space-3);
+}
+
+.ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node:is(
+  [data-node-type="grid"],
+  [data-node-type="table"],
+  [data-node-type="visualization"],
+  [data-node-type="electionDelta"],
+  [data-node-type="territoryRanking"],
+  [data-node-type="participationTimeline"],
+  [data-node-type="dataQualityBadge"],
+  [data-node-type="demographicBreakdown"],
+  [data-node-type="comparisonMatrix"],
+  [data-node-type="evidenceSummary"],
+  [data-node-type="civicInsight"],
+  [data-node-type="mexicoChoropleth"],
+  [data-node-type="alert"]
+) {
+  margin-block-start: var(--space-6);
+}
+
 .ui-section--surface-transparent { background: transparent; }
 .ui-section--surface-primary { background: var(--color-surface-primary); }
 .ui-section--surface-secondary { background: var(--color-surface-secondary); }
 .ui-section--surface-elevated {
   background: var(--color-surface-elevated);
-  border: var(--border-subtle);
-  box-shadow: var(--shadow-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-brand-primary);
+  box-shadow: var(--ui-editorial-shadow, var(--shadow-hard));
   transition: border-color var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard), transform var(--duration-normal) var(--ease-standard);
 }
 
 .ui-section--surface-elevated:hover {
-  border-color: color-mix(in srgb, var(--color-brand-primary) 14%, var(--color-border-subtle));
-  box-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 22px 56px rgb(15 23 42 / 9%);
-  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-brand-primary) 45%, var(--color-border-strong));
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+  transform: translate(-1px, -1px);
 }
 .ui-section--padding-none { padding: 0; }
 .ui-section--padding-sm { padding: var(--space-3); }
@@ -78,8 +101,8 @@
 .ui--gap-none { gap: 0; }
 .ui--gap-xs { gap: var(--space-1); }
 .ui--gap-sm { gap: var(--space-2); }
-.ui--gap-md { gap: var(--space-4); }
-.ui--gap-lg { gap: var(--space-6); }
+.ui--gap-md { gap: var(--space-5); }
+.ui--gap-lg { gap: var(--space-8); }
 .ui--gap-xl { gap: var(--space-10); }
 .ui--align-start { align-items: start; }
 .ui--align-center { align-items: center; }
@@ -112,6 +135,10 @@
 .ui-divider--orientation-horizontal { width: 100%; height: 1px; }
 .ui-divider--orientation-vertical { align-self: stretch; width: 1px; min-height: 1.5rem; }
 .ui-divider--strength-strong { background: var(--color-border-strong); }
+.ui-divider--strength-strong.ui-divider--orientation-horizontal {
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand-primary) 0 36%, var(--color-civic-accent) 36% 52%, var(--color-border-strong) 52%);
+}
 
 .ui-tabs {
   min-width: 0;
@@ -121,7 +148,8 @@
   display: flex;
   gap: var(--space-1);
   overflow-x: auto;
-  border-bottom: var(--border-subtle);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-strong);
   scrollbar-width: thin;
 }
 
@@ -135,6 +163,7 @@
   white-space: nowrap;
   background: transparent;
   border: 0;
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .ui-tabs__tab::after {
@@ -150,9 +179,14 @@
 
 .ui-tabs__tab[aria-selected="true"] {
   color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  font-weight: var(--font-weight-bold);
 }
 
 .ui-tabs__tab[aria-selected="true"]::after {
+  right: 0;
+  left: 0;
+  height: 3px;
   background: var(--color-brand-primary);
 }
 
@@ -161,7 +195,9 @@
 }
 
 .ui-accordion {
-  border-top: var(--border-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-civic-accent);
+  box-shadow: var(--ui-editorial-shadow-accent, var(--shadow-hard));
 }
 
 .ui-accordion__item {
@@ -179,7 +215,7 @@
   justify-content: space-between;
   width: 100%;
   min-height: 3rem;
-  padding: var(--space-3) var(--space-1);
+  padding: var(--space-3) var(--space-4);
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
   text-align: left;
@@ -197,8 +233,13 @@
   transform: rotate(45deg);
 }
 
+.ui-accordion__trigger[aria-expanded="true"] {
+  color: var(--color-brand-primary);
+  background: var(--color-brand-soft);
+}
+
 .ui-accordion__panel {
-  padding: 0 var(--space-1) var(--space-5);
+  padding: var(--space-4);
   overflow: hidden;
 }
 
@@ -235,5 +276,23 @@
   .ui-tabs__tab {
     min-height: 3rem;
     padding-inline: var(--space-3);
+  }
+
+  .ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node:is(
+    [data-node-type="grid"],
+    [data-node-type="table"],
+    [data-node-type="visualization"],
+    [data-node-type="electionDelta"],
+    [data-node-type="territoryRanking"],
+    [data-node-type="participationTimeline"],
+    [data-node-type="dataQualityBadge"],
+    [data-node-type="demographicBreakdown"],
+    [data-node-type="comparisonMatrix"],
+    [data-node-type="evidenceSummary"],
+    [data-node-type="civicInsight"],
+    [data-node-type="mexicoChoropleth"],
+    [data-node-type="alert"]
+  ) {
+    margin-block-start: var(--space-5);
   }
 }

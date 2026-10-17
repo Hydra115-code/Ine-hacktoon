@@ -1,0 +1,19 @@
+.page { min-height: 100dvh; padding: clamp(1rem, 4vw, 3rem); color: var(--color-text-primary); background: var(--color-surface-page); }
+.hero, .nav, .event, .auditSection { width: min(100%, 92rem); margin-inline: auto; }
+.hero { display: grid; gap: var(--space-3); padding: clamp(1.5rem, 5vw, 4rem); color: #fff; background: #191724; border: 1px solid var(--color-border-strong); box-shadow: var(--shadow-hard); }
+.hero p, .hero h1 { margin: 0; }
+.hero p { color: #ff79b8; font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); letter-spacing: .12em; text-transform: uppercase; }
+.hero h1 { max-width: 16ch; font-family: var(--font-family-display); font-size: clamp(2.6rem, 7vw, 6.5rem); line-height: .92; }
+.hero > span { color: #d8d3ca; }
+.score { display: grid; grid-template-columns: repeat(6, auto); align-items: baseline; gap: .35rem 1rem; margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid #ffffff40; }
+.score strong { color: #ff79b8; font-family: var(--font-family-display); font-size: clamp(1.6rem, 4vw, 3rem); }
+.score span { max-width: 12ch; font-weight: var(--font-weight-bold); }
+.nav { position: sticky; top: 0; z-index: 20; display: flex; gap: .5rem; overflow-x: auto; margin-block: var(--space-5); padding: .65rem; background: color-mix(in srgb, var(--color-surface-page) 92%, transparent); border: 1px solid var(--color-border-strong); backdrop-filter: blur(12px); }
+.nav a { flex: 0 0 auto; padding: .6rem .8rem; color: var(--color-text-primary); font-weight: var(--font-weight-bold); text-decoration: none; border: 1px solid transparent; }
+.nav a:hover, .nav a:focus-visible { color: var(--color-brand-primary); border-color: currentColor; }
+.event { margin-bottom: var(--space-6); padding: .8rem 1rem; font-family: ui-monospace, monospace; font-size: var(--font-size-caption); background: var(--color-surface-secondary); border-left: .3rem solid var(--color-brand-primary); overflow-wrap: anywhere; }
+.auditSection { scroll-margin-top: 6rem; margin-block: clamp(3rem, 8vw, 7rem); }
+.auditSection > h2 { width: fit-content; margin: 0 0 var(--space-4); padding: .65rem 1rem; color: #fff; font-size: var(--font-size-body); letter-spacing: .06em; text-transform: uppercase; background: #292637; box-shadow: .35rem .35rem 0 color-mix(in srgb, var(--color-brand-primary) 35%, transparent); transform: rotate(-.4deg); }
+.canvas { overflow: hidden; background: var(--color-surface-primary); border: 1px solid var(--color-border-strong); box-shadow: var(--shadow-hard); }
+@media (max-width: 58rem) { .score { grid-template-columns: auto 1fr; } }
+@media (max-width: 40rem) { .page { padding: .75rem; } .hero { padding: 1.35rem; } .hero h1 { font-size: 2.8rem; } .auditSection { margin-block: 3rem; } }

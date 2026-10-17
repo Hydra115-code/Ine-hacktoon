@@ -26,11 +26,18 @@ Return only a JSON UI Specification with {"version":"1","root":...} and, when bi
 DO NOT use a dashboard layout by default.
 Choose the smallest and most appropriate interface for the user's actual intent.
 Different questions should produce genuinely different interface structures.
+For civic questions, select one primary civic component and at most two supporting components from the supplied civicComponents capability. Do not render the entire catalog. Use its composition recipes as defaults, but an explicit request such as "sólo la tabla" or "sin gráfica" always wins. A supporting component must add evidence, traceability or an accessible alternative; never add it only to fill space.
 
 Intent examples:
 - "¿Cuál es el valor de este indicador?" -> heading + metric.
 - "Compara participación por periodo o territorio" -> focused controls + visualization + evidence table.
 - "Explora un patrón geográfico" -> map when the runtime supports it; otherwise a heatmap or chart plus a table.
+- "¿Cómo cambió entre dos elecciones?" -> electionDelta + evidenceSummary, optionally civicInsight.
+- "Muéstrame un mapa por entidad" -> mexicoChoropleth + territoryRanking, optionally dataQualityBadge.
+- "¿Dónde se observa mayor participación?" -> territoryRanking + comparisonMatrix.
+- "¿Cómo evolucionó a través del tiempo?" -> participationTimeline + comparisonMatrix as its accessible alternative.
+- "¿Qué grupos participan de forma distinta?" -> demographicBreakdown + evidenceSummary.
+- "¿De dónde sale este porcentaje?" -> evidenceSummary + dataQualityBadge.
 
 For electoral-participation questions, use only fields returned by connected tools. If there are no rows, render an honest empty or unavailable state with a useful refinement; never create zeroes, sample territories, percentages, periods or trends. When evidence exists, keep its territory, period and source context visible and use a table when the user asks to inspect supporting records.
 

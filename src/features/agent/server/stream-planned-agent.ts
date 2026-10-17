@@ -83,6 +83,7 @@ export async function* streamPlannedAgent(
   let patchState: UIPatchState | undefined = options.initialState;
   let hasPartialData = patchState !== undefined;
   let hasProgressiveCivicFallback = false;
+  let preserveProgressiveCivicSpecification = false;
   let sawUiCompleted = false;
   const dataGuard = new DataRevisionGuard(options.intent ?? options.sessionState);
 
@@ -110,19 +111,27 @@ export async function* streamPlannedAgent(
       if (event.type === "data-patch") {
         yield event;
         hasPartialData = true;
-        if (!patchState) {
-          const fallback = createCivicStreamFallback(event.patch);
-          if (fallback) {
-            const initial = createUIPatchState(fallback.specification, 0);
-            if (initial.success) {
-              patchState = initial.state;
-              hasProgressiveCivicFallback = true;
-              yield {
-                type: "ui-started",
-                specification: initial.state.specification,
-                data: fallback.data,
-                revision: initial.state.revision,
-              };
+        const fallback = createCivicStreamFallback(event.patch);
+        const shouldStartFallback = fallback && (
+          !patchState
+          || (!options.intent && fallback.preserveSpecification && !preserveProgressiveCivicSpecification)
+        );
+        if (shouldStartFallback) {
+          const initial = createUIPatchState(fallback.specification, 0);
+          if (initial.success) {
+            patchState = initial.state;
+            hasProgressiveCivicFallback = true;
+            preserveProgressiveCivicSpecification = fallback.preserveSpecification;
+            yield {
+              type: "ui-started",
+              specification: initial.state.specification,
+              data: fallback.data,
+              revision: initial.state.revision,
+            };
+            if (fallback.preserveSpecification) {
+              yield { type: "status", stage: "ready", message: "Mapa territorial listo" };
+              yield { type: "ui-completed", revision: initial.state.revision };
+              return;
             }
           }
         }
@@ -130,6 +139,7 @@ export async function* streamPlannedAgent(
       }
       if (event.type === "data-available") dataGuard.available(event.key);
       if (event.type === "ui" || event.type === "ui-started") {
+        if (preserveProgressiveCivicSpecification) continue;
         const validation = validateUIEvent(event);
         if (!validation.success) {
           invalidUI = validation.errors;
@@ -159,6 +169,7 @@ export async function* streamPlannedAgent(
       }
 
       if (event.type === "ui-patch") {
+        if (preserveProgressiveCivicSpecification) continue;
         if (!patchState) {
           yield {
             type: "error",
@@ -195,6 +206,7 @@ export async function* streamPlannedAgent(
       }
 
       if (event.type === "ui-completed") {
+        if (preserveProgressiveCivicSpecification) continue;
         if (!patchState || event.revision !== patchState.revision) {
           yield {
             type: "error",
@@ -212,6 +224,7 @@ export async function* streamPlannedAgent(
       }
 
       if (repair && event.type === "text-delta") continue;
+      if (event.type === "error" && preserveProgressiveCivicSpecification) continue;
       if (event.type === "data-available") hasPartialData = true;
       yield event;
     }

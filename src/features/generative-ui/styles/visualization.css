@@ -2,6 +2,12 @@
   width: 100%;
   min-width: 0;
   margin: 0;
+  padding: var(--space-4);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-civic-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--ui-editorial-shadow-accent, var(--shadow-hard));
 }
 
 .ui-flex--direction-column > .ui-runtime-motion-node[data-node-type="visualization"] {
@@ -30,15 +36,22 @@
 .ui-visualization__data summary {
   width: fit-content;
   min-height: 2.75rem;
-  padding-block: 0.75rem;
-  font-weight: var(--font-weight-medium);
+  padding: 0.65rem 0.8rem;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-civic-accent) 18%, transparent);
   cursor: pointer;
 }
 
 .ui-visualization__data-viewport {
   max-width: 100%;
   overflow-x: auto;
-  border: var(--border-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-brand-primary);
   border-radius: var(--radius-md);
   scrollbar-width: thin;
 }
@@ -58,9 +71,23 @@
 }
 
 .ui-visualization__data th {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-bold);
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
   background: var(--color-surface-secondary);
+}
+
+.ui-visualization__data tbody .ui-visualization__data-cell--text {
+  text-align: justify;
+  text-align-last: start;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+.ui-visualization__data .ui-visualization__data-cell--numeric {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
 }
 
 .ui-visualization__data tbody tr:last-child td {
@@ -80,8 +107,10 @@
   font-size: 0.875rem;
   text-align: center;
   background: var(--color-surface-secondary);
-  border: var(--border-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-civic-accent);
   border-radius: var(--radius-md);
+  box-shadow: var(--ui-editorial-shadow-accent, var(--shadow-hard));
 }
 
 @keyframes visualization-enter {
@@ -93,6 +122,7 @@
   .ui-visualization--sm { --chart-height: 14rem; }
   .ui-visualization--md { --chart-height: 18rem; }
   .ui-visualization--lg { --chart-height: 22rem; }
+  .ui-visualization { padding: var(--space-3); box-shadow: 3px 3px 0 var(--color-civic-accent-soft); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -969,6 +969,27 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       return;
     }
 
+    if (event.name === "map.entity_selected" && typeof event.value === "string") {
+      const groups = dataStateRef.current.data.groups;
+      const selected = Array.isArray(groups)
+        ? groups.find((group) => group !== null
+          && typeof group === "object"
+          && !Array.isArray(group)
+          && (group as Record<string, unknown>).value === event.value) as Record<string, unknown> | undefined
+        : undefined;
+      const entity = typeof selected?.group === "string" ? selected.group : `la entidad con clave ${event.value}`;
+
+      // The current backend contract does not yet persist the frontend-only
+      // choropleth node. Start a normal conversational refinement instead of
+      // submitting an unsupported UI control against that stored snapshot.
+      sessionIdRef.current = undefined;
+      patchStateRef.current = undefined;
+      dataStateRef.current = createDataRegistryPatchState();
+      isFollowUpRequestRef.current = false;
+      void sendPrompt(`Profundiza en la participación de ${entity} para 2024 y muestra la evidencia disponible sin ocultar las limitaciones de la fuente.`);
+      return;
+    }
+
     const formValues = event.name === "form.submit"
       ? collectFormValues(patchState.specification, event.sourceId, new Map([...formDraftsRef.current].filter(([key]) => key.startsWith(`${sessionId}:`)).map(([key, value]) => [key.slice(sessionId.length + 1), value])))
       : undefined;
@@ -1000,7 +1021,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       return;
     }
     dispatchAgentInteraction(intent.data);
-  }, [dispatchAgentInteraction, isHistoricalView, setError, status]);
+  }, [dispatchAgentInteraction, isHistoricalView, sendPrompt, setError, status]);
 
   const testStaleSimulation = useCallback(() => {
     if (process.env.NODE_ENV !== "development" || window.location.pathname !== "/dev/ui-interaction-harness") return;
@@ -1047,7 +1068,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       || status === "submitted" || status === "streaming") return;
     const epoch = ++recoveryEpochRef.current;
     setIsRecoveringSnapshot(true);
-    setActivityMessage("Recuperando la UI y sus datos sin repetir la operación");
+    setActivityMessage("Recuperando la última vista sin repetir la operación");
     void (async () => {
       try {
         const response = await fetch("/api/agent/snapshot", {
@@ -1067,13 +1088,20 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         conflictedSessionIdsRef.current.delete(sessionId);
         setFailure(undefined);
         setCanRetry(false);
-        setActivityMessage("UI y datos sincronizados con el backend");
+        setActivityMessage("Última vista recuperada");
         useWorkspaceStore.setState({ errorMessage: null });
         dispatchExperience({ type: "RESTORE_SESSION" });
         restoreGeneratedUIFocusAfterCommit(focusedControl);
       } catch {
         if (epoch === recoveryEpochRef.current && sessionIdRef.current === sessionId) {
-          setActivityMessage("Snapshot no disponible; conservamos la vista y el bloqueo de esta sesión");
+          setActivityMessage("No fue posible recuperar la vista; conservamos el resultado anterior");
+          setFailure({
+            code: "snapshot_unavailable",
+            title: "Paper no pudo recuperar esa revisión",
+            message: "El resultado anterior sigue visible y tus preguntas permanecen en la conversación. Puedes iniciar una consulta nueva.",
+            canRetry: false,
+            canContinue: false,
+          });
         }
       } finally {
         if (epoch === recoveryEpochRef.current) setIsRecoveringSnapshot(false);

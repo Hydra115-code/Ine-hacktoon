@@ -21,7 +21,7 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
     return {
       code: input.code,
       title: "Revisa los campos",
-      message: input.message ?? "Completa los campos requeridos antes de continuar.",
+      message: "Completa los campos requeridos antes de continuar.",
       canRetry: false,
       canContinue: false,
     };
@@ -53,7 +53,7 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
     return {
       code: input.code,
       title: "Esta acción requiere confirmación",
-      message: input.message ?? "La interfaz no ejecutará esta acción sin validación autoritativa del backend.",
+      message: "La interfaz no ejecutará esta acción sin validación del servicio correspondiente.",
       canRetry: false,
       canContinue,
     };
@@ -62,10 +62,10 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("revision_conflict")) {
     return {
       code: input.code,
-      title: "La interfaz necesita sincronizarse",
-      message: "Conservamos la última revisión válida. No repetiremos la operación; la integración debe recuperar el snapshot vigente antes de aceptar más patches.",
+      title: "Paper necesita recuperar la última vista",
+      message: "Conservamos el resultado anterior. Recupéralo antes de pedir otro cambio; no repetiremos la operación automáticamente.",
       canRetry: false,
-      canContinue,
+      canContinue: false,
     };
   }
 

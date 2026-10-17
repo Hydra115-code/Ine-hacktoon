@@ -6,6 +6,7 @@ import {
 import { MAX_LAYOUT_CHILDREN, MAX_LAYOUT_DEPTH } from "../../generative-ui/schemas/layout-node";
 import { MAX_LOGIC_NESTING, MAX_REPEAT_ITERATIONS } from "../../generative-ui/schemas/logic-node";
 import { MAX_TABLE_COLUMNS } from "../../generative-ui/schemas/table-node";
+import { CIVIC_COMPOSITION_RECIPES, civicComponentTypes } from "./civic-composition-policy";
 
 export const UI_RUNTIME_CAPABILITIES = {
   schemaVersion: UI_DSL_VERSION,
@@ -36,6 +37,27 @@ export const UI_RUNTIME_CAPABILITIES = {
     progress: ["label", "valueBinding", "semanticState", "showValue"],
     icon: ["name", "label", "size", "semanticState"],
     list: ["ordered", "items"],
+  },
+  civicComponents: {
+    allowed: civicComponentTypes,
+    electionDelta: ["title", "dataBinding", "previousLabelField", "currentLabelField", "previousValueField", "currentValueField", "differenceField", "format", "unit", "ariaLabel"],
+    territoryRanking: ["title", "dataBinding", "territoryField", "valueField", "valueLabel", "limit", "order", "format", "unit", "ariaLabel"],
+    participationTimeline: ["title", "dataBinding", "periodField", "valueField", "valueLabel", "format", "unit", "ariaLabel"],
+    dataQualityBadge: ["title", "dataBinding", "statusField", "labelField", "recordCountField", "updatedAtField", "ariaLabel"],
+    demographicBreakdown: ["title", "dataBinding", "segmentField", "valueField", "valueLabel", "order", "format", "unit", "ariaLabel"],
+    comparisonMatrix: ["title", "dataBinding", "rowField", "columnField", "valueField", "valueLabel", "maximumColumns", "format", "unit", "ariaLabel"],
+    evidenceSummary: ["title", "dataBinding", "numeratorField", "denominatorField", "resultField", "numeratorLabel", "denominatorLabel", "resultLabel", "format", "unit", "ariaLabel"],
+    civicInsight: ["dataBinding", "titleField", "explanationField", "statisticField", "sourceField", "tone", "ariaLabel"],
+    mexicoChoropleth: ["title", "dataBinding", "entityCodeField", "entityNameField", "valueField", "valueLabel", "numeratorField", "denominatorField", "periodField", "format", "unit", "selectionEvent", "ariaLabel"],
+    recipes: CIVIC_COMPOSITION_RECIPES,
+    compositionRules: [
+      "choose one primary component and no more than two supporting components",
+      "explicit presentation requests such as only table or without chart override the default recipe",
+      "comparisonMatrix is the accessible tabular alternative for cross-period or cross-territory evidence",
+      "mexicoChoropleth is preferred for explicitly geographic questions and always includes its own accessible table alternative",
+      "dataQualityBadge describes coverage; it never substitutes the analytical result",
+      "never bind a civic component to fields that were not returned by a connected tool",
+    ],
   },
   dataDisplay: {
     table: ["ariaLabel", "caption", "dataBinding", "columns", "sorting", "filtering", "pagination", "selection", "density", "stickyHeader"],

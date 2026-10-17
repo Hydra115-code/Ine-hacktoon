@@ -4,6 +4,7 @@ export * from "./generative-ui/data-binding/schemas/data-registry-schema.js";
 export * from "./generative-ui/data-binding/schemas/data-patch-schema.js";
 export * from "./generative-ui/patches/ui-patch-schema.js";
 export * from "./generative-ui/schemas/content-node.js";
+export * from "./generative-ui/schemas/civic-node.js";
 export * from "./generative-ui/schemas/interaction-node.js";
 export * from "./generative-ui/schemas/layout-node.js";
 export * from "./generative-ui/schemas/logic-node.js";

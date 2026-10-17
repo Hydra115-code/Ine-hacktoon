@@ -26,10 +26,22 @@ export function buildCivicToolUISpecification(adaptation: CivicToolAdaptation): 
   const data = adaptation.data;
   if (data) {
     addSource(children, data);
-    if (adaptation.toolName === "get_participation_summary") addSummary(children, data);
-    if (adaptation.toolName === "compare_elections") addComparison(children, data);
-    if (adaptation.toolName === "get_participation_breakdown") addBreakdown(children, data);
-    if (adaptation.toolName === "get_supporting_records") addSupportingRecords(children, data);
+    const context = recordAt(data, "context");
+    const hasNoData = context?.status === "no_data";
+    if (hasNoData) {
+      children.push({
+        type: "alert",
+        id: "civic-no-data",
+        title: "Sin datos para estos filtros",
+        message: "La fuente no devolvió registros para los filtros elegidos. Esto no significa que la participación sea cero.",
+        semanticState: "status.info",
+      });
+    } else {
+      if (adaptation.toolName === "get_participation_summary") addSummary(children, data);
+      if (adaptation.toolName === "compare_elections") addComparison(children, data);
+      if (adaptation.toolName === "get_participation_breakdown") addBreakdown(children, data);
+      if (adaptation.toolName === "get_supporting_records") addSupportingRecords(children, data);
+    }
     addMethodology(children, data);
     addCoverage(children, data);
   }
@@ -48,6 +60,19 @@ export function buildCivicToolUISpecification(adaptation: CivicToolAdaptation): 
 }
 
 function addSource(children: UINode[], data: DataRegistryValue) {
+  if (recordAt(data, "quality")) {
+    children.push({
+      type: "dataQualityBadge",
+      id: "civic-data-quality",
+      ariaLabel: "Calidad, cobertura y actualización de los datos",
+      title: "Cobertura de la consulta",
+      dataBinding: "quality",
+      statusField: "status",
+      labelField: "label",
+      recordCountField: "recordCount",
+      updatedAtField: "updatedAt",
+    });
+  }
   const provenance = recordAt(data, "provenance");
   const source = provenance && recordAt(provenance, "source");
   if (source && typeof source.name === "string") {
@@ -59,6 +84,28 @@ function addSource(children: UINode[], data: DataRegistryValue) {
 }
 
 function addSummary(children: UINode[], data: DataRegistryValue) {
+  if (recordAt(data, "totals")) {
+    children.push({
+      type: "evidenceSummary",
+      id: "summary-evidence",
+      ariaLabel: "Cálculo verificable de participación oficial",
+      title: "De dónde sale la participación",
+      dataBinding: "totals",
+      numeratorField: "voted",
+      denominatorField: "classified",
+      resultField: "participationPct",
+      numeratorLabel: "Personas que votaron",
+      denominatorLabel: "Votaron + no votaron",
+      resultLabel: "Participación oficial",
+      format: "number",
+      unit: "%",
+    });
+    children.push({ type: "grid", id: "summary-current-metrics", columns: 3, gap: "md", children: [
+      { type: "metric", id: "summary-current-voters", label: "Personas que votaron", valueBinding: "totals.voted", format: "number", semanticState: "evidence.neutral" },
+      { type: "metric", id: "summary-current-nominal", label: "Lista nominal", valueBinding: "totals.nominalList", format: "number", semanticState: "evidence.neutral" },
+      { type: "metric", id: "summary-current-unspecified", label: "No especificado", valueBinding: "totals.unspecified", format: "number", semanticState: "evidence.caution" },
+    ] });
+  }
   if (recordAt(data, "participation")) {
     children.push({
       type: "grid", id: "summary-metrics", columns: 3, gap: "md", children: [
@@ -75,18 +122,58 @@ function addSummary(children: UINode[], data: DataRegistryValue) {
       { field: "percentage", label: "Distribución (%)", format: "number", align: "end", sortable: true },
     ], sorting: { enabled: true }, pagination: { pageSize: 10 } });
   }
+  if (arrayAt(data, "composition")) {
+    children.push({ type: "table", id: "summary-composition", ariaLabel: "Composición de la lista nominal", dataBinding: "composition", columns: [
+      { field: "category", label: "Categoría", format: "text" },
+      { field: "count", label: "Personas", format: "number", align: "end", sortable: true },
+      { field: "nominalSharePct", label: "Proporción de la lista (%)", format: "number", align: "end", sortable: true },
+    ], sorting: { enabled: true }, pagination: { pageSize: 10 } });
+  }
 }
 
 function addComparison(children: UINode[], data: DataRegistryValue) {
+  if (recordAt(data, "comparison")) {
+    children.push({
+      type: "electionDelta",
+      id: "comparison-delta",
+      ariaLabel: "Cambio de participación entre el año base y el último año disponible",
+      title: "Cambio entre elecciones",
+      dataBinding: "comparison",
+      previousLabelField: "previousPeriod",
+      currentLabelField: "currentPeriod",
+      previousValueField: "previousValue",
+      currentValueField: "currentValue",
+      differenceField: "difference",
+      format: "number",
+      unit: "%",
+      differenceUnit: "pp",
+    });
+  }
   if (recordAt(data, "turnoutChange")) {
     children.push({ type: "metric", id: "comparison-change", label: "Diferencia (puntos porcentuales)", valueBinding: "turnoutChange.points", format: "number", importance: "primary", semanticState: "evidence.neutral" });
   }
   if (arrayAt(data, "elections")) {
-    children.push({ type: "visualization", id: "comparison-chart", ariaLabel: "Participación por proceso", description: "Comparación de los porcentajes entregados por la fuente.", mark: "bar", dataBinding: "elections", encoding: {
-      x: { field: "year", type: "ordinal", label: "Año", format: "number" },
-      y: { field: "turnoutPercentage", type: "quantitative", label: "Participación (%)", format: "number" },
-    }, legend: { show: false }, height: "md" });
-    children.push({ type: "table", id: "comparison-table", ariaLabel: "Cifras de los procesos comparados", dataBinding: "elections", columns: [
+    const currentContract = (arrayAt(data, "elections") ?? []).some((election) => isRecord(election) && "participationPct" in election);
+    const valueField = currentContract ? "participationPct" : "turnoutPercentage";
+    children.push({
+      type: "participationTimeline",
+      id: "comparison-timeline",
+      ariaLabel: "Participación a través de las elecciones consultadas",
+      title: "Participación a través del tiempo",
+      dataBinding: "elections",
+      periodField: "year",
+      valueField,
+      valueLabel: "Usa las flechas izquierda y derecha para recorrer los años",
+      format: "number",
+      unit: "%",
+    });
+    children.push({ type: "table", id: "comparison-table", ariaLabel: "Cifras de los procesos comparados", dataBinding: "elections", columns: currentContract ? [
+      { field: "year", label: "Año", format: "number", sortable: true },
+      { field: "voted", label: "Personas que votaron", format: "number", align: "end" },
+      { field: "classified", label: "Votaron + no votaron", format: "number", align: "end" },
+      { field: "nominalList", label: "Lista nominal", format: "number", align: "end" },
+      { field: "participationPct", label: "Participación oficial (%)", format: "number", align: "end" },
+    ] : [
       { field: "year", label: "Año", format: "number", sortable: true },
       { field: "totalVotes", label: "Personas que votaron", format: "number", align: "end" },
       { field: "nominalList", label: "Lista nominal", format: "number", align: "end" },
@@ -96,12 +183,64 @@ function addComparison(children: UINode[], data: DataRegistryValue) {
 }
 
 function addBreakdown(children: UINode[], data: DataRegistryValue) {
-  if (!arrayAt(data, "groups")) return;
-  children.push({ type: "visualization", id: "breakdown-chart", ariaLabel: "Participación por grupo", description: "Comparación de participación entre los grupos disponibles.", mark: "bar", dataBinding: "groups", encoding: {
-    x: { field: "group", type: "nominal", label: "Grupo" },
-    y: { field: "turnoutPercentage", type: "quantitative", label: "Participación (%)", format: "number" },
-  }, legend: { show: false }, height: "md" });
-  children.push({ type: "table", id: "breakdown-table", ariaLabel: "Evidencia por grupo", dataBinding: "groups", columns: [
+  const groups = arrayAt(data, "groups");
+  const context = recordAt(data, "context");
+  if (!groups) {
+    children.push({
+      type: "alert",
+      id: "breakdown-no-data",
+      title: "Sin datos para estos filtros",
+      message: "La fuente no devolvió observaciones territoriales. Esto no significa que la participación sea cero.",
+      semanticState: "status.info",
+    });
+    return;
+  }
+
+  const isTerritorial = context?.dimension === "entidad"
+    && groups.some((group) => isRecord(group) && typeof group.value === "string");
+  if (isTerritorial) {
+    children.push({
+      type: "mexicoChoropleth",
+      id: "breakdown-mexico-map",
+      ariaLabel: "Mapa interactivo de participación por entidad federativa",
+      title: `Participación por entidad${typeof context?.year === "number" ? ` · ${context.year}` : ""}`,
+      dataBinding: "groups",
+      entityCodeField: "value",
+      entityNameField: "group",
+      valueField: "participationPct",
+      valueLabel: "Participación oficial CCPC. Las entidades sin observaciones se muestran como Sin dato.",
+      numeratorField: "voted",
+      denominatorField: "classified",
+      format: "number",
+      unit: "%",
+      selectionEvent: "map.entity_selected",
+    });
+  } else {
+    const valueField = groups.some((group) => isRecord(group) && "participationPct" in group)
+      ? "participationPct"
+      : "turnoutPercentage";
+    children.push({
+      type: "demographicBreakdown",
+      id: "breakdown-segments",
+      ariaLabel: "Participación por segmento disponible",
+      title: "Cómo cambia entre grupos",
+      dataBinding: "groups",
+      segmentField: "group",
+      valueField,
+      valueLabel: "Comparación descriptiva de los grupos observados",
+      order: "source",
+      format: "number",
+      unit: "%",
+    });
+  }
+  const currentContract = groups.some((group) => isRecord(group) && "participationPct" in group);
+  children.push({ type: "table", id: "breakdown-table", ariaLabel: "Evidencia por grupo", dataBinding: "groups", columns: currentContract ? [
+    { field: "group", label: isTerritorial ? "Entidad" : "Grupo", format: "text", sortable: true },
+    { field: "voted", label: "Personas que votaron", format: "number", align: "end" },
+    { field: "classified", label: "Votaron + no votaron", format: "number", align: "end" },
+    { field: "nominalList", label: "Lista nominal", format: "number", align: "end" },
+    { field: "participationPct", label: "Participación oficial (%)", format: "number", align: "end", sortable: true },
+  ] : [
     { field: "group", label: "Grupo", format: "text", sortable: true },
     { field: "voters", label: "Personas que votaron", format: "number", align: "end" },
     { field: "nominalList", label: "Lista nominal", format: "number", align: "end" },
@@ -111,12 +250,23 @@ function addBreakdown(children: UINode[], data: DataRegistryValue) {
 
 function addSupportingRecords(children: UINode[], data: DataRegistryValue) {
   if (!arrayAt(data, "records")) return;
-  children.push({ type: "table", id: "supporting-records-table", ariaLabel: "Registros de evidencia", dataBinding: "records", columns: [
+  const currentContract = (arrayAt(data, "records") ?? []).some((record) => isRecord(record) && "entityCode" in record);
+  children.push({ type: "table", id: "supporting-records-table", ariaLabel: "Registros de evidencia", dataBinding: "records", columns: currentContract ? [
+    { field: "entity", label: "Entidad", format: "text", sortable: true },
+    { field: "year", label: "Año", format: "number", sortable: true },
+    { field: "sex", label: "Sexo", format: "text" },
+    { field: "ageGroup", label: "Grupo de edad", format: "text" },
+    { field: "sectionType", label: "Tipo de sección", format: "text" },
+    { field: "voted", label: "Votaron", format: "number", align: "end" },
+    { field: "nominalList", label: "Lista nominal", format: "number", align: "end" },
+  ] : [
     { field: "label", label: "Dato", format: "text" },
     { field: "value", label: "Valor", format: "number", align: "end" },
     { field: "kind", label: "Tipo", format: "status" },
     { field: "derivation", label: "Cómo se obtuvo", format: "text" },
-  ], filtering: { enabled: true, fields: ["label", "kind", "derivation"], placeholder: "Filtrar evidencia" }, pagination: { pageSize: 10 } });
+  ], filtering: currentContract
+    ? { enabled: true, fields: ["entity", "sex", "ageGroup", "sectionType"], placeholder: "Filtrar evidencia" }
+    : { enabled: true, fields: ["label", "kind", "derivation"], placeholder: "Filtrar evidencia" }, pagination: { pageSize: 10 } });
 }
 
 function addMethodology(children: UINode[], data: DataRegistryValue) {
@@ -139,4 +289,8 @@ function recordAt(record: Record<string, unknown>, key: string): Record<string, 
 function arrayAt(record: Record<string, unknown>, key: string): unknown[] | undefined {
   const value = record[key];
   return Array.isArray(value) && value.length > 0 ? value : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }

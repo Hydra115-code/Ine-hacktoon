@@ -35,7 +35,20 @@ export function hasMissingBindings(root: UINode, registry?: DataRegistry) {
       if (node.comparisonBinding) bindings.push({ path: node.comparisonBinding });
     } else if (node.type === "progress") {
       bindings.push({ path: node.valueBinding, hasFallback: node.fallback !== undefined });
-    } else if (node.type === "visualization" || node.type === "table" || node.type === "repeat") {
+    } else if (
+      node.type === "visualization"
+      || node.type === "table"
+      || node.type === "repeat"
+      || node.type === "electionDelta"
+      || node.type === "territoryRanking"
+      || node.type === "participationTimeline"
+      || node.type === "dataQualityBadge"
+      || node.type === "demographicBreakdown"
+      || node.type === "comparisonMatrix"
+      || node.type === "evidenceSummary"
+      || node.type === "civicInsight"
+      || node.type === "mexicoChoropleth"
+    ) {
       bindings.push({ path: node.dataBinding });
     } else if (node.type === "conditional") {
       bindings.push({ path: node.condition.binding });

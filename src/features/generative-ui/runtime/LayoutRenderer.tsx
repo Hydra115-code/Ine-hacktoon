@@ -13,6 +13,15 @@ import { List } from "../primitives/content/List";
 import { Metric } from "../primitives/content/Metric";
 import { Progress } from "../primitives/content/Progress";
 import { Text } from "../primitives/content/Text";
+import { DataQualityBadge } from "../primitives/civic/DataQualityBadge";
+import { DemographicBreakdown } from "../primitives/civic/DemographicBreakdown";
+import { ComparisonMatrix } from "../primitives/civic/ComparisonMatrix";
+import { EvidenceSummary } from "../primitives/civic/EvidenceSummary";
+import { CivicInsight } from "../primitives/civic/CivicInsight";
+import { ElectionDelta } from "../primitives/civic/ElectionDelta";
+import { ParticipationTimeline } from "../primitives/civic/ParticipationTimeline";
+import { TerritoryRanking } from "../primitives/civic/TerritoryRanking";
+import { MexicoChoropleth } from "../primitives/civic/MexicoChoropleth";
 import { Accordion } from "../primitives/layout/Accordion";
 import { Container } from "../primitives/layout/Container";
 import { Divider } from "../primitives/layout/Divider";
@@ -216,6 +225,51 @@ const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, 
       return <Icon {...node} />;
     case "list":
       return <List {...node} />;
+    case "electionDelta":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
+        return <ElectionDelta data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "territoryRanking":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
+        return <TerritoryRanking data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "participationTimeline":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
+        return <ParticipationTimeline data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "dataQualityBadge":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
+        return <DataQualityBadge data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "demographicBreakdown":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
+        return <DemographicBreakdown data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "comparisonMatrix":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
+        return <ComparisonMatrix data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "evidenceSummary":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
+        return <EvidenceSummary data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
+    case "civicInsight":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
+        return <CivicInsight data={resolution?.status === "resolved" ? resolution.value : undefined} spec={node} />;
+      }
+    case "mexicoChoropleth":
+      {
+        const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
+        return <MexicoChoropleth data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+      }
     case "visualization":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
