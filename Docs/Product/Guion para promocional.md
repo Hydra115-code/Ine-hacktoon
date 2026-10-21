@@ -16,7 +16,7 @@
 
 (Ubicación: Pasillo camino a la biblioteca. Alumno 1 y Alumno 2 van caminando con sus mochilas).
 
-    Alumno 1: Oye, ya casi son las votaciones y me dio bastante curiosidad... ¿sabes por cuál partido votaron más aquí en nuestra localidad la elección pasada?
+    Alumno 1: Oye, ya casi son las votaciones y me dio bastante curiosidad... ¿sabes que porcentaje de nuestra localidad votó la elección pasada?
 
     Alumno 2: Bro, eso lo puedes ver directo en la página del INE. Vamos a la biblioteca, ahí hay buen internet y sacas tu portátil.
 
@@ -42,11 +42,11 @@
 
 (En pantalla se observa una interfaz moderna, limpia y la mascota animada saludando).
 
-    Narrador: Un asistente inteligente y amigable que simplifica la consulta de datos. A través de un chat natural, [Nombre de la mascota] procesa bases de datos complejas, responde preguntas puntuales y genera gráficas claras al instante con el poder de la Inteligencia Artificial.
+    Narrador: Un asistente inteligente y amigable que simplifica la consulta de datos. A través de un chat natural, [Nombre de la mascota] procesa bases de datos complejas, responde preguntas puntuales y genera gráficas claras al instante.
 
 (Demostración en pantalla del Alumno 1 interactuando con el sistema):
 
-    Consulta en lenguaje natural: Alumno 1 escribe: "¿Cuál fue el partido más votado en [Localidad] en las últimas elecciones?"
+    Consulta en lenguaje natural: Alumno 1 escribe: "¿Cuál fue el porcentaje de personas que votaron en[Localidad] en las últimas elecciones?"
 
     Respuesta rápida: La mascota responde de forma concisa.
 
