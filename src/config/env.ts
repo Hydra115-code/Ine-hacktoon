@@ -32,6 +32,19 @@ const EnvSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9.-]{1,100}$/, "GEMINI_MODEL contiene caracteres inválidos")
     .default("gemini-3.7-flash"),
   GEMINI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(60_000),
+  UI_PLANNER_MODE: z.preprocess(
+    (value) => value === "" ? undefined : value,
+    z.enum(["rules", "local-model", "gemini"]).default("rules"),
+  ),
+  LOCAL_MODEL_URL: z.preprocess(
+    (value) => value === "" ? undefined : value,
+    z.string().url().refine(isLocalHttpUrl, "LOCAL_MODEL_URL debe apuntar a este equipo (localhost o 127.0.0.1)").optional(),
+  ),
+  LOCAL_MODEL_NAME: z.preprocess(
+    (value) => value === "" ? undefined : value,
+    z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,100}$/, "LOCAL_MODEL_NAME contiene caracteres inválidos").optional(),
+  ),
+  LOCAL_MODEL_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(4_000),
   ELEVENLABS_API_KEY: z.preprocess(
     (value) => value === "" ? undefined : value,
     z.string().trim().min(16).max(512).optional(),
@@ -111,6 +124,14 @@ function isTrustedGeminiUrl(value: string): boolean {
     && !url.password
     && !url.search
     && !url.hash;
+}
+
+function isLocalHttpUrl(value: string): boolean {
+  const url = new URL(value);
+  return (url.protocol === "http:" || url.protocol === "https:")
+    && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+    && !url.username
+    && !url.password;
 }
 
 function splitCommaSeparatedValue(value: unknown): unknown {

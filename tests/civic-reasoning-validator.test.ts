@@ -4,6 +4,7 @@ import { type FinancialToolClient } from "../src/agent/mcp-client/financial-mcp-
 import { validateToolOutput } from "../src/agent/mcp-client/tool-output-validator.js";
 import { type ModelGateway } from "../src/agent/model/model.js";
 import { AgentOrchestrator } from "../src/agent/orchestrator.js";
+import { createModelUiPlanner } from "../src/agent/planning/ui-planner.js";
 import { shapeCivicDataForUi } from "../src/agent/reasoning/civic-data-shaper.js";
 import {
   groundCivicAnswer,
@@ -115,7 +116,7 @@ function createOrchestrator(answers: string[]) {
   const ui: UiGenerator = {
     generate: async () => ({ version: "1.0", root: { id: "respuesta", type: "text", text: "Respuesta", variant: "body" } }),
   };
-  const orchestrator = new AgentOrchestrator(model, tools, ui, { maxToolCalls: 3, maxReasoningRepairs: 1, currentDate: () => "2026-10-15" });
+  const orchestrator = new AgentOrchestrator(createModelUiPlanner("gemini", model, ui), tools, { maxToolCalls: 3, maxReasoningRepairs: 1, currentDate: () => "2026-10-15" });
   return { orchestrator, feedbacks };
 }
 

@@ -1,3 +1,4 @@
+import { PlannerProviderError } from "../planning/planner-result.js";
 import {
   GeminiResponseSchema,
   type GeminiContent,
@@ -127,7 +128,7 @@ function tokenSummary(response: GeminiResponse) {
   };
 }
 
-export class GeminiModelError extends Error {
+export class GeminiModelError extends PlannerProviderError {
   constructor(message: string) {
     super(message);
     this.name = "GeminiModelError";

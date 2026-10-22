@@ -6,7 +6,12 @@ import {
   textAgentStreamEventSchema,
 } from "@banorte/contracts";
 import { createTextAgentService, type TextAgentService } from "../integration/text-agent-service.js";
-import { createSystemStatus, type RuntimeCapabilities } from "./system-status.js";
+import {
+  createSystemStatus,
+  plannerHeaderValue,
+  readRuntimeCapabilities,
+  type RuntimeCapabilities,
+} from "./system-status.js";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import {
@@ -139,8 +144,13 @@ async function handleRequest(
   }
 
   if (request.method === "GET" && request.url === STATUS_PATH) {
-    const status = createSystemStatus(options.readCapabilities?.(), options.now);
-    writeJson(response, 200, status);
+    const capabilities = options.readCapabilities?.() ?? readRuntimeCapabilities();
+    const planner = plannerHeaderValue(capabilities);
+    if (planner) {
+      response.setHeader("X-Ui-Planner", planner);
+      response.setHeader("Access-Control-Expose-Headers", "X-Ui-Planner");
+    }
+    writeJson(response, 200, createSystemStatus(capabilities, options.now));
     return;
   }
 

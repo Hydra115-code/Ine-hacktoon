@@ -6,8 +6,14 @@ import {
   FinancialToolTransportError,
   type FinancialToolClient,
 } from "./mcp-client/financial-mcp-client.js";
-import { GeminiModelError } from "./model/gemini-api-client.js";
-import { type ModelGateway } from "./model/model.js";
+import {
+  PlannerConfigurationError,
+  PlannerProviderError,
+  PlannerResultSchema,
+  UiCompositionError,
+  UiSemanticCompositionError,
+} from "./planning/planner-result.js";
+import { type UiPlanner } from "./planning/ui-planner.js";
 import { createCivicSystemPrompt } from "./prompts/civic-system-prompt.js";
 import {
   CivicReasoningError,
@@ -35,11 +41,6 @@ import {
   type UiDocument,
   type UiNode,
 } from "../ui/dsl/ui.schema.js";
-import {
-  UiGenerationError,
-  UiSemanticGenerationError,
-} from "../ui/generation/gemini-ui-generator.js";
-import { type UiGenerator } from "../ui/generation/ui-generator.js";
 import { type AgentStreamBuffer } from "./stream/agent-stream-buffer.js";
 import {
   AgentStreamEventSchema,
@@ -89,9 +90,8 @@ export class AgentOrchestrator {
   private toolDefinitions: AgentToolDefinition[] | undefined;
 
   constructor(
-    private readonly model: ModelGateway,
+    private readonly planner: UiPlanner,
     private readonly tools: FinancialToolClient,
-    private readonly uiGenerator: UiGenerator,
     private readonly config: AgentOrchestratorConfig,
   ) {
     this.currentDate = config.currentDate ?? (() => new Date().toISOString().slice(0, 10));
@@ -162,7 +162,7 @@ export class AgentOrchestrator {
       }
       const definitions = await this.getToolDefinitions(traceContext, options.signal);
       const knownTools = new Set(definitions.map((tool) => tool.name));
-      const session = this.model.createSession({
+      const session = this.planner.createSession({
         query,
         tools: definitions,
         systemInstruction: createCivicSystemPrompt(this.currentDate()),
@@ -172,17 +172,18 @@ export class AgentOrchestrator {
 
       while (true) {
         throwIfCancelled(options.signal);
-        const turn = await runWithTraceContext(traceContext, () => telemetry.observe(
+        const planned = PlannerResultSchema.safeParse(await runWithTraceContext(traceContext, () => telemetry.observe(
           { component: "agent", operation: "model-decision" },
           () => session.next(pendingResults, options.signal, reasoningFeedback),
-          (result) => ({ toolCallCount: result.toolCalls.length }),
-        ));
+          (result) => ({ toolCallCount: result.kind === "tools" ? result.toolCalls.length : 0 }),
+        )));
+        if (!planned.success) throw new PlannerProviderError("El planificador devolvió un resultado inválido");
+        const turn = planned.data;
         pendingResults = [];
         reasoningFeedback = undefined;
         throwIfCancelled(options.signal);
 
-        if (turn.toolCalls.length === 0) {
-          if (!turn.text) throw new AgentExecutionError("El modelo no produjo una respuesta");
+        if (turn.kind === "answer") {
           if (!isCivicResponseSafe(turn.text)) {
             logger.warn("Agente: respuesta bloqueada por política de ámbito", {
               reason: "unsafe-response",
@@ -230,7 +231,7 @@ export class AgentOrchestrator {
           });
           const ui = await runWithTraceContext(traceContext, () => telemetry.observe(
             { component: "ui", operation: "generate" },
-            () => this.uiGenerator.generate({
+            () => this.planner.composeUi({
               query,
               answer: groundedAnswer,
               dataSources: uiDataSources,
@@ -537,7 +538,7 @@ function createErrorEvent(
       hasPartialData,
     };
   }
-  if (error instanceof UiSemanticGenerationError) {
+  if (error instanceof UiSemanticCompositionError) {
     return {
       type: "error",
       code: "semantic-ui-error",
@@ -555,7 +556,7 @@ function createErrorEvent(
       hasPartialData,
     };
   }
-  if (error instanceof UiGenerationError) {
+  if (error instanceof UiCompositionError) {
     return {
       type: "error",
       code: "ui-error",
@@ -564,11 +565,20 @@ function createErrorEvent(
       hasPartialData,
     };
   }
-  if (error instanceof GeminiModelError) {
+  if (error instanceof PlannerConfigurationError) {
     return {
       type: "error",
       code: "provider-error",
-      message: "El proveedor de IA no pudo completar la solicitud",
+      message: "El planificador configurado no está disponible",
+      recoverable: false,
+      hasPartialData,
+    };
+  }
+  if (error instanceof PlannerProviderError) {
+    return {
+      type: "error",
+      code: "provider-error",
+      message: "El planificador no pudo completar la solicitud",
       recoverable: true,
       hasPartialData,
     };

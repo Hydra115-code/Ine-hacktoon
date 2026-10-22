@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { AuthenticationError } from "../../application/errors/authentication.error.js";
-import { GeminiModelError } from "../model/gemini-model.js";
+import { PlannerConfigurationError, PlannerProviderError } from "../planning/planner-result.js";
 import { AgentExecutionError } from "../orchestrator.js";
 import { AgentQuerySchema } from "../schemas/agent.schema.js";
 import { createAgentRuntime, type SessionFactory } from "./agent-runtime.js";
@@ -41,7 +41,7 @@ export function handleAgentCliError(error: unknown): void {
     ? "No se pudo iniciar sesión. Verifica las credenciales y que el usuario esté confirmado"
     : error instanceof InteractiveLoginError
     ? error.message
-    : error instanceof AgentExecutionError || error instanceof GeminiModelError
+    : error instanceof AgentExecutionError || error instanceof PlannerProviderError || error instanceof PlannerConfigurationError
     ? error.message
     : "No fue posible completar la consulta";
   process.stderr.write(`${message}\n`);

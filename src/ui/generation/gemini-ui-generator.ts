@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
   GeminiApiClient,
-  GeminiModelError,
   type FetchImplementation,
   type GeminiModelConfig,
 } from "../../agent/model/gemini-api-client.js";
@@ -28,6 +27,7 @@ import { createCivicUiFallback } from "./civic-ui-fallback.js";
 import { logger } from "../../config/logger.js";
 import type { FinancialExperienceScope } from "../../agent/security/financial-scope-policy.js";
 import { containsUnsupportedNegativeAnomalyClaim } from "../../agent/reasoning/anomaly-claim.js";
+import { UiCompositionError, UiSemanticCompositionError } from "../../agent/planning/planner-result.js";
 
 const MAX_UI_CONTEXT_BYTES = 1_000_000;
 const MAX_UI_OUTPUT_BYTES = 512_000;
@@ -236,16 +236,16 @@ class UiSemanticValidationError extends Error {
   }
 }
 
-export class UiGenerationError extends GeminiModelError {
+export class UiGenerationError extends UiCompositionError {
   constructor(message: string) {
     super(message);
     this.name = "UiGenerationError";
   }
 }
 
-export class UiSemanticGenerationError extends UiGenerationError {
+export class UiSemanticGenerationError extends UiSemanticCompositionError {
   constructor(readonly issues: SemanticUiIssue[]) {
-    super("Gemini no pudo generar una interfaz que respetara la intención explícita");
+    super("Gemini no pudo generar una interfaz que respetara la intención explícita", issues.map((issue) => issue.code));
     this.name = "UiSemanticGenerationError";
   }
 }

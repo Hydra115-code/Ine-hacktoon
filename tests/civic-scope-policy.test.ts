@@ -3,6 +3,7 @@ import test from "node:test";
 import { type FinancialToolClient } from "../src/agent/mcp-client/financial-mcp-client.js";
 import { type ModelGateway } from "../src/agent/model/model.js";
 import { AgentOrchestrator } from "../src/agent/orchestrator.js";
+import { createModelUiPlanner } from "../src/agent/planning/ui-planner.js";
 import {
   classifyCivicQuery,
   createCivicScopeResponse,
@@ -147,7 +148,7 @@ function createOrchestrator(
       };
     },
   };
-  return new AgentOrchestrator(model, tools, ui, {
+  return new AgentOrchestrator(createModelUiPlanner("gemini", model, ui), tools, {
     maxToolCalls: 2,
     currentDate: () => "2026-10-08",
   });

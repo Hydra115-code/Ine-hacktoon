@@ -10,6 +10,7 @@ import { type FinancialToolClient } from "../../src/agent/mcp-client/financial-m
 import { validateToolOutput } from "../../src/agent/mcp-client/tool-output-validator.js";
 import { type ModelGateway } from "../../src/agent/model/model.js";
 import { AgentOrchestrator } from "../../src/agent/orchestrator.js";
+import { createModelUiPlanner } from "../../src/agent/planning/ui-planner.js";
 import { type AgentToolCall, type AgentToolResult } from "../../src/agent/schemas/agent.schema.js";
 import {
   type BeginSessionInput,
@@ -64,9 +65,8 @@ export class CivicHarness {
       sessionFactory: async () => ({ client: {} as never, user: { id: ACTOR_ID } }),
       createRuntime: async () => {
         const orchestrator = new AgentOrchestrator(
-          createCivicModel(this.modelQueries),
+          createModelUiPlanner("gemini", createCivicModel(this.modelQueries), uiGenerator),
           new CivicToolClient(this.toolCalls),
-          uiGenerator,
           {
             maxToolCalls: 4,
             maxReasoningRepairs: 0,

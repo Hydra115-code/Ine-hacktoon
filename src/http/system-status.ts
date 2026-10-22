@@ -5,20 +5,28 @@ import {
   type SystemStatus,
 } from "@banorte/contracts";
 import { env } from "../config/env.js";
+import { readPlannerStatus, type PlannerStatus } from "../agent/planning/planner-factory.js";
 
 export interface RuntimeCapabilities {
   isAgentReady: boolean;
   isMcpReady: boolean;
+  planner?: PlannerStatus;
 }
 
-export function readRuntimeCapabilities(): RuntimeCapabilities {
+export function readRuntimeCapabilities(planner: PlannerStatus = readPlannerStatus()): RuntimeCapabilities {
   const hasSessionRuntime = env.AUTH_MODE === "local_sqlite"
     ? Boolean(env.AGENT_API_TOKEN && env.SQLITE_DATABASE_PATH)
     : Boolean(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY);
   return {
-    isAgentReady: Boolean(hasSessionRuntime && env.GEMINI_API_URL && env.GEMINI_API_KEY),
+    isAgentReady: hasSessionRuntime && planner.ready,
     isMcpReady: hasSessionRuntime,
+    planner,
   };
+}
+
+export function plannerHeaderValue(capabilities: RuntimeCapabilities): string | undefined {
+  if (!capabilities.planner) return undefined;
+  return `${capabilities.planner.mode}; ${capabilities.planner.ready ? "ready" : "unavailable"}`;
 }
 
 export function isAccessTokenFresh(
