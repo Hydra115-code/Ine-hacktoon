@@ -157,6 +157,7 @@ interface ChartNode {
   data: z.infer<typeof UiDataReferenceSchema>;
   categoryKey: string;
   series: Array<{ key: string; label: string }>;
+  sort?: "ascending" | "descending" | undefined;
 }
 
 interface HeatmapNode {
@@ -293,6 +294,7 @@ export const UiNodeSchema: z.ZodType<UiNode> = z.lazy(() => z.discriminatedUnion
       key: DataKeySchema,
       label: z.string().trim().min(1).max(100),
     }).strict()).min(1).max(8),
+    sort: z.enum(["ascending", "descending"]).optional(),
   }).strict(),
   z.object({
     id: UiIdSchema,

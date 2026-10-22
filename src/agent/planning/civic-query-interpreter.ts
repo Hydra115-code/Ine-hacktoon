@@ -202,7 +202,8 @@ function normalize(text: string): string {
 function extract(text: string): Extraction {
   const { years, invalidYears, wantsAllYears } = extractYears(text);
   const { codes, remainder } = extractEntities(text);
-  const sexes = extractSexes(text);
+  const pyramid = wantsAgeSexPyramid(text);
+  const sexes: CcpcSex[] = pyramid ? ["hombre", "mujer"] : extractSexes(text);
   const ageGroups = extractAgeGroups(text);
   const sectionTypes = extractSectionTypes(text);
   return {
@@ -214,7 +215,7 @@ function extract(text: string): Extraction {
     sexes,
     ageGroups,
     sectionTypes,
-    ...optionalDimension(extractDimension(text, sexes, sectionTypes)),
+    ...optionalDimension(pyramid ? "grupo_edad" : extractDimension(text, sexes, sectionTypes)),
     indicator: extractIndicator(text),
     presentation: extractPresentation(text),
     scores: scoreAnalyses(text),
@@ -302,6 +303,12 @@ function extractSectionTypes(text: string): CcpcSectionType[] {
   if (/\b(?:rural|rurales|campo|comunidades rurales)\b/u.test(text)) types.push("rural");
   if (/\b(?:mixta|mixtas|mixto|mixtos)\b/u.test(text)) types.push("mixta");
   return sortUnique(types);
+}
+
+function wantsAgeSexPyramid(text: string): boolean {
+  const byAge = /\bpor (?:edad|edades|grupo de edad|grupos de edad|rango de edad|rangos de edad)\b|\b(?:grupos de edad|rangos de edad|edades)\b/u.test(text);
+  const bySex = /\b(?:por|y) (?:sexo|genero)\b|\b(?:hombres y mujeres|mujeres y hombres)\b/u.test(text);
+  return /\bpiramide\b/u.test(text) || (byAge && bySex);
 }
 
 function extractDimension(

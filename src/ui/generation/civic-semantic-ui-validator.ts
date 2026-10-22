@@ -32,12 +32,15 @@ export function validateCivicUi(input: CivicUiValidationInput): SemanticUiIssue[
   const metricPaths = nodes.flatMap((node) => (node.type === "metric" && node.value.path ? [node.value.path] : []));
   const showsBase = metricPaths.some((path) => /(?:^|\.)voted$/u.test(path))
     && metricPaths.some((path) => /(?:^|\.)(?:classified|nominalList)$/u.test(path));
-  if (!hasTable && !showsBase && !wantsNoTables) {
+  const hasData = sources.some((source) => (source.data as Record<string, unknown>).status !== "no_data");
+  if (hasData && !hasTable && !showsBase && !wantsNoTables) {
     issues.push({
       code: "civic_evidence_required",
       message: "Incluye evidencia verificable: una tabla con las cifras usadas (o los registros de get_supporting_records), o al menos las métricas de votaron y su total junto al porcentaje.",
     });
   }
+
+  if (!hasData) return issues;
 
   for (const node of nodes) {
     if (node.type !== "chart" && node.type !== "table" && node.type !== "heatmap") continue;

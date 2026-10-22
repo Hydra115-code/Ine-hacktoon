@@ -113,17 +113,21 @@ export function validateUiSemantics(
   return issues.length === 0 ? { success: true, issues: [] } : { success: false, issues };
 }
 
-export function allowsProvisionalCollectionPreview(query: string): boolean {
+export interface UiPreferences {
+  forbidTables: boolean;
+  forbidCharts: boolean;
+  requireTable: boolean;
+  requireChart: boolean;
+}
+
+export function readUiPreferences(query: string): UiPreferences {
   const requirements = extractExplicitUiRequirements(latestUiRequest(query));
-  return !requirements.forbidTables
-    && !requirements.forbidDashboard
-    && !requirements.requireChart
-    && !requirements.requireDateRange
-    && !requirements.requireInteraction
-    && !requirements.requireSlider
-    && requirements.exactCharts === undefined
-    && requirements.exactMetrics === undefined
-    && requirements.maxCollectionItems === undefined;
+  return {
+    forbidTables: requirements.forbidTables,
+    forbidCharts: requirements.forbidCharts,
+    requireTable: requirements.requireTable,
+    requireChart: requirements.requireChart,
+  };
 }
 
 function extractExplicitUiRequirements(query: string): ExplicitUiRequirements {

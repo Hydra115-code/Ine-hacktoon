@@ -1,3 +1,4 @@
+import { CCPC_YEARS } from "../../application/ports/civic-data.js";
 import { type UiDataSource } from "../../ui/dsl/ui.schema.js";
 
 export type CivicReasoningIssueCode =
@@ -172,6 +173,10 @@ function collectAllowedNumbers(sources: readonly UiDataSource[], query: string):
       values.push(value, Math.abs(value));
       return;
     }
+    if (typeof value === "string" && value.length <= 40) {
+      extractNumbers(value).forEach((number) => values.push(number.value));
+      return;
+    }
     if (Array.isArray(value)) {
       value.forEach(visit);
       values.push(value.length);
@@ -181,7 +186,7 @@ function collectAllowedNumbers(sources: readonly UiDataSource[], query: string):
   };
   sources.forEach((source) => visit(source.data));
   extractNumbers(query).forEach((number) => values.push(number.value * number.scale));
-  values.push(TOTAL_ENTITIES, 100);
+  values.push(TOTAL_ENTITIES, 100, ...CCPC_YEARS);
   return values;
 }
 

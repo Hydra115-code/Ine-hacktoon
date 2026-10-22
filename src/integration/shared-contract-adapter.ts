@@ -80,16 +80,7 @@ const countFields = new Set([
   "unspecified",
   "voted",
 ]);
-const percentageFields = new Set([
-  "abstentionPercentage",
-  "percentage",
-  "turnoutPercentage",
-  "participationPct",
-  "nominalParticipationPct",
-  "unspecifiedPct",
-  "abstentionPct",
-  "nominalSharePct",
-]);
+const percentageFieldPattern = /^(?:percentage|\w*Percentage|\w*Pct)$/u;
 const privateFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner|idempotency)(?:_|$)|(?:Id|ID|Uuid|UUID)$|^idempotencyKey$/u;
 
 function normalizeSourceData(source: UiDataSource): unknown {
@@ -101,7 +92,7 @@ function normalizeSourceData(source: UiDataSource): unknown {
 }
 
 function normalizeValues(value: unknown, field?: string): unknown {
-  if ((typeof value === "string" || typeof value === "number") && percentageFields.has(field ?? "")) {
+  if ((typeof value === "string" || typeof value === "number") && percentageFieldPattern.test(field ?? "")) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? Number((numeric / 100).toFixed(6)) : value;
   }
@@ -116,7 +107,7 @@ function normalizeValues(value: unknown, field?: string): unknown {
 
 function adaptTableColumn(column: { key: string; label: string }) {
   const field = column.key.split(".").at(-1) ?? column.key;
-  if (percentageFields.has(field)) {
+  if (percentageFieldPattern.test(field)) {
     return { field: column.key, label: column.label, format: "percentage" as const, align: "end" as const };
   }
   if (countFields.has(field) || /(?:Count|count|Points)$/u.test(field)) {
@@ -281,6 +272,7 @@ function adaptChart(
       x: { field: node.categoryKey, type: "nominal" },
       y: { field: series.key, type: "quantitative", label: series.label },
     },
+    ...(node.sort ? { sort: { by: "y" as const, direction: node.sort } } : {}),
   };
 }
 

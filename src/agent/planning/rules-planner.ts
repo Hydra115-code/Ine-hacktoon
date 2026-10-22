@@ -7,6 +7,7 @@ import {
 } from "../../schemas/civic.schema.js";
 import { parseUiDocument, type UiDocument } from "../../ui/dsl/ui.schema.js";
 import { createCivicUiFallback } from "../../ui/generation/civic-ui-fallback.js";
+import { composeCivicUi } from "../../ui/generation/civic-ui-composer.js";
 import { type UiGenerationInput } from "../../ui/generation/ui-generator.js";
 import { type AgentToolResult } from "../schemas/agent.schema.js";
 import {
@@ -42,12 +43,13 @@ export function createRulesUiPlanner(
   return {
     mode,
     createSession: (input) => new RulesPlannerSession(interpreter, input),
-    composeUi: async (input) => composeCivicUi(input),
+    composeUi: async (input) => composeUi(input),
   };
 }
 
 class RulesPlannerSession implements PlannerSession {
   private plan: CivicPlan | undefined;
+  private results: AgentToolResult[] = [];
 
   constructor(
     private readonly interpreter: CivicQueryInterpreter,
@@ -68,13 +70,17 @@ class RulesPlannerSession implements PlannerSession {
       if (toolCalls.length === 0) throw new PlannerProviderError("No hay herramientas disponibles para esta consulta");
       return { kind: "tools", toolCalls };
     }
-    return { kind: "answer", text: writeAnswer(this.plan, toolResults, Boolean(feedback)) };
+    if (toolResults.length > 0) this.results = toolResults;
+    return { kind: "answer", text: writeAnswer(this.plan, this.results, Boolean(feedback)) };
   }
 }
 
 function writeAnswer(plan: CivicPlan, results: readonly AgentToolResult[], conservative: boolean): string {
   const result = results[0];
   if (!result) throw new PlannerProviderError("La consulta no devolvió datos");
+  if (results.length === 2 && results.every((item) => item.call.name === BREAKDOWN_TOOL)) {
+    return describeAgeBySex(results.map((item) => item.output as GetParticipationBreakdownOutput));
+  }
   if (result.call.name === COMPARE_TOOL) return describeComparison(result.output as CompareElectionsOutput, plan, conservative);
   if (result.call.name === BREAKDOWN_TOOL) return describeBreakdown(result.output as GetParticipationBreakdownOutput, plan);
   if (result.call.name === SUPPORTING_TOOL) return describeRecords(result.output as GetSupportingRecordsOutput);
@@ -146,6 +152,23 @@ function describeRecords(output: GetSupportingRecordsOutput): string {
     + "cada uno con su lista nominal, votaron, no votaron y su archivo de origen.";
 }
 
+function describeAgeBySex(outputs: readonly GetParticipationBreakdownOutput[]): string {
+  const [men, women] = outputs;
+  if (!men || !women || men.status === "no_data" || women.status === "no_data") {
+    return noDataAnswer(men?.scope ?? "esos filtros", men?.year ?? 2024);
+  }
+  const peak = (output: GetParticipationBreakdownOutput) => [...output.groups]
+    .filter((group) => group.participationPct !== null)
+    .sort((left, right) => (right.participationPct ?? 0) - (left.participationPct ?? 0))[0];
+  const topMen = peak(men);
+  const topWomen = peak(women);
+  if (!topMen || !topWomen) return noDataAnswer(men.scope, men.year);
+  return `Participación oficial por edad y sexo ${where(men.scope)} en ${men.year}: entre los hombres, el grupo con mayor `
+    + `participación fue ${topMen.group} con ${pct(topMen.participationPct)} (${count(topMen.voted)} de ${count(topMen.classified)}); `
+    + `entre las mujeres, ${topWomen.group} con ${pct(topWomen.participationPct)} (${count(topWomen.voted)} de ${count(topWomen.classified)}). `
+    + "La tabla muestra todos los grupos de edad.";
+}
+
 function noDataAnswer(scope: string, year: number): string {
   return `No hay datos de participación ${where(scope)} en ${year} con esos filtros. `
     + "La falta de registros no indica la participación real; prueba con otro año o entidad "
@@ -166,7 +189,9 @@ function dimensionLabel(dimension: GetParticipationBreakdownOutput["dimension"])
   return dimension;
 }
 
-function composeCivicUi(input: UiGenerationInput): UiDocument {
+function composeUi(input: UiGenerationInput): UiDocument {
+  const composed = composeCivicUi(input);
+  if (composed) return composed;
   const document = createCivicUiFallback(input.dataSources) ?? textDocument(input.answer);
   try {
     return parseUiDocument(document, input.dataSources);

@@ -57,6 +57,13 @@ export function planToolCalls(plan: CivicPlan): AgentToolCall[] {
     const years = plan.years.length >= 2 ? plan.years : [...CCPC_YEARS];
     return [{ name: COMPARE_TOOL, arguments: { years, ...filters } }];
   }
+  if (plan.analysis === "breakdown" && plan.breakdown === "grupo_edad"
+    && plan.sexes.includes("hombre") && plan.sexes.includes("mujer")) {
+    return (["hombre", "mujer"] as const).map((sex) => ({
+      name: BREAKDOWN_TOOL,
+      arguments: { ...singleYear, dimension: "grupo_edad", ...filters, sexes: [sex] },
+    }));
+  }
   if (plan.analysis === "breakdown") {
     return [{
       name: BREAKDOWN_TOOL,
