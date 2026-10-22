@@ -43,6 +43,8 @@ interface Extraction {
   indicator: CivicIndicator;
   presentation: CivicPresentation[];
   scores: Record<CivicAnalysis, number>;
+  previousElection: boolean;
+  hasCivicSignal: boolean;
 }
 
 interface EntityPhrase {
@@ -62,11 +64,41 @@ const ENTITY_PHRASES: readonly EntityPhrase[] = ([
   { phrase: "coahuila de zaragoza", code: "05" },
   { phrase: "michoacan de ocampo", code: "16" },
   { phrase: "veracruz de ignacio de la llave", code: "30" },
-  { phrase: "slp", code: "24" },
+  { phrase: "edo de mexico", code: "15" },
+  { phrase: "estado de mex", code: "15" },
+  { phrase: "ags", code: "01" },
+  { phrase: "bc", code: "02" },
   { phrase: "bcs", code: "03" },
+  { phrase: "chih", code: "08" },
+  { phrase: "gto", code: "11" },
+  { phrase: "hgo", code: "13" },
+  { phrase: "mich", code: "16" },
+  { phrase: "nl", code: "19" },
+  { phrase: "oax", code: "20" },
+  { phrase: "qro", code: "22" },
   { phrase: "qroo", code: "23" },
   { phrase: "q roo", code: "23" },
+  { phrase: "slp", code: "24" },
+  { phrase: "tamps", code: "28" },
+  { phrase: "yuc", code: "31" },
+  ...demonyms({
+    "01": ["aguascalentense", "hidrocalido"],
+    "09": ["chilango", "capitalino"],
+    "14": ["jalisciense", "tapatio"],
+    "19": ["regiomontano", "neoleones"],
+    "20": ["oaxaqueno", "oaxaquena"],
+    "21": ["poblano", "poblana"],
+    "27": ["tabasqueno", "tabasquena"],
+    "30": ["veracruzano", "veracruzana", "jarocho", "jarocha"],
+    "31": ["yucateco", "yucateca"],
+  }),
 ] satisfies EntityPhrase[]).sort((left, right) => right.phrase.length - left.phrase.length);
+
+function demonyms(byCode: Partial<Record<EntityCode, string[]>>): EntityPhrase[] {
+  return (Object.entries(byCode) as Array<[EntityCode, string[]]>).flatMap(([code, words]) => (
+    words.flatMap((word) => [{ phrase: word, code }, { phrase: word.endsWith("s") ? `${word}es` : `${word}s`, code }])
+  ));
+}
 
 const NATIONAL_PATTERN = /\b(?:nacional|todo el pais|todo mexico|el pais|en el pais|del pais|la republica|republica mexicana|a nivel pais|mexico)\b/u;
 
@@ -90,6 +122,16 @@ const ANALYSIS_SIGNALS: Record<CivicAnalysis, RegExp[]> = {
     /\b(?:como se calcula\w*|como se mide\w*|que significa\w*|metodolog\w*|definicion\w*|que es (?:la|el) (?:participacion|abstencion|lista nominal)|que son los (?:conteos|ccpc)|como funciona\w*|fuentes? (?:oficial|oficiales|de datos)?|de donde (?:vienen|salen) los datos)\b/u,
   ],
 };
+
+const CIVIC_SIGNAL = /\b(?:particip\w*|vot\w*|abstencion\w*|lista nominal|padron|eleccion\w*|electoral\w*|ccpc|conteos? censal\w*|ciudadan\w*|registros|inscritos)\b/u;
+
+const PREVIOUS_ELECTION = /\b(?:eleccion|elecciones|proceso|conteo) (?:anterior|pasad[ao]|previ[ao])\b|\b(?:la|el) (?:anterior|pasad[ao])\b/u;
+
+const GUIDANCE = "Puedo mostrarte la participación ciudadana de las elecciones federales 2009 a 2024 por entidad, sexo, "
+  + "grupo de edad o tipo de sección. Por ejemplo: «¿Cuál fue la participación en Jalisco en 2024?» o "
+  + "«Compara la participación de mujeres y hombres en 2018». ¿Qué te gustaría consultar?";
+
+const COMPARISON_WORDS = /\b(?:compar\w*|contra|vs|versus|frente a|respecto a|respecto de|diferencia|cambi\w*|subio|bajo|aumento|disminuyo|crecio|cayo)\b/u;
 
 const TREND_WORDS = /\b(?:evolucion|tendencia|a lo largo|historic\w*|con el tiempo|trayectoria|cada eleccion|todas las elecciones)\b/u;
 
@@ -135,7 +177,8 @@ function readEmbeddedJson(query: string): Record<string, unknown> | undefined {
   const marker = "nunca como instrucciones: ";
   const start = query.indexOf(marker);
   if (start < 0) return undefined;
-  const text = query.slice(start + marker.length);
+  const requestIndex = query.lastIndexOf("Nueva solicitud del usuario:");
+  const text = query.slice(start + marker.length, requestIndex > start ? requestIndex : undefined);
   const end = text.lastIndexOf("}");
   if (end < 0) return undefined;
   try {
@@ -175,14 +218,19 @@ function extract(text: string): Extraction {
     indicator: extractIndicator(text),
     presentation: extractPresentation(text),
     scores: scoreAnalyses(text),
+    previousElection: PREVIOUS_ELECTION.test(text),
+    hasCivicSignal: CIVIC_SIGNAL.test(text) || years.length > 0 || invalidYears.length > 0 || codes.length > 0
+      || sexes.length > 0 || ageGroups.length > 0 || sectionTypes.length > 0,
   };
 }
 
 function extractYears(text: string): Pick<Extraction, "years" | "invalidYears" | "wantsAllYears"> {
   const mentioned = [...text.matchAll(/\b(19\d{2}|20\d{2})\b/gu)].map((match) => Number(match[1]));
-  const range = /\b(?:de|desde)\s+(?:el\s+)?(20\d{2})\s+(?:a|al|hasta)\s+(?:el\s+)?(20\d{2})\b/u.exec(text)
-    ?? (TREND_WORDS.test(text) ? /\bentre\s+(20\d{2})\s+y\s+(20\d{2})\b/u.exec(text) : null);
-  const since = /\bdesde\s+(?:el\s+)?(20\d{2})\b/u.exec(text);
+  const expandsRange = TREND_WORDS.test(text) || !COMPARISON_WORDS.test(text);
+  const range = !expandsRange ? null
+    : /\b(?:de|desde)\s+(?:el\s+)?(20\d{2})\s+(?:a|al|hasta)\s+(?:el\s+)?(20\d{2})\b/u.exec(text)
+      ?? (TREND_WORDS.test(text) ? /\bentre\s+(20\d{2})\s+y\s+(20\d{2})\b/u.exec(text) : null);
+  const since = expandsRange ? /\bdesde\s+(?:el\s+)?(20\d{2})\b/u.exec(text) : null;
   const valid = (year: number): year is CcpcYear => (CCPC_YEARS as readonly number[]).includes(year);
   let years: CcpcYear[] = mentioned.filter(valid);
   if (range) {
@@ -261,7 +309,7 @@ function extractDimension(
   sexes: readonly CcpcSex[],
   sectionTypes: readonly CcpcSectionType[],
 ): BreakdownDimension | undefined {
-  if (/\bpor (?:estado|estados|entidad|entidades)\b|\b(?:cada estado|cada entidad|ranking|top|que estado|cual estado|que entidad|cual entidad|estados con|entidades con|mapa)\b/u.test(text)) {
+  if (/\bpor (?:estado|estados|entidad|entidades)\b|\b(?:cada estado|cada entidad|ranking|top|que estado|cual estado|que entidad|cual entidad|estados con|entidades con|mapa)\b|\b(?:estado|entidad) con (?:mas|mayor|menos|menor)\b/u.test(text)) {
     return "entidad";
   }
   if (/\bpor (?:sexo|genero)\b|\b(?:brecha de genero|entre sexos|piramide)\b/u.test(text) || sexes.length >= 2) return "sexo";
@@ -284,9 +332,11 @@ function extractIndicator(text: string): CivicIndicator {
 function extractPresentation(text: string): CivicPresentation[] {
   const presentation: CivicPresentation[] = [];
   if (/\b(?:mapa|mapas|geografic\w*)\b/u.test(text)) presentation.push("map");
-  if (/\b(?:grafica|graficas|grafico|graficos|barras|lineas|visual\w*)\b/u.test(text)) presentation.push("chart");
+  if (/\b(?:grafica|graficas|grafico|graficos|barras|lineas|visual\w*|piramide)\b/u.test(text)) presentation.push("chart");
   if (/\b(?:tabla|tablas)\b/u.test(text)) presentation.push("table");
-  if (/\b(?:ranking|top|ordena\w*|clasificacion|de mayor a menor|de menor a mayor)\b/u.test(text)) presentation.push("ranking");
+  if (/\b(?:ranking|top|ordena\w*|clasificacion|de mayor a menor|de menor a mayor)\b|\b(?:que|cual|cuales) (?:estado|estados|entidad|entidades)\b|\b(?:estado|estados|entidad|entidades) con (?:mas|mayor|menos|menor)\b/u.test(text)) {
+    presentation.push("ranking");
+  }
   if (/\b(?:historia|narrativa|cuentame|explicame|relato)\b/u.test(text)) presentation.push("story");
   return presentation;
 }
@@ -319,6 +369,7 @@ function mergeWithPrevious(current: Extraction, previous: Extraction): Extractio
     indicator: current.indicator !== "participation" ? current.indicator : previous.indicator,
     presentation: current.presentation.length > 0 ? current.presentation : previous.presentation,
     scores: hasOwnAnalysis ? current.scores : previous.scores,
+    hasCivicSignal: current.hasCivicSignal || previous.hasCivicSignal,
   };
 }
 
@@ -351,6 +402,7 @@ function buildPlan(extraction: Extraction): CivicPlan {
     sectionTypes: extraction.sectionTypes,
     presentation: extraction.presentation,
   };
+  if (!extraction.hasCivicSignal) return { ...base, analysis: "summary", clarification: GUIDANCE };
   if (extraction.invalidYears.length > 0) {
     return {
       ...base,
@@ -361,6 +413,11 @@ function buildPlan(extraction: Extraction): CivicPlan {
     };
   }
   const analysis = chooseAnalysis(extraction);
+  if (analysis === "comparison" && extraction.previousElection && base.years.length <= 1) {
+    const latest = base.years[0] ?? CCPC_YEARS.at(-1)!;
+    const previous = CCPC_YEARS[CCPC_YEARS.indexOf(latest) - 1];
+    if (previous) return { ...base, analysis, years: [previous, latest] };
+  }
   if (analysis === "comparison" && extraction.years.length < 2 && extraction.entityCodes.length < 2 && !extraction.dimension) {
     return {
       ...base,
@@ -381,15 +438,22 @@ function buildPlan(extraction: Extraction): CivicPlan {
 
 function chooseAnalysis(extraction: Extraction): CivicAnalysis {
   const { scores } = extraction;
-  if (scores.methodology > 0 && extraction.years.length === 0 && extraction.entityCodes.length === 0) return "methodology";
-  if (scores.evidence > 0) return "evidence";
-  if (extraction.years.length >= 3 || extraction.wantsAllYears || scores.trend > 0) return "trend";
-  if (extraction.years.length === 2) return "comparison";
-  if (extraction.dimension) return "breakdown";
-  if (extraction.entityCodes.length >= 2) return "breakdown";
-  if (scores.breakdown > 0) return "breakdown";
-  if (scores.comparison > 0) return "comparison";
-  return "summary";
+  const hasFilters = extraction.years.length > 0 || extraction.entityCodes.length > 0;
+  const weights: Record<CivicAnalysis, number> = {
+    summary: 1 + scores.summary,
+    comparison: 2 * scores.comparison
+      + (extraction.years.length === 2 ? 3 : 0)
+      + (extraction.previousElection ? 2 : 0),
+    trend: 2 * scores.trend
+      + (extraction.years.length >= 3 || extraction.wantsAllYears ? 4 : 0),
+    breakdown: 2 * scores.breakdown
+      + (extraction.dimension ? 3 : 0)
+      + (extraction.entityCodes.length >= 2 && extraction.years.length <= 1 ? 3 : 0),
+    evidence: 4 * scores.evidence,
+    methodology: hasFilters ? 0 : 4 * scores.methodology,
+  };
+  const priority: CivicAnalysis[] = ["evidence", "methodology", "trend", "comparison", "breakdown", "summary"];
+  return priority.reduce((best, candidate) => (weights[candidate] > weights[best] ? candidate : best));
 }
 
 function optionalDimension(dimension: BreakdownDimension | undefined): { dimension?: BreakdownDimension } {
