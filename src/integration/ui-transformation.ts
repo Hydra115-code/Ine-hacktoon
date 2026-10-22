@@ -171,7 +171,7 @@ function visualizationToTable(node: VisualizationNode): UINode {
     return [{
       field: channel.field,
       label: labelFromKey(channel.field, channel.label),
-      format: inferColumnFormat(channel.field, channel.label, channel.type),
+      format: inferColumnFormat(channel.field, channel.type),
       sortable: true,
     }];
   });
@@ -201,7 +201,7 @@ function createLargestChangeView(root: UINode, registry: DataRegistryValue): UIN
   return {
     type: "section",
     id: root.id ?? "gen2-primary-change",
-    ariaLabel: "Cambio financiero más grande",
+    ariaLabel: "Cambio más grande",
     surface: "primary",
     padding: "md",
     children: [
@@ -213,7 +213,6 @@ function createLargestChangeView(root: UINode, registry: DataRegistryValue): UIN
         valueBinding: candidate.binding,
         format: candidate.format,
         importance: "primary",
-        semanticState: candidate.value < 0 ? "financial.negative" : "financial.neutral",
       },
     ],
   };
@@ -223,7 +222,7 @@ interface NumericCandidate {
   binding: string;
   label: string;
   value: number;
-  format: "currency" | "percent" | "number";
+  format: "percent" | "number";
   priority: number;
 }
 
@@ -235,7 +234,7 @@ function findLargestVisibleTableChange(root: UINode, registry: DataRegistryValue
   if (!changeColumn) return undefined;
   const rows = resolveRegistryPath(registry, table.dataBinding);
   if (!Array.isArray(rows)) return undefined;
-  const labelColumn = table.columns.find((column) => /(?:category|categoria|description|descripcion|name|nombre)/iu.test(column.field));
+  const labelColumn = table.columns.find((column) => /(?:entity|entidad|group|grupo|scope|category|categoria|description|descripcion|name|nombre)/iu.test(column.field));
   const candidates = rows.flatMap((row, index) => {
     const raw = resolveRegistryPath(row, changeColumn.field);
     const value = parseFiniteNumber(raw);
@@ -245,7 +244,7 @@ function findLargestVisibleTableChange(root: UINode, registry: DataRegistryValue
       binding: `${table.dataBinding}.${index}.${changeColumn.field}`,
       label: typeof label === "string" ? label : changeColumn.label,
       value,
-      format: changeColumn.format === "percentage" ? "percent" as const : "currency" as const,
+      format: changeColumn.format === "percentage" ? "percent" as const : "number" as const,
       priority: 4,
     }];
   });
@@ -273,17 +272,16 @@ function findLargestChange(registry: DataRegistryValue): NumericCandidate | unde
     const number = parseFiniteNumber(value);
     const key = path.at(-1) ?? "";
     if (number === undefined || !isSafeBinding(path)) return;
-    const priority = /(?:difference|diferencia|delta|change|cambio|variation|variacion)/u.test(key) ? 3
-      : /(?:amount|monto|expense|gasto)/u.test(key) ? 2
-      : /(?:percentage|percent|porcentaje|rate)/u.test(key) ? 1 : 0;
+    const priority = /(?:difference|diferencia|delta|change|cambio|variation|variacion|points)/iu.test(key) ? 3
+      : /(?:percentage|percent|porcentaje|rate|pct)/iu.test(key) ? 1 : 0;
     if (priority === 0) return;
-    const descriptor = parent && ["category", "categoria", "description", "descripcion", "name", "nombre", "label"]
+    const descriptor = parent && ["entity", "entidad", "group", "grupo", "scope", "category", "categoria", "description", "descripcion", "name", "nombre", "label"]
       .map((field) => parent[field]).find((item) => typeof item === "string");
     candidates.push({
       binding: path.join("."),
       label: typeof descriptor === "string" ? descriptor : labelFromKey(key),
       value: number,
-      format: /(?:percentage|percent|porcentaje|rate)/u.test(key) ? "percent" : priority >= 2 ? "currency" : "number",
+      format: /(?:percentage|percent|porcentaje|rate|pct)$/iu.test(key) ? "percent" : "number",
       priority,
     });
   };
@@ -369,17 +367,15 @@ function isSafeBinding(path: string[]): boolean {
 function labelFromKey(key: string, proposed?: string): string {
   const lower = key.toLocaleLowerCase("es-MX");
   if (/(?:^|\.)(?:category|categoria)$/u.test(lower)) return "Categoría";
-  if (/(?:^|\.)(?:amount|monto)$/u.test(lower)) return proposed && proposed.length <= 40 ? proposed : "Monto";
   if (/(?:^|\.)(?:percentage|porcentaje)$/u.test(lower)) return "Porcentaje";
   return proposed && proposed.length <= 40 ? proposed : key.replaceAll("_", " ").replace(/([a-z])([A-Z])/gu, "$1 $2")
     .replace(/^./u, (letter) => letter.toLocaleUpperCase("es-MX"));
 }
 
-function inferColumnFormat(field: string, label: string | undefined, type: string): TableColumn["format"] {
-  if (/(?:amount|monto|expenses?|gastos?|income|ingresos?|balance|saldo)/iu.test(field)) return "currency";
-  if (/(?:percentage|porcentaje|percent|ratio|share)/iu.test(field)) return "percentage";
+function inferColumnFormat(field: string, type: string): TableColumn["format"] {
+  if (/(?:percentage|porcentaje|percent|ratio|share|pct)$/iu.test(field)) return "percentage";
   if (type === "temporal") return "date";
-  if (type === "quantitative") return /(?:monto|gasto|ingreso|saldo)/iu.test(label ?? "") ? "currency" : "number";
+  if (type === "quantitative") return "number";
   return "text";
 }
 

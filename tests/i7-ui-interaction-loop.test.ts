@@ -38,23 +38,23 @@ const controls: UISpecification = {
       },
       {
         type: "select",
-        id: "account-control",
-        label: "Cuenta",
-        event: "account.changed",
+        id: "entity-control",
+        label: "Entidad",
+        event: "entity.changed",
         options: [
-          { value: "checking", label: "Cuenta principal" },
-          { value: "savings", label: "Ahorro" },
+          { value: "jalisco", label: "Jalisco" },
+          { value: "oaxaca", label: "Oaxaca" },
         ],
         required: true,
       },
       {
         type: "slider",
-        id: "amount-control",
-        label: "Ahorro mensual",
-        event: "simulation.changed",
-        min: 0,
-        max: 15_000,
-        step: 250,
+        id: "age-control",
+        label: "Edad mínima",
+        event: "age.changed",
+        min: 18,
+        max: 100,
+        step: 1,
       },
       {
         type: "button",
@@ -69,8 +69,8 @@ const controls: UISpecification = {
 test("DateRange, Select, Slider y Button producen intención semántica sin seleccionar herramientas", () => {
   const events: UIEvent["event"][] = [
     { name: "period.changed", sourceId: "period-control", value: { start: "2026-08-01", end: "2026-08-31" } },
-    { name: "account.changed", sourceId: "account-control", value: "savings" },
-    { name: "simulation.changed", sourceId: "amount-control", value: 7_500 },
+    { name: "entity.changed", sourceId: "entity-control", value: "oaxaca" },
+    { name: "age.changed", sourceId: "age-control", value: 30 },
     { name: "analysis.refresh.requested", sourceId: "refresh-control" },
   ];
 
@@ -94,15 +94,15 @@ test("DateRange, Select, Slider y Button producen intención semántica sin sele
 
 test("la UI recompuesta conserva el valor absoluto validado aunque el planner proponga otro", () => {
   const reconciled = reconcileUiEventControl(controls, {
-    name: "simulation.changed",
-    sourceId: "amount-control",
-    value: 10_000,
+    name: "age.changed",
+    sourceId: "age-control",
+    value: 40,
   });
   const slider = reconciled.root.type === "stack"
-    ? reconciled.root.children.find((node) => node.id === "amount-control")
+    ? reconciled.root.children.find((node) => node.id === "age-control")
     : undefined;
   assert.equal(slider?.type, "slider");
-  if (slider?.type === "slider") assert.equal(slider.initialValue, 10_000);
+  if (slider?.type === "slider") assert.equal(slider.initialValue, 40);
 });
 
 test("un cambio numérico conserva identidad y validación de borradores locales sin mutar el snapshot", () => {
@@ -113,7 +113,7 @@ test("un cambio numérico conserva identidad y validación de borradores locales
   const generated = structuredClone(previous);
   if (generated.root.type !== "stack") throw new Error("Expected stack");
   generated.root.children[generated.root.children.length - 1] = { ...note, id: "new-note", validation: { maxLength: 1000 } };
-  const result = reconcileUiEventControl(generated, { name: "simulation.changed", sourceId: "amount-control", value: 10_000 }, previous);
+  const result = reconcileUiEventControl(generated, { name: "age.changed", sourceId: "age-control", value: 40 }, previous);
   if (result.root.type !== "stack") throw new Error("Expected stack");
   assert.deepEqual(result.root.children.at(-1), note);
   assert.equal(generated.root.children.at(-1)?.id, "new-note");
@@ -124,65 +124,38 @@ test("controles que comparten evento no sobrescriben selecciones ajenas", () => 
   const specification = structuredClone(controls);
   if (specification.root.type !== "stack") throw new Error("Expected stack");
   specification.root.children.push({
-    type: "slider", id: "other-amount", label: "Otro ahorro",
-    event: "simulation.changed", min: 0, max: 15_000, step: 250, initialValue: 500,
+    type: "slider", id: "other-age", label: "Edad máxima",
+    event: "age.changed", min: 18, max: 100, step: 1, initialValue: 60,
   });
   const reconciled = reconcileUiEventControl(specification, {
-    name: "simulation.changed", sourceId: "amount-control", value: 10_000,
+    name: "age.changed", sourceId: "age-control", value: 40,
   });
   if (reconciled.root.type !== "stack") throw new Error("Expected stack");
-  const other = reconciled.root.children.find((node) => node.id === "other-amount");
+  const other = reconciled.root.children.find((node) => node.id === "other-age");
   if (other?.type !== "slider") throw new Error("Expected slider");
-  assert.equal(other.initialValue, 500);
+  assert.equal(other.initialValue, 60);
   assert.deepEqual(reconcileUiEventControl(specification, {
-    name: "simulation.changed", sourceId: "unknown", value: 10_000,
+    name: "age.changed", sourceId: "unknown", value: 40,
   }), specification);
 });
 
-test("los importes de simulación llegan al renderer como números formateables", () => {
-  const adapted = adaptUiDataSource({
-    id: "source-1",
-    toolName: "simulate_savings",
-    data: {
-      dataType: "SIMULATED",
-      projectedBalance: "120000.00",
-      totalContributions: "120000.00",
-      estimatedGrowth: "0.00",
-      numberOfPeriods: 8,
-      timeline: [{ period: 1, contribution: "15000.00", interestEarned: "0.00", balance: "15000.00" }],
-    },
-  }, 0);
-  const value = adapted.value as Record<string, unknown>;
-  assert.equal(value.projectedBalance, 120000);
-  assert.equal(value.totalContributions, 120000);
-  assert.deepEqual(value.timeline, [{ period: 1, contribution: 15000, interestEarned: 0, balance: 15000 }]);
-});
-
-test("BP1 normaliza porcentajes anidados de compare_periods como fracciones", () => {
+test("los porcentajes de participación llegan como fracciones y los puntos porcentuales no se dividen", () => {
   const value = adaptUiDataSource({
     id: "source-1",
-    toolName: "compare_periods",
+    toolName: "compare_elections",
     data: {
-      comparisons: [{
-        currency: "MXN",
-        income: { previousValue: "30000.00", currentValue: "30000.00", absoluteChange: "0.00", percentageChange: "0.00", trend: "unchanged" },
-        expenses: { previousValue: "20650.00", currentValue: "27600.00", absoluteChange: "6950.00", percentageChange: "33.66", trend: "increased" },
-        savingsRate: { previousValue: "31.17", currentValue: "8.00", absoluteChange: "-23.17", percentageChange: "-74.33", trend: "decreased" },
-        categories: [],
-      }],
-      metadata: { queriedAt: "2026-09-12T00:00:00.000Z", previousPeriod: { startDate: "2026-07-01", endDate: "2026-07-31" }, currentPeriod: { startDate: "2026-08-01", endDate: "2026-08-31" } },
+      elections: [{ year: 2018, voted: 7_288, classified: 14_585, participationPct: 49.97, nominalParticipationPct: 48.89 }],
+      changes: [{ year: 2024, baselineYear: 2018, participationPoints: -3.61 }],
     },
-  }).value as Record<string, unknown>;
-  const comparison = (value.comparisons as Array<Record<string, unknown>>)[0]!;
-  const savingsRate = comparison.savingsRate as Record<string, unknown>;
-  const expenses = comparison.expenses as Record<string, unknown>;
+  }, 0).value as Record<string, unknown>;
+  const election = (value.elections as Array<Record<string, unknown>>)[0]!;
+  const change = (value.changes as Array<Record<string, unknown>>)[0]!;
 
-  assert.equal(savingsRate.currentValue, 0.08);
-  assert.equal(savingsRate.previousValue, 0.3117);
-  assert.equal(savingsRate.absoluteChange, -0.2317);
-  assert.equal(savingsRate.percentageChange, -0.7433);
-  assert.equal(expenses.currentValue, 27600);
-  assert.equal(expenses.percentageChange, 0.3366);
+  assert.equal(election.participationPct, 0.4997);
+  assert.equal(election.nominalParticipationPct, 0.4889);
+  assert.equal(election.voted, 7_288);
+  assert.equal(change.participationPoints, -3.61);
+  assert.equal(value.dataType, "OBSERVED");
 });
 
 test("rechaza eventos fabricados o valores que no pertenecen al control", () => {
@@ -193,14 +166,14 @@ test("rechaza eventos fabricados o valores que no pertenecen al control", () => 
     interfaceRevision: 2,
     dataRevision: 3,
     dataKeys: ["source_1"],
-    event: { name: "account.changed", sourceId: "period-control", value: "savings" },
+    event: { name: "entity.changed", sourceId: "period-control", value: "oaxaca" },
   });
   assert.throws(() => createUiEventQuery(forged, controls), SharedUiEventValidationError);
 
   const invalidSlider = uiEventSchema.parse({
     ...forged,
     correlationId: "35000000-0000-4000-8000-000000000011",
-    event: { name: "simulation.changed", sourceId: "amount-control", value: 7_525 },
+    event: { name: "age.changed", sourceId: "age-control", value: 150 },
   });
   assert.throws(() => createUiEventQuery(invalidSlider, controls), SharedUiEventValidationError);
 });

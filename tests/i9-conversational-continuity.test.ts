@@ -5,7 +5,7 @@ import { createSharedUiPatches } from "../src/integration/shared-ui-stream.js";
 import { CivicHarness, queryRequest } from "./support/civic-harness.js";
 
 const current: UISpecification = { version: "1", root: {
-  type: "section", id: "root", ariaLabel: "Gastos", children: [
+  type: "section", id: "root", ariaLabel: "Participación", children: [
     { type: "heading", id: "period", level: 2, content: "Septiembre" },
     { type: "heading", id: "result", level: 3, content: "Resultado anterior" },
     { type: "input", id: "note", label: "Notas", event: "form.value.changed", validation: { maxLength: 500 } },

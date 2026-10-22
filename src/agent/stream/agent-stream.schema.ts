@@ -49,7 +49,7 @@ export const AgentStreamEventSchema = z.discriminatedUnion("type", [
     type: z.literal("error"),
     streamId: StreamIdSchema,
     sequence: SequenceSchema,
-    code: z.enum(["invalid-request", "agent-error", "provider-error", "tool-error", "insufficient_funds", "ui-error", "semantic-ui-error", "financial-reasoning-error", "internal-error"]),
+    code: z.enum(["invalid-request", "agent-error", "provider-error", "tool-error", "ui-error", "semantic-ui-error", "evidence-validation-error", "internal-error"]),
     message: z.string().trim().min(1).max(300),
     recoverable: z.boolean(),
     hasPartialData: z.boolean(),

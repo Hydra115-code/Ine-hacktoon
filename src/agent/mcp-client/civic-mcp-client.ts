@@ -8,7 +8,7 @@ import {
   type AgentToolCall,
   type AgentToolDefinition,
 } from "../schemas/agent.schema.js";
-import { validateToolOutput } from "./tool-output-validator.js";
+import { validateToolOutput } from "./civic-tool-output-validator.js";
 import { readToolErrorDetails, type ToolErrorCode } from "../../application/tool-error-result.js";
 
 const MAX_TOOL_OUTPUT_BYTES = 1_000_000;
@@ -22,12 +22,12 @@ const McpToolResultSchema = z.object({
   }).passthrough()).min(1),
 }).passthrough();
 
-export interface FinancialToolClient {
+export interface CivicToolClient {
   listTools(signal?: AbortSignal): Promise<AgentToolDefinition[]>;
   callTool(call: AgentToolCall, signal?: AbortSignal): Promise<unknown>;
 }
 
-export class FinancialMcpClient implements FinancialToolClient {
+export class CivicMcpClient implements CivicToolClient {
   private constructor(
     private readonly client: Client,
     private readonly server: McpServer,
@@ -37,14 +37,14 @@ export class FinancialMcpClient implements FinancialToolClient {
   static async connect(
     server: McpServer,
     toolTimeoutMs = 12_000,
-  ): Promise<FinancialMcpClient> {
-    const client = new Client({ name: "financial-agent", version: "0.1.0" });
+  ): Promise<CivicMcpClient> {
+    const client = new Client({ name: "civic-agent", version: "0.1.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([
       server.connect(serverTransport),
       client.connect(clientTransport),
     ]);
-    return new FinancialMcpClient(client, server, toolTimeoutMs);
+    return new CivicMcpClient(client, server, toolTimeoutMs);
   }
 
   async listTools(signal?: AbortSignal): Promise<AgentToolDefinition[]> {
@@ -71,27 +71,27 @@ export class FinancialMcpClient implements FinancialToolClient {
         },
       );
     } catch {
-      throw new FinancialToolTransportError(call.name);
+      throw new ToolTransportError(call.name);
     }
     const result = McpToolResultSchema.parse(rawResult);
     const text = result.content.find((item) => item.type === "text")?.text;
 
     if (result.isError) {
       const details = readToolErrorDetails(result._meta);
-      throw new FinancialToolError(call.name, details?.retryable ?? false, details?.code);
+      throw new CivicToolError(call.name, details?.retryable ?? false, details?.code);
     }
     if (!text) {
-      throw new FinancialToolError(call.name);
+      throw new CivicToolError(call.name);
     }
     if (Buffer.byteLength(text, "utf8") > MAX_TOOL_OUTPUT_BYTES) {
-      throw new FinancialToolError(call.name);
+      throw new CivicToolError(call.name);
     }
 
     let output: unknown;
     try {
       output = JSON.parse(text) as unknown;
     } catch {
-      throw new FinancialToolError(call.name);
+      throw new CivicToolError(call.name);
     }
     return validateToolOutput(call.name, output);
   }
@@ -101,20 +101,20 @@ export class FinancialMcpClient implements FinancialToolClient {
   }
 }
 
-export class FinancialToolTransportError extends Error {
+export class ToolTransportError extends Error {
   constructor(toolName: string) {
     super(`No fue posible comunicarse con la herramienta ${toolName}`);
-    this.name = "FinancialToolTransportError";
+    this.name = "ToolTransportError";
   }
 }
 
-export class FinancialToolError extends Error {
+export class CivicToolError extends Error {
   constructor(
     toolName: string,
     readonly retryable = false,
     readonly code?: ToolErrorCode,
   ) {
     super(`La herramienta ${toolName} no pudo entregar datos válidos`);
-    this.name = "FinancialToolError";
+    this.name = "CivicToolError";
   }
 }

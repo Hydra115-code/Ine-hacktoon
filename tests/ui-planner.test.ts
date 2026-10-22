@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { CIVIC_TOOL_NAMES } from "../src/agent/civic-tool-policy.js";
-import { FinancialMcpClient } from "../src/agent/mcp-client/financial-mcp-client.js";
+import { CivicMcpClient } from "../src/agent/mcp-client/civic-mcp-client.js";
 import { AgentOrchestrator } from "../src/agent/orchestrator.js";
 import { rulesQueryInterpreter } from "../src/agent/planning/civic-query-interpreter.js";
 import { LocalModelQueryInterpreter } from "../src/agent/planning/local-model-interpreter.js";
@@ -15,7 +15,7 @@ import { crearServidor } from "../src/server.js";
 const ACTOR_ID = "10000000-0000-4000-8000-000000000001";
 
 async function run(planner: UiPlanner, query: string): Promise<AgentStreamEvent[]> {
-  const tools = await FinancialMcpClient.connect(crearServidor({ client: {} as never, user: { id: ACTOR_ID } }), 5_000);
+  const tools = await CivicMcpClient.connect(crearServidor({ client: {} as never, user: { id: ACTOR_ID } }), 5_000);
   const orchestrator = new AgentOrchestrator(planner, tools, {
     maxToolCalls: 4,
     maxReasoningRepairs: 1,

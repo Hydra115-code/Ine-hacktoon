@@ -14,8 +14,6 @@ import {
   type SessionStore,
 } from "../application/ports/session-store.js";
 import { applySessionCompletion } from "../application/session-state.js";
-import { FinancialCategorySchema } from "../domain/transaction.js";
-import { emptyFinancialConstraints } from "../domain/financial-constraints.js";
 import { sessionUiSnapshotSchema } from "../integration/session-ui-snapshot.js";
 
 const DEFAULT_SESSION_TTL_MS = 30 * 60 * 1_000;
@@ -27,10 +25,6 @@ const InteractionValueSchema = z.union([
   z.array(z.string().max(500)).max(24),
   z.object({ start: z.string().max(10), end: z.string().max(10) }).strict(),
 ]);
-const MoneySchema = z.object({
-  amount: z.string().regex(/^\d{1,12}(?:\.\d{1,2})?$/u),
-  currency: z.literal("MXN"),
-}).strict();
 const SnapshotSchema = z.object({
   sessionId: z.string().uuid(),
   interfaceRevision: z.number().int().nonnegative(),
@@ -44,15 +38,8 @@ const SnapshotSchema = z.object({
     assistant: z.string().max(2_000),
   }).strict()).max(6),
   interactionState: z.record(InteractionValueSchema),
-  financialConstraints: z.object({
-    revision: z.number().int().nonnegative(),
-    savingsGoal: MoneySchema.optional(),
-    horizonMonths: z.number().int().min(1).max(600).optional(),
-    monthlyContribution: MoneySchema.optional(),
-    protectedExpenseCategories: z.array(FinancialCategorySchema).max(20),
-  }).strict(),
-  pendingPaymentIntentId: z.string().uuid().optional(),
 }).strict();
+const LEGACY_SNAPSHOT_KEYS = ["financialConstraints", "pendingPaymentIntentId"] as const;
 const StoredSessionSchema = z.object({
   actorId: z.string().uuid(),
   activeCorrelationId: z.string().uuid().optional(),
@@ -117,7 +104,6 @@ export class SqliteSessionStore implements SessionStore {
           dataKeys: [],
           turns: [],
           interactionState: {},
-          financialConstraints: emptyFinancialConstraints(),
         },
       };
       stored.activeCorrelationId = input.correlationId;
@@ -177,7 +163,7 @@ export class SqliteSessionStore implements SessionStore {
     return StoredSessionSchema.parse({
       actorId: row.actor_id,
       ...(row.active_correlation_id ? { activeCorrelationId: row.active_correlation_id } : {}),
-      state: JSON.parse(row.snapshot_json) as unknown,
+      state: withoutLegacyKeys(JSON.parse(row.snapshot_json) as unknown),
     }) as StoredSession;
   }
 
@@ -226,6 +212,13 @@ export class SqliteSessionStore implements SessionStore {
       throw error;
     }
   }
+}
+
+function withoutLegacyKeys(state: unknown): unknown {
+  if (typeof state !== "object" || state === null || Array.isArray(state)) return state;
+  const copy = { ...(state as Record<string, unknown>) };
+  for (const key of LEGACY_SNAPSHOT_KEYS) delete copy[key];
+  return copy;
 }
 
 function hasMatchingRevision(

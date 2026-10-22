@@ -13,28 +13,28 @@ const specification: UISpecification = {
   root: {
     type: "section",
     id: "analysis-root",
-    ariaLabel: "Concentración de gastos",
+    ariaLabel: "Participación ciudadana",
     children: [
-      { type: "heading", id: "analysis-title", content: "Gastos por categoría", level: 2 },
+      { type: "heading", id: "analysis-title", content: "Participación por entidad", level: 2 },
       {
         type: "visualization",
         id: "category-chart",
-        ariaLabel: "Gastos por categoría",
+        ariaLabel: "Participación por entidad",
         mark: "bar",
         dataBinding: "source_1.categories",
         encoding: {
-          x: { field: "category", type: "nominal", label: "Categoría" },
-          y: { field: "amount", type: "quantitative", label: "Monto" },
+          x: { field: "entity", type: "nominal", label: "Entidad" },
+          y: { field: "participationPct", type: "quantitative", label: "Participación" },
         },
       },
       {
         type: "table",
         id: "category-table",
-        ariaLabel: "Detalle por categoría",
+        ariaLabel: "Detalle por entidad",
         dataBinding: "source_1.categories",
         columns: [
-          { field: "category", label: "Categoría" },
-          { field: "amount", label: "Monto", format: "currency" },
+          { field: "entity", label: "Entidad" },
+          { field: "participationPct", label: "Participación", format: "percentage" },
         ],
       },
     ],
@@ -44,8 +44,8 @@ const specification: UISpecification = {
 const dataRegistry: DataRegistryValue = {
   source_1: {
     categories: [
-      { category: "Restaurantes", amount: "1800.00", difference: "950.00" },
-      { category: "Transporte", amount: "1200.00", difference: "-240.00" },
+      { entity: "Aguascalientes", participationPct: 0.5538, difference: 2.1 },
+      { entity: "Tabasco", participationPct: 0.5, difference: -0.8 },
     ],
   },
 };
@@ -79,8 +79,8 @@ test("GEN2 no interpreta «conserva la tabla» como orden de eliminarla", () => 
 test("GEN2 «deja solo tablas» retira también tarjetas y métricas ajenas", () => {
   const withMetric: UISpecification = {
     version: "1",
-    root: { type: "section", id: "root", ariaLabel: "Gastos", children: [
-      { type: "metric", id: "total-spending", label: "Gasto total", valueBinding: "source_1.total", format: "currency" },
+    root: { type: "section", id: "root", ariaLabel: "Participación", children: [
+      { type: "metric", id: "total-participation", label: "Participación total", valueBinding: "source_1.total", format: "percentage" },
       specification.root.type === "section" ? specification.root.children[1]! : specification.root,
       specification.root.type === "section" ? specification.root.children[2]! : specification.root,
     ] },
@@ -121,7 +121,7 @@ test("GEN2 conserva fuente y aviso de muestra cuando se solicitan explícitament
   assert.doesNotMatch(result.answer, /financier/u);
 });
 
-test("GEN2 deja únicamente el cambio financiero de mayor magnitud usando el registro existente", () => {
+test("GEN2 deja únicamente el cambio de mayor magnitud usando el registro existente", () => {
   const result = transformPersistedUi({
     specification,
     dataRegistry,
@@ -130,7 +130,7 @@ test("GEN2 deja únicamente el cambio financiero de mayor magnitud usando el reg
   assert.ok(result);
   const metric = findType(result.specification.root, "metric");
   assert.ok(metric && metric.type === "metric");
-  assert.equal(metric.label, "Restaurantes");
+  assert.equal(metric.label, "Aguascalientes");
   assert.equal(metric.valueBinding, "source_1.categories.0.difference");
   assert.equal(findType(result.specification.root, "visualization"), undefined);
   assert.equal(findType(result.specification.root, "table"), undefined);
@@ -140,27 +140,27 @@ test("GEN2 prioriza el mayor cambio de las filas visibles, no el total agregado"
   const comparison: UISpecification = {
     version: "1",
     root: {
-      type: "section", id: "comparison", ariaLabel: "Comparación por categoría", children: [
-        { type: "metric", id: "total", label: "Variación total", valueBinding: "source_1.totalChange", format: "currency" },
-        { type: "table", id: "comparison-table", ariaLabel: "Categorías", dataBinding: "source_1.categories", columns: [
-          { field: "category", label: "Categoría" },
-          { field: "absoluteChange", label: "Variación", format: "currency" },
+      type: "section", id: "comparison", ariaLabel: "Comparación por entidad", children: [
+        { type: "metric", id: "total", label: "Variación total", valueBinding: "source_1.totalChange", format: "number" },
+        { type: "table", id: "comparison-table", ariaLabel: "Entidades", dataBinding: "source_1.categories", columns: [
+          { field: "entity", label: "Entidad" },
+          { field: "absoluteChange", label: "Variación", format: "number" },
         ] },
       ],
     },
   };
   const result = transformPersistedUi({
     specification: comparison,
-    dataRegistry: { source_1: { totalChange: "8400.00", categories: [
-      { category: "Entretenimiento", absoluteChange: "5600.00" },
-      { category: "Restaurantes", absoluteChange: "2800.00" },
+    dataRegistry: { source_1: { totalChange: 8.4, categories: [
+      { entity: "Oaxaca", absoluteChange: 5.6 },
+      { entity: "Jalisco", absoluteChange: 2.8 },
     ] } },
     prompt: "Deja únicamente el cambio más grande de esta comparación y oculta el resto de la evidencia.",
   });
   assert.ok(result);
   const metric = findType(result.specification.root, "metric");
   assert.ok(metric && metric.type === "metric");
-  assert.equal(metric.label, "Entretenimiento");
+  assert.equal(metric.label, "Oaxaca");
   assert.equal(metric.valueBinding, "source_1.categories.0.absoluteChange");
 });
 
@@ -176,8 +176,8 @@ test("GEN2 convierte la visualización en tabla ordenable sin cambiar su binding
   assert.equal(replacement.dataBinding, "source_1.categories");
   assert.equal(replacement.sorting?.enabled, true);
   assert.ok(replacement.columns.every((column) => column.sortable));
-  assert.equal(replacement.columns.find((column) => column.field === "amount")?.format, "currency");
-  assert.equal(replacement.columns.find((column) => column.field === "category")?.label, "Categoría");
+  assert.equal(replacement.columns.find((column) => column.field === "participationPct")?.format, "percentage");
+  assert.equal(replacement.columns.find((column) => column.field === "entity")?.label, "Entidad");
   assert.equal(findById(result.specification.root, "category-table")?.type, "table");
 });
 

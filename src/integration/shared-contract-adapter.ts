@@ -69,49 +69,20 @@ function toSharedSourceId(sourceId: string, sourceOffset: number): string {
   return `source_${Number(match[1]) + sourceOffset}`;
 }
 
-const numericFinancialFields = new Set([
-  "absoluteChange",
-  "averageMonthlyMargin",
-  "amount",
-  "availableBalance",
-  "balance",
-  "balanceAfter",
-  "balanceBefore",
-  "contribution",
-  "currentValue",
-  "expenses",
-  "estimatedBalanceAfter",
-  "estimatedGrowth",
-  "fee",
-  "income",
-  "initialAmount",
-  "interestEarned",
-  "interestPaid",
-  "largestExpense",
-  "largestIncome",
-  "netCashFlow",
-  "paymentAmount",
-  "periodicContribution",
-  "precedingExpenseTotal",
-  "principalPaid",
-  "projectedBalance",
-  "previousValue",
-  "relativeLiquidity",
-  "remainingBalance",
-  "totalContributions",
-  "totalExpenses",
-  "totalIncome",
-  "totalInterest",
-  "totalLiquidBalance",
-  "totalPaid",
+const countFields = new Set([
+  "classified",
+  "count",
+  "didNotVote",
+  "matchedRecords",
+  "nominalList",
+  "sourceRows",
+  "totalRecords",
+  "unspecified",
+  "voted",
 ]);
-const percentageFinancialFields = new Set([
+const percentageFields = new Set([
   "abstentionPercentage",
-  "expenseToIncomeRatio",
   "percentage",
-  "percentageChange",
-  "savingsRate",
-  "score",
   "turnoutPercentage",
   "participationPct",
   "nominalParticipationPct",
@@ -120,79 +91,35 @@ const percentageFinancialFields = new Set([
   "nominalSharePct",
 ]);
 const privateFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner|idempotency)(?:_|$)|(?:Id|ID|Uuid|UUID)$|^idempotencyKey$/u;
-const financialValueLabels: Record<string, Record<string, string>> = {
-  category: {
-    education: "Educación",
-    entertainment: "Entretenimiento",
-    food: "Alimentación",
-    groceries: "Supermercado",
-    health: "Salud",
-    housing: "Vivienda",
-    income: "Ingresos",
-    other: "Otros",
-    restaurants: "Restaurantes",
-    salary: "Salario",
-    shopping: "Compras",
-    subscriptions: "Suscripciones",
-    transport: "Transporte",
-    transfers: "Transferencias",
-    travel: "Viajes",
-    utilities: "Servicios",
-  },
-  type: { expense: "Gasto", income: "Ingreso", payment: "Pago", transfer: "Transferencia" },
-};
 
 function normalizeSourceData(source: UiDataSource): unknown {
-  const normalized = normalizeFinancialValues(source.data);
-  const dataType = source.toolName === "simulate_loan" || source.toolName === "simulate_savings"
-    ? "SIMULATED"
-    : "OBSERVED";
+  const normalized = normalizeValues(source.data);
   if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
-    return { ...(normalized as Record<string, unknown>), dataType };
+    return { ...(normalized as Record<string, unknown>), dataType: "OBSERVED" };
   }
-  return { dataType, value: normalized };
+  return { dataType: "OBSERVED", value: normalized };
 }
 
-type FinancialNumericSemantic = "currency" | "percentage";
-
-function normalizeFinancialValues(
-  value: unknown,
-  field?: string,
-  inheritedSemantic?: FinancialNumericSemantic,
-): unknown {
-  const semantic: FinancialNumericSemantic | undefined = percentageFinancialFields.has(field ?? "")
-    ? "percentage"
-    : inheritedSemantic ?? (numericFinancialFields.has(field ?? "") ? "currency" : undefined);
-  if (typeof value === "string" && field) {
-    const label = financialValueLabels[field]?.[value.toLowerCase()];
-    if (label) return label;
-  }
-  if ((typeof value === "string" || typeof value === "number") && semantic === "percentage") {
+function normalizeValues(value: unknown, field?: string): unknown {
+  if ((typeof value === "string" || typeof value === "number") && percentageFields.has(field ?? "")) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? Number((numeric / 100).toFixed(6)) : value;
   }
-  if (typeof value === "string" && semantic === "currency") {
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? numeric : value;
-  }
-  if (Array.isArray(value)) return value.map((item) => normalizeFinancialValues(item, undefined, semantic));
+  if (Array.isArray(value)) return value.map((item) => normalizeValues(item));
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value)
       .filter(([key]) => !privateFieldPattern.test(key))
-      .map(([key, item]) => [key, normalizeFinancialValues(item, key, semantic)]));
+      .map(([key, item]) => [key, normalizeValues(item, key)]));
   }
   return value;
 }
 
 function adaptTableColumn(column: { key: string; label: string }) {
   const field = column.key.split(".").at(-1) ?? column.key;
-  if (percentageFinancialFields.has(field)) {
+  if (percentageFields.has(field)) {
     return { field: column.key, label: column.label, format: "percentage" as const, align: "end" as const };
   }
-  if (numericFinancialFields.has(field)) {
-    return { field: column.key, label: column.label, format: "currency" as const, align: "end" as const };
-  }
-  if (field === "transaction_count" || /(?:Count|count|dayOfMonth|daysBeforeLow)$/u.test(field)) {
+  if (countFields.has(field) || /(?:Count|count|Points)$/u.test(field)) {
     return { field: column.key, label: column.label, format: "number" as const, align: "end" as const };
   }
   if (/(?:Date|date|At|periodStart|periodEnd)$/u.test(field)) {
@@ -212,7 +139,7 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
     case "grid":
       return { type: "grid", id, columns: normalizeColumnCount(node.columnCount), gap: "md", children: node.children.map((child) => adaptNode(child, context)) };
     case "card":
-      return { type: "section", id, ariaLabel: node.title ?? "Contenido financiero", surface: "elevated", padding: "md", children: node.children.map((child) => adaptNode(child, context)) };
+      return { type: "section", id, ariaLabel: node.title ?? "Contenido electoral", surface: "elevated", padding: "md", children: node.children.map((child) => adaptNode(child, context)) };
     case "text":
       return node.variant === "title" || node.variant === "subtitle"
         ? { type: "heading", id, content: node.text, level: node.variant === "title" ? 2 : 3 }
@@ -244,7 +171,7 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
         gap: "md",
         children: [
           { type: "heading", content: node.title, level: 3 },
-          ...node.fields.map((field) => adaptField(field, context, /(?:revis|prepar).*pago/iu.test(node.submitLabel))),
+          ...node.fields.map((field) => adaptField(field, context)),
           { type: "button", id: getNodeId(`${node.id}-submit`, context), label: node.submitLabel, event: "form.submit" },
         ],
       };
@@ -259,7 +186,7 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
       return {
         type: "tabs",
         id,
-        ariaLabel: "Secciones financieras",
+        ariaLabel: "Secciones",
         ...(node.tabs[0] ? { defaultValue: node.tabs[0].id } : {}),
         items: node.tabs.map((tab) => ({ value: tab.id, label: tab.label, children: tab.children.map((child) => adaptNode(child, context)) })),
       };
@@ -315,7 +242,7 @@ function createLimitedCollectionBinding(
 ): string {
   const rows = resolveSourceRows(reference, context);
   const dataBinding = `${requireSourceId(reference.sourceId, context)}_${nodeId.replaceAll("-", "_")}_rows`;
-  context.data[dataBinding] = normalizeFinancialValues(rows.slice(0, maxRows));
+  context.data[dataBinding] = normalizeValues(rows.slice(0, maxRows));
   return dataBinding;
 }
 
@@ -368,9 +295,9 @@ function adaptMultiSeriesChart(
   const rows = resolveSourceRows(node.data, context);
   const dataBinding = `${requireSourceId(node.data.sourceId, context)}_${id.replaceAll("-", "_")}`;
   context.data[dataBinding] = rows.flatMap((row) => node.series.map((series) => ({
-    category: normalizeFinancialValues(row[node.categoryKey] ?? "—", node.categoryKey),
+    category: normalizeValues(row[node.categoryKey] ?? "—", node.categoryKey),
     series: series.label,
-    value: normalizeFinancialValues(row[series.key], series.key),
+    value: normalizeValues(row[series.key], series.key),
   })));
 
   return {
@@ -413,13 +340,11 @@ function resolveSourceRows(reference: UiDataReference, context: AdapterContext):
 function adaptField(
   field: Extract<UiNode, { type: "form" }>["fields"][number],
   context: AdapterContext,
-  paymentReviewForm: boolean,
 ): UINode {
   const id = getNodeId(field.id, context);
   if (field.type === "date") return { type: "datePicker", id, label: field.label, event: "form.value.changed" };
   if (field.type === "select") return { type: "select", id, label: field.label, event: "form.value.changed", options: field.options, required: true, placeholder: "Selecciona una opción", ...(field.initialValue ? { initialValue: field.initialValue } : {}) };
-  const required = paymentReviewForm && /^(?:monto|importe|cantidad|moneda)\b/iu.test(field.label.trim());
-  return { type: "input", id, label: field.label, event: "form.value.changed", placeholder: field.placeholder, validation: { maxLength: field.maxLength, ...(required ? { required: true } : {}) }, ...(field.initialValue ? { initialValue: field.initialValue } : {}) };
+  return { type: "input", id, label: field.label, event: "form.value.changed", placeholder: field.placeholder, validation: { maxLength: field.maxLength }, ...(field.initialValue ? { initialValue: field.initialValue } : {}) };
 }
 
 function adaptFilter(
@@ -480,9 +405,8 @@ function normalizeColumnCount(columnCount: number): 1 | 2 | 3 | 4 {
   return 4;
 }
 
-function adaptActionName(action: "refresh" | "confirm-payment" | "apply-filters" | "submit-form" | "select-tab"): string {
+function adaptActionName(action: "refresh" | "apply-filters" | "submit-form" | "select-tab"): string {
   if (action === "refresh") return "ui.refresh";
-  if (action === "confirm-payment") return "payment.confirmed";
   return action.replaceAll("-", ".");
 }
 

@@ -96,7 +96,6 @@ const FilterFieldSchema = z.discriminatedUnion("type", [
 
 const ButtonActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("refresh") }).strict(),
-  z.object({ type: z.literal("confirm-payment") }).strict(),
   z.object({ type: z.literal("apply-filters"), filterId: UiIdSchema }).strict(),
   z.object({ type: z.literal("submit-form"), formId: UiIdSchema }).strict(),
   z.object({
@@ -456,7 +455,6 @@ function validateActionTargets(nodes: UiNode[], context: z.RefinementCtx): void 
     if (
       node.type !== "button"
       || node.action.type === "refresh"
-      || node.action.type === "confirm-payment"
     ) continue;
     const action = node.action;
     const isValid = action.type === "apply-filters"

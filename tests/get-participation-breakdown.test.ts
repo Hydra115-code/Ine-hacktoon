@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateToolOutput } from "../src/agent/mcp-client/tool-output-validator.js";
+import { validateToolOutput } from "../src/agent/mcp-client/civic-tool-output-validator.js";
 import { GetParticipationBreakdownInputSchema } from "../src/schemas/civic.schema.js";
 import { CivicDataService } from "../src/services/civic-data.service.js";
 

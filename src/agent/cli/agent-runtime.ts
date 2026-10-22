@@ -1,7 +1,7 @@
 import { env } from "../../config/env.js";
 import { type AuthenticatedSupabaseSession } from "../../config/supabase.js";
 import { crearServidor } from "../../server.js";
-import { FinancialMcpClient } from "../mcp-client/financial-mcp-client.js";
+import { CivicMcpClient } from "../mcp-client/civic-mcp-client.js";
 import { AgentOrchestrator } from "../orchestrator.js";
 import { type UiGenerator } from "../../ui/generation/ui-generator.js";
 import { CIVIC_TOOL_NAMES } from "../civic-tool-policy.js";
@@ -28,7 +28,7 @@ export async function createAgentRuntime(
   const planner = options.uiGenerator ? withUiComposer(basePlanner, options.uiGenerator) : basePlanner;
   const supabaseSession = await sessionFactory();
   const permittedToolNames = [...CIVIC_TOOL_NAMES];
-  const mcpClient = await FinancialMcpClient.connect(
+  const mcpClient = await CivicMcpClient.connect(
     crearServidor(supabaseSession),
     env.AGENT_TOOL_TIMEOUT_MS,
   );
@@ -41,7 +41,6 @@ export async function createAgentRuntime(
       retryDelayMs: env.AGENT_RETRY_DELAY_MS,
       userId: supabaseSession.user.id,
       permittedToolNames,
-      experienceScope: env.FINANCIAL_EXPERIENCE_SCOPE,
     },
   );
 

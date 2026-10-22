@@ -4,7 +4,6 @@ import {
   type UISpecification,
   type DataRegistryValue,
 } from "@banorte/contracts";
-import { type FinancialConstraints } from "../../domain/financial-constraints.js";
 
 export interface SessionTurn {
   user: string;
@@ -18,8 +17,6 @@ export interface AgentSessionSnapshot extends SessionReference {
   specification?: UISpecification;
   turns: readonly SessionTurn[];
   interactionState: Readonly<Record<string, UIEvent["event"]["value"]>>;
-  financialConstraints: FinancialConstraints;
-  pendingPaymentIntentId?: string;
 }
 
 export interface BeginSessionInput {
@@ -39,7 +36,6 @@ export interface CompleteSessionInput extends SessionReference {
   prompt?: string;
   answer: string;
   interaction?: UIEvent["event"];
-  pendingPaymentIntentId?: string | null;
 }
 
 export type BeginSessionResult =

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { type RepositoryErrorCode } from "../errors/repository.error.js";
 
-const TOOL_ERROR_META_KEY = "banorte/error";
+const TOOL_ERROR_META_KEY = "civic/error";
 
 const ToolErrorDetailsSchema = z.object({
   code: z.enum([
@@ -10,7 +10,6 @@ const ToolErrorDetailsSchema = z.object({
     "unauthorized",
     "not_found",
     "invalid_input",
-    "insufficient_funds",
     "internal",
   ]),
   retryable: z.boolean(),
@@ -50,7 +49,5 @@ export function classifyRepositoryError(code: RepositoryErrorCode) {
     case "INVALID_INPUT":
     case "CONFLICT":
       return { code: "invalid_input" as const, retryable: false };
-    case "INSUFFICIENT_FUNDS":
-      return { code: "insufficient_funds" as const, retryable: false };
   }
 }

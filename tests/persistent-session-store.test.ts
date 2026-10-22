@@ -5,7 +5,6 @@ import { SupabaseSessionStore } from "../src/repositories/supabase-session.repos
 
 const userId = "10000000-0000-4000-8000-000000000001";
 const sessionId = "80000000-0000-4000-8000-000000000001";
-const intentId = "40000000-0000-4000-8000-000000000001";
 
 test("SupabaseSessionStore recupera el estado después de crear una instancia nueva", async () => {
   let persisted: Record<string, unknown> | undefined;
@@ -42,8 +41,6 @@ test("SupabaseSessionStore recupera el estado después de crear una instancia nu
           specification: parameters.p_specification,
           turns: parameters.p_turns,
           interaction_state: parameters.p_interaction_state,
-          financial_constraints: parameters.p_financial_constraints,
-          pending_payment_intent_id: parameters.p_pending_payment_intent_id,
         };
         activeCorrelationId = undefined;
         return { data: [{ result_code: "success" }], error: null };
@@ -70,9 +67,8 @@ test("SupabaseSessionStore recupera el estado después de crear una instancia nu
     interfaceRevision: 3,
     dataRevision: 2,
     dataKeys: ["source_1"],
-    prompt: "¿En qué estoy gastando más?",
-    answer: "La categoría principal es restaurantes.",
-    pendingPaymentIntentId: intentId,
+    prompt: "¿Cuál fue la participación en Jalisco en 2024?",
+    answer: "La participación oficial fue de 61.2 %.",
   });
 
   const processAfterRestart = new SupabaseSessionStore(client);
@@ -88,8 +84,7 @@ test("SupabaseSessionStore recupera el estado después de crear una instancia nu
   });
   assert.equal(recovered.success, true);
   if (!recovered.success) return;
-  assert.equal(recovered.state.turns[0]?.user, "¿En qué estoy gastando más?");
-  assert.equal(recovered.state.pendingPaymentIntentId, intentId);
+  assert.equal(recovered.state.turns[0]?.user, "¿Cuál fue la participación en Jalisco en 2024?");
 
   await processAfterRestart.complete({
     actorId: userId,
@@ -98,9 +93,8 @@ test("SupabaseSessionStore recupera el estado después de crear una instancia nu
     interfaceRevision: 4,
     dataRevision: 3,
     dataKeys: ["source_2"],
-    prompt: "Ahora sólo restaurantes.",
+    prompt: "¿Y en 2018?",
     answer: "Filtro actualizado.",
-    pendingPaymentIntentId: null,
   });
 
   const thirdProcess = new SupabaseSessionStore(client);
@@ -117,7 +111,6 @@ test("SupabaseSessionStore recupera el estado después de crear una instancia nu
   assert.equal(final.success, true);
   if (final.success) {
     assert.equal(final.state.turns.length, 2);
-    assert.equal(final.state.pendingPaymentIntentId, undefined);
   }
 });
 
@@ -131,8 +124,6 @@ function emptyRow(): Record<string, unknown> {
     specification: null,
     turns: [],
     interaction_state: {},
-    financial_constraints: { revision: 0, protectedExpenseCategories: [] },
-    pending_payment_intent_id: null,
   };
 }
 
@@ -147,7 +138,5 @@ function failureRow(resultCode: string): Record<string, unknown> {
     specification: null,
     turns: null,
     interaction_state: null,
-    financial_constraints: null,
-    pending_payment_intent_id: null,
   };
 }

@@ -53,7 +53,7 @@ export function createUiPlanner(settings: PlannerSettings = readPlannerSettings(
     return createModelUiPlanner(
       "gemini",
       new GeminiModel(settings.gemini),
-      new GeminiUiGenerator(settings.gemini, fetch, env.FINANCIAL_EXPERIENCE_SCOPE),
+      new GeminiUiGenerator(settings.gemini),
     );
   }
   if (settings.mode === "local-model") {

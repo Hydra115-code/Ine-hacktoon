@@ -9,7 +9,6 @@ import {
   type SessionStore,
 } from "../application/ports/session-store.js";
 import { applySessionCompletion } from "../application/session-state.js";
-import { FinancialCategorySchema } from "../domain/transaction.js";
 import { mapearErrorSupabase, RepositoryError } from "../errors/repository.error.js";
 import { telemetry } from "../observability/telemetry.js";
 import { readSessionUiSnapshot, isMissingSnapshotRpc } from "../integration/session-ui-snapshot.js";
@@ -33,17 +32,11 @@ const InteractionValueSchema = z.union([
   z.array(z.string().max(500)).max(24),
   z.object({ start: z.string().max(10), end: z.string().max(10) }).strict(),
 ]);
-const MoneySchema = z.object({
-  amount: z.string().regex(/^\d{1,12}(?:\.\d{1,2})?$/u),
-  currency: z.literal("MXN"),
-}).strict();
-const ConstraintsSchema = z.object({
-  revision: z.number().int().nonnegative(),
-  savingsGoal: MoneySchema.optional(),
-  horizonMonths: z.number().int().min(1).max(600).optional(),
-  monthlyContribution: MoneySchema.optional(),
-  protectedExpenseCategories: z.array(FinancialCategorySchema).max(20),
-}).strict();
+// Las funciones SQL de sesión aún exigen estos dos parámetros; se envían vacíos.
+const EMPTY_LEGACY_SESSION_FIELDS = {
+  p_financial_constraints: { revision: 0, protectedExpenseCategories: [] },
+  p_pending_payment_intent_id: null,
+} as const;
 const BeginRowSchema = z.object({
   result_code: ResultCodeSchema,
   user_id: z.string().uuid().nullable(),
@@ -54,8 +47,6 @@ const BeginRowSchema = z.object({
   specification: uiSpecificationSchema.nullable(),
   turns: z.array(TurnSchema).max(6).nullable(),
   interaction_state: z.record(z.string().max(100), InteractionValueSchema).nullable(),
-  financial_constraints: ConstraintsSchema.nullable(),
-  pending_payment_intent_id: z.string().uuid().nullable(),
 }).passthrough();
 const MutationRowSchema = z.object({ result_code: ResultCodeSchema }).passthrough();
 
@@ -83,7 +74,6 @@ export class SupabaseSessionStore implements SessionStore {
       || !row.data_keys
       || !row.turns
       || !row.interaction_state
-      || !row.financial_constraints
     ) {
       throw new RepositoryError("Respuesta incompleta de begin_agent_session", "DATABASE_ERROR");
     }
@@ -96,22 +86,6 @@ export class SupabaseSessionStore implements SessionStore {
       ...(row.specification ? { specification: row.specification } : {}),
       turns: row.turns,
       interactionState: row.interaction_state as Record<string, UIEvent["event"]["value"]>,
-      financialConstraints: {
-        revision: row.financial_constraints.revision,
-        protectedExpenseCategories: row.financial_constraints.protectedExpenseCategories,
-        ...(row.financial_constraints.savingsGoal
-          ? { savingsGoal: row.financial_constraints.savingsGoal }
-          : {}),
-        ...(row.financial_constraints.horizonMonths !== undefined
-          ? { horizonMonths: row.financial_constraints.horizonMonths }
-          : {}),
-        ...(row.financial_constraints.monthlyContribution
-          ? { monthlyContribution: row.financial_constraints.monthlyContribution }
-          : {}),
-      },
-      ...(row.pending_payment_intent_id
-        ? { pendingPaymentIntentId: row.pending_payment_intent_id }
-        : {}),
     };
     try {
       const result = await readSessionUiSnapshot(this.client, input.sessionId, input.correlationId);
@@ -142,8 +116,7 @@ export class SupabaseSessionStore implements SessionStore {
       p_specification: completed.specification ?? null,
       p_turns: completed.turns,
       p_interaction_state: completed.interactionState,
-      p_financial_constraints: completed.financialConstraints,
-      p_pending_payment_intent_id: completed.pendingPaymentIntentId ?? null,
+      ...EMPTY_LEGACY_SESSION_FIELDS,
     };
     const completeKeys = Object.keys(completed.dataRegistry ?? {}).sort();
     const hasSnapshot = completed.dataRegistry !== undefined

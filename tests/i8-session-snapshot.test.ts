@@ -41,7 +41,7 @@ test("I8 persiste con RPC atómica y restaura datos al crear otra instancia", as
     if (name === "begin_agent_session") return { data: [{ result_code: "success", user_id: actorId, session_id: sessionId,
       interface_revision: persisted?.interfaceRevision ?? 0, data_revision: persisted?.dataRevision ?? 0,
       data_keys: persisted?.dataKeys ?? [], specification: persisted?.specification ?? null,
-      turns: [], interaction_state: {}, financial_constraints: { revision: 0, protectedExpenseCategories: [] }, pending_payment_intent_id: null }], error: null };
+      turns: [], interaction_state: {} }], error: null };
     assert.equal(name, "complete_agent_session_snapshot");
     atomicCalls += 1;
     assert.deepEqual(parameters.p_data_registry, snapshot.data);

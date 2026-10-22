@@ -45,7 +45,7 @@ interface TranscriptionEvent {
 
 async function main(): Promise<void> {
   requireSupportedTerminal();
-  stdout.write("Prueba de voz en modo de solo lectura. No puede ejecutar pagos.\n");
+  stdout.write("Prueba de voz en modo de solo lectura.\n");
 
   const accessToken = await getSupabaseAccessTokenWithPassword(
     await requestCredentials(),
@@ -117,7 +117,7 @@ async function recordAndTranscribe(session: RealtimeSession): Promise<string> {
   try {
     await terminal.question("\nPresiona Enter para comenzar a grabar...");
     recorder = startRecorder(socket);
-    await terminal.question("Grabando. Pregunta por tu saldo y presiona Enter para detener...\n");
+    await terminal.question("Grabando. Pregunta por la participación en tu estado y presiona Enter para detener...\n");
     recordingStopped = true;
     const finalAudio = await stopRecorder(recorder);
     sendAudio(socket, finalAudio, true);

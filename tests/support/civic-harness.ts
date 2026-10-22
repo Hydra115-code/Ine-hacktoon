@@ -6,8 +6,8 @@ import {
   type UIEvent,
 } from "@banorte/contracts";
 import { CIVIC_TOOL_NAMES } from "../../src/agent/civic-tool-policy.js";
-import { type FinancialToolClient } from "../../src/agent/mcp-client/financial-mcp-client.js";
-import { validateToolOutput } from "../../src/agent/mcp-client/tool-output-validator.js";
+import { type CivicToolClient } from "../../src/agent/mcp-client/civic-mcp-client.js";
+import { validateToolOutput } from "../../src/agent/mcp-client/civic-tool-output-validator.js";
 import { type ModelGateway } from "../../src/agent/model/model.js";
 import { AgentOrchestrator } from "../../src/agent/orchestrator.js";
 import { createModelUiPlanner } from "../../src/agent/planning/ui-planner.js";
@@ -66,7 +66,7 @@ export class CivicHarness {
       createRuntime: async () => {
         const orchestrator = new AgentOrchestrator(
           createModelUiPlanner("gemini", createCivicModel(this.modelQueries), uiGenerator),
-          new CivicToolClient(this.toolCalls),
+          new RecordingToolClient(this.toolCalls),
           {
             maxToolCalls: 4,
             maxReasoningRepairs: 0,
@@ -114,7 +114,7 @@ export class RecordingSessionStore implements SessionStore {
   }
 }
 
-class CivicToolClient implements FinancialToolClient {
+class RecordingToolClient implements CivicToolClient {
   private readonly service = new CivicDataService({ now: () => new Date(QUERIED_AT) });
 
   constructor(private readonly calls: RecordedToolCall[]) {}

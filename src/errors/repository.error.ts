@@ -25,7 +25,6 @@ export type RepositoryErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "INVALID_INPUT"
-  | "INSUFFICIENT_FUNDS"
   | "DATABASE_ERROR"
   | "UNAUTHORIZED";
 
@@ -66,9 +65,6 @@ export function mapearErrorSupabase(
     }
     if (error.code === "P0002") {
       return new RepositoryError(`Recurso no encontrado en ${contexto}`, "NOT_FOUND", error);
-    }
-    if (error.code === "P0001" && /^insufficient funds$/iu.test(error.message.trim())) {
-      return new RepositoryError(`Saldo insuficiente en ${contexto}`, "INSUFFICIENT_FUNDS", error);
     }
     if (error.code === "22023" || error.code === "23514" || error.code === "P0001") {
       return new RepositoryError(`Entrada o estado inválido en ${contexto}`, "INVALID_INPUT", error);

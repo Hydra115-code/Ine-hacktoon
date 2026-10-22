@@ -1,4 +1,3 @@
-import { updateFinancialConstraints } from "../domain/financial-constraints.js";
 import {
   type AgentSessionSnapshot,
   type CompleteSessionInput,
@@ -24,12 +23,6 @@ export function applySessionCompletion(
   if (input.interaction) {
     interactionState[input.interaction.name] = input.interaction.value ?? null;
   }
-  const financialConstraints = input.prompt
-    ? updateFinancialConstraints(current.financialConstraints, input.prompt).constraints
-    : current.financialConstraints;
-  const pendingPaymentIntentId = input.pendingPaymentIntentId === undefined
-    ? current.pendingPaymentIntentId
-    : input.pendingPaymentIntentId ?? undefined;
 
   return {
     sessionId: input.sessionId,
@@ -45,7 +38,5 @@ export function applySessionCompletion(
       : current.specification ? { specification: current.specification } : {}),
     turns,
     interactionState,
-    financialConstraints,
-    ...(pendingPaymentIntentId ? { pendingPaymentIntentId } : {}),
   };
 }

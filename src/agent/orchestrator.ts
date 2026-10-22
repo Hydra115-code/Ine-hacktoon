@@ -2,10 +2,10 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { logger } from "../config/logger.js";
 import {
-  FinancialToolError,
-  FinancialToolTransportError,
-  type FinancialToolClient,
-} from "./mcp-client/financial-mcp-client.js";
+  CivicToolError,
+  ToolTransportError,
+  type CivicToolClient,
+} from "./mcp-client/civic-mcp-client.js";
 import {
   PlannerConfigurationError,
   PlannerProviderError,
@@ -58,7 +58,6 @@ import {
   isCivicResponseSafe,
   type CivicScopeBlockReason,
 } from "./security/civic-scope-policy.js";
-import type { FinancialExperienceScope } from "./security/financial-scope-policy.js";
 
 interface AgentOrchestratorConfig {
   maxToolCalls: number;
@@ -69,7 +68,6 @@ interface AgentOrchestratorConfig {
   userId?: string;
   maxReasoningRepairs?: number;
   permittedToolNames?: readonly string[];
-  experienceScope?: FinancialExperienceScope;
 }
 
 export interface AgentStreamOptions {
@@ -91,7 +89,7 @@ export class AgentOrchestrator {
 
   constructor(
     private readonly planner: UiPlanner,
-    private readonly tools: FinancialToolClient,
+    private readonly tools: CivicToolClient,
     private readonly config: AgentOrchestratorConfig,
   ) {
     this.currentDate = config.currentDate ?? (() => new Date().toISOString().slice(0, 10));
@@ -374,7 +372,7 @@ export class AgentOrchestrator {
   }
 
   private async executeTool(
-    call: Parameters<FinancialToolClient["callTool"]>[0],
+    call: Parameters<CivicToolClient["callTool"]>[0],
     signal?: AbortSignal,
   ): Promise<unknown> {
     const maxRetries = this.config.maxToolRetries ?? 1;
@@ -418,13 +416,13 @@ function createScopeAgentResponse(
 }
 
 function isRetryableToolError(error: unknown): boolean {
-  return error instanceof FinancialToolTransportError
-    || (error instanceof FinancialToolError && error.retryable);
+  return error instanceof ToolTransportError
+    || (error instanceof CivicToolError && error.retryable);
 }
 
 function validateToolCall(
   toolName: string,
-  call: Parameters<FinancialToolClient["callTool"]>[0],
+  call: Parameters<CivicToolClient["callTool"]>[0],
   knownTools: ReadonlySet<string>,
   executedCalls: Set<string>,
 ): void {
@@ -550,7 +548,7 @@ function createErrorEvent(
   if (error instanceof CivicReasoningError) {
     return {
       type: "error",
-      code: "financial-reasoning-error",
+      code: "evidence-validation-error",
       message: "No pudimos respaldar la respuesta con evidencia suficiente",
       recoverable: true,
       hasPartialData,
@@ -583,12 +581,12 @@ function createErrorEvent(
       hasPartialData,
     };
   }
-  if (error instanceof FinancialToolError || error instanceof FinancialToolTransportError) {
+  if (error instanceof CivicToolError || error instanceof ToolTransportError) {
     return {
       type: "error",
       code: "tool-error",
       message: "Una herramienta de datos no pudo completar la solicitud",
-      recoverable: error instanceof FinancialToolTransportError,
+      recoverable: error instanceof ToolTransportError,
       hasPartialData,
     };
   }

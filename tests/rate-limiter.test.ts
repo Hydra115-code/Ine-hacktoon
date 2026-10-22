@@ -7,9 +7,9 @@ import { RateLimitError } from "../src/application/errors/rate-limit.error.js";
 import { ToolRateLimiter } from "../src/application/tool-rate-limiter.js";
 import { createSystemApi } from "../src/http/system-api.js";
 import {
-  FinancialMcpClient,
-  FinancialToolError,
-} from "../src/agent/mcp-client/financial-mcp-client.js";
+  CivicMcpClient,
+  CivicToolError,
+} from "../src/agent/mcp-client/civic-mcp-client.js";
 import { crearServidor } from "../src/server.js";
 
 test("comparte contadores entre scopes derivados y aísla usuarios", () => {
@@ -58,7 +58,7 @@ test("conserva el límite MCP al recrear el runtime del mismo usuario", async ()
     await first.callTool(statusCall());
     await assert.rejects(
       second.callTool(statusCall()),
-      (error: unknown) => error instanceof FinancialToolError && error.code === "rate_limited",
+      (error: unknown) => error instanceof CivicToolError && error.code === "rate_limited",
     );
     await assert.doesNotReject(otherUser.callTool(statusCall()));
   } finally {
@@ -99,7 +99,7 @@ function session(userId: string): AuthenticatedSupabaseSession {
 }
 
 function connectStatusClient(userId: string, rateLimiter: ToolRateLimiter) {
-  return FinancialMcpClient.connect(crearServidor(
+  return CivicMcpClient.connect(crearServidor(
     { client: {} as AuthenticatedSupabaseSession["client"], user: { id: userId } },
     { rateLimiter },
   ));

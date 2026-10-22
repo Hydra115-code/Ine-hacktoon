@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { type FinancialToolClient } from "../src/agent/mcp-client/financial-mcp-client.js";
+import { type CivicToolClient } from "../src/agent/mcp-client/civic-mcp-client.js";
 import { type ModelGateway } from "../src/agent/model/model.js";
 import { AgentOrchestrator } from "../src/agent/orchestrator.js";
 import { createModelUiPlanner } from "../src/agent/planning/ui-planner.js";
@@ -130,7 +130,7 @@ function createOrchestrator(
       return { next: async () => ({ text: modelText, toolCalls: [] }) };
     },
   };
-  const tools: FinancialToolClient = {
+  const tools: CivicToolClient = {
     listTools: async () => {
       counters.catalog += 1;
       return [];
