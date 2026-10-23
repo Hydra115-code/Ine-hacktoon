@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ccpc-delivery/v1",
-  "description": "Initial team handoff snapshot; manifest excludes itself.",
+  "description": "Branch Data handoff: historical DATA-01/02/03 source plus the audited DATA-04/05/06 delivery ZIP, checksum and integration README; manifest excludes itself.",
   "files": [
     {
       "path": ".gitattributes",
@@ -16,6 +16,21 @@
       "path": ".nvmrc",
       "bytes": 8,
       "sha256": "51849cee918b92b09b95121b54380f6124c0f578d8c2323221c0d75bbbadb08d"
+    },
+    {
+      "path": "Entrega-final-CCPC-1.0.0.zip",
+      "bytes": 1365764,
+      "sha256": "ddb07cc64d45c6f7cfa2c2cb6b30941c22f538f1044d23a5c7a7193c9bd7199d"
+    },
+    {
+      "path": "Entrega-final-CCPC-1.0.0.zip.sha256",
+      "bytes": 95,
+      "sha256": "c3d0104b91eef1fbbd3141baf8cd0036a38360c969db3e017cd77e8b1b14bbb1"
+    },
+    {
+      "path": "README.md",
+      "bytes": 15750,
+      "sha256": "7eea615d6e1af59814c45df73b3fe11ed02875fc7655f7d565b85fc1592e56a6"
     },
     {
       "path": "data/ccpc/README.md",
@@ -173,6 +188,11 @@
       "sha256": "ef7f9fc08ec151432506f31b39def1003cea0265ec22625cd0d3b396a6d177be"
     },
     {
+      "path": "docs/evidence/data03-independent/README.md",
+      "bytes": 960,
+      "sha256": "41fa47d60316e99f8d228efdc2fd36c9a65ba1ce99ae1761f21b2f3ff8bb0b20"
+    },
+    {
       "path": "docs/evidence/data03-independent/expected-results.json",
       "bytes": 22623,
       "sha256": "5eab6eeb22ab9c17024d6b9138768084d70ca43b427da847e349fb992b24abc2"
@@ -181,11 +201,6 @@
       "path": "docs/evidence/data03-independent/query-execution-report.json",
       "bytes": 13799,
       "sha256": "3a9c38f6173ebb8c574ee7027f3fcb813d27fd433487d31910b418b7b298cbfb"
-    },
-    {
-      "path": "docs/evidence/data03-independent/README.md",
-      "bytes": 960,
-      "sha256": "41fa47d60316e99f8d228efdc2fd36c9a65ba1ce99ae1761f21b2f3ff8bb0b20"
     },
     {
       "path": "docs/evidence/handoff/01-install.log",
@@ -238,9 +253,9 @@
       "sha256": "0f51770769fd6dc444c798ee43244d0e4b1765d2963579479bfb186f7e210386"
     },
     {
-      "path": "README.md",
-      "bytes": 6529,
-      "sha256": "f87c831a6133bf3fe700cbc9485bbb2e1812239aa0c9208f7b110c42811613fd"
+      "path": "scripts/audit/data03/README.md",
+      "bytes": 2234,
+      "sha256": "fd16c371770b088882d25fad879b22acba07c409518fb1a68c015ec907d94aff"
     },
     {
       "path": "scripts/audit/data03/check_queries.mjs",
@@ -251,11 +266,6 @@
       "path": "scripts/audit/data03/independent_queries.py",
       "bytes": 8323,
       "sha256": "dc55c6b749f1442e90664f071a552d908cba4676ed431b8db26c0e772d0a41a6"
-    },
-    {
-      "path": "scripts/audit/data03/README.md",
-      "bytes": 2234,
-      "sha256": "fd16c371770b088882d25fad879b22acba07c409518fb1a68c015ec907d94aff"
     },
     {
       "path": "scripts/ccpc/download-data.ts",
