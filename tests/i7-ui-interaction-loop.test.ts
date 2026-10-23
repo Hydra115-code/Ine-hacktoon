@@ -158,6 +158,25 @@ test("los porcentajes de participación llegan como fracciones y los puntos porc
   assert.equal(value.dataType, "OBSERVED");
 });
 
+test("los identificadores públicos de la fuente se conservan y los privados no", () => {
+  const value = adaptUiDataSource({
+    id: "source-1",
+    toolName: "get_supporting_records",
+    data: {
+      userId: "10000000-0000-4000-8000-000000000001",
+      records: [{ entity: "Aguascalientes", sourceId: "ccpc-2024-01", sourceRows: 12, ownerId: "x" }],
+      sources: [{ id: "ccpc-2024-01", year: 2024, url: "https://example.org/ccpc.zip" }],
+    },
+  }, 0).value as Record<string, unknown>;
+  const record = (value.records as Array<Record<string, unknown>>)[0]!;
+  const source = (value.sources as Array<Record<string, unknown>>)[0]!;
+
+  assert.equal(record.sourceId, "ccpc-2024-01");
+  assert.equal(source.id, "ccpc-2024-01");
+  assert.equal("userId" in value, false);
+  assert.equal("ownerId" in record, false);
+});
+
 test("rechaza eventos fabricados o valores que no pertenecen al control", () => {
   const forged = uiEventSchema.parse({
     version: "1",

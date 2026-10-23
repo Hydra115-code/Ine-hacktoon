@@ -91,15 +91,20 @@ function normalizeSourceData(source: UiDataSource): unknown {
   return { dataType: "OBSERVED", value: normalized };
 }
 
-function normalizeValues(value: unknown, field?: string): unknown {
+function isPrivateField(key: string, container?: string): boolean {
+  if (key === "sourceId" || (key === "id" && container === "sources")) return false;
+  return privateFieldPattern.test(key);
+}
+
+function normalizeValues(value: unknown, field?: string, container?: string): unknown {
   if ((typeof value === "string" || typeof value === "number") && percentageFieldPattern.test(field ?? "")) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? Number((numeric / 100).toFixed(6)) : value;
   }
-  if (Array.isArray(value)) return value.map((item) => normalizeValues(item));
+  if (Array.isArray(value)) return value.map((item) => normalizeValues(item, undefined, field));
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value)
-      .filter(([key]) => !privateFieldPattern.test(key))
+      .filter(([key]) => !isPrivateField(key, container))
       .map(([key, item]) => [key, normalizeValues(item, key)]));
   }
   return value;
