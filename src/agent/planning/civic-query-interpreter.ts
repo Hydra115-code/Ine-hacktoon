@@ -149,6 +149,14 @@ export function interpretCivicQuery(query: string): CivicPlan {
   return CivicPlanSchema.parse(buildPlan(merged));
 }
 
+export function readLatestRequest(query: string): { text: string; hasContext: boolean } {
+  const context = readRequestContext(query);
+  return {
+    text: context.latest,
+    hasContext: context.previous.length > 0 || context.selectedValue !== undefined || context.latest !== query,
+  };
+}
+
 function readRequestContext(query: string): RequestContext {
   const data = readEmbeddedJson(query);
   const intent = typeof data?.intent === "string" ? data.intent : undefined;
@@ -231,7 +239,7 @@ function extractYears(text: string): Pick<Extraction, "years" | "invalidYears" |
   const range = !expandsRange ? null
     : /\b(?:de|desde)\s+(?:el\s+)?(20\d{2})\s+(?:a|al|hasta)\s+(?:el\s+)?(20\d{2})\b/u.exec(text)
       ?? (TREND_WORDS.test(text) ? /\bentre\s+(20\d{2})\s+y\s+(20\d{2})\b/u.exec(text) : null);
-  const since = expandsRange ? /\bdesde\s+(?:el\s+)?(20\d{2})\b/u.exec(text) : null;
+  const since = /\bdesde\s+(?:el\s+)?(20\d{2})\b/u.exec(text);
   const valid = (year: number): year is CcpcYear => (CCPC_YEARS as readonly number[]).includes(year);
   let years: CcpcYear[] = mentioned.filter(valid);
   if (range) {

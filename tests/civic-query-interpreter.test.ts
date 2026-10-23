@@ -163,6 +163,12 @@ test("compara contra la elección anterior sin que el usuario dé ambos años", 
   assert.deepEqual(plan.entityCodes, ["14"]);
 });
 
+test("«desde» un año incluye todas las elecciones posteriores aunque la pregunta hable de cambio", () => {
+  const plan = interpretCivicQuery("¿Cómo ha cambiado la abstención desde 2012 a nivel nacional?");
+  assert.equal(plan.analysis, "trend");
+  assert.deepEqual(plan.years, [2012, 2015, 2018, 2021, 2024]);
+});
+
 test("en una conversación hereda los filtros que la nueva pregunta no cambia", () => {
   const context = { recentConversation: [{ user: "¿Cuál fue la participación en Jalisco en 2024?", assistant: "..." }] };
   const followUp = (prompt: string) => [

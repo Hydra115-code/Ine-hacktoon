@@ -48,6 +48,8 @@ test("bloquea peticiones partidistas", () => {
     "Recomiéndame un partido",
     "¿Cuál partido es el mejor?",
     "Escribe propaganda para mi candidato",
+    "¿Quién va a ganar la próxima elección?",
+    "Pronostica el resultado de la elección de 2030",
   ]) assert.deepEqual(classifyCivicQuery(query), { allowed: false, reason: "partisan" }, query);
 });
 

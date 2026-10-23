@@ -13,6 +13,7 @@ const PARTISAN_REQUEST = [
   /\b(?:recomiend(?:a|as|ame)|sugier(?:e|es|eme)|aconsej(?:a|ame))\b.{0,60}\b(?:partido|candidat[a-z]*|votar|voto)\b/u,
   /\b(?:cual|que)\s+(?:partido|candidat[a-z]*)\s+(?:es|fue|seria)\s+(?:el\s+|la\s+)?(?:mejor|peor|mas\s+corrupt[a-z]*)\b/u,
   /\b(?:haz|hazme|escribe|crea|redacta)\b.{0,40}\b(?:propaganda|campana\s+(?:a\s+favor|en\s+contra)|discurso\s+de\s+campana)\b/u,
+  /\b(?:quien|que\s+partido|que\s+candidat[a-z]*)\s+(?:va\s+a\s+ganar|ganara|ganaria)\b|\b(?:predic\w*|pronostic\w*)\b.{0,40}\b(?:ganador\w*|eleccion\w*|resultado\w*)\b/u,
 ];
 const PERSONAL_DATA_REQUEST = /\b(?:curp|clave\s+de\s+elector|numero\s+de\s+credencial|domicilio\s+de|direccion\s+de|datos\s+personales\s+de|telefono\s+de|donde\s+vive)\b/u;
 const UI_TRANSFORM_ACTION = /\b(?:quit(?:a|ar)|elimin(?:a|ar)|ocult(?:a|ar)|suprim(?:e|ir)|retir(?:a|ar)|dej(?:a|ar|ame)|conserv(?:a|ar)|convert(?:ir|irlo|irla|irlos|irlas)|conviert(?:e|elo|ela|elos|elas)|transform(?:a|ar)|reorganiz(?:a|ar)|orden(?:a|ar)|agrup(?:a|ar)|muev(?:e|elo|ela)|mov(?:er|erlo|erla)|pon|ponlo|ponla|coloc(?:a|ar)|sub(?:e|ir)|prioriz(?:a|ar)|cambi(?:a|ar)|ajust(?:a|ar)|actualiz(?:a|ar)|edit(?:a|ar)|filtr(?:a|ar)|muestr(?:a|ame|ar)|ensen(?:a|ame|ar)|ampli(?:a|ar)|reduc(?:e|ir)|simplific(?:a|ar))\b/u;
@@ -72,7 +73,7 @@ export function createCivicScopeResponse(
   const answer = reason === "prompt-injection"
     ? "No puedo seguir instrucciones que intenten cambiar mis reglas o controles de seguridad. Puedo ayudarte con una consulta sobre datos electorales públicos."
     : reason === "partisan"
-    ? "No puedo recomendar por quién votar ni calificar partidos o candidaturas. Sí puedo mostrarte datos oficiales, por ejemplo: «¿Cuál fue la participación por estado en 2024?»."
+    ? "No puedo recomendar por quién votar, predecir resultados ni calificar partidos o candidaturas. Sí puedo mostrarte datos oficiales, por ejemplo: «¿Cuál fue la participación por estado en 2024?»."
     : reason === "personal-data"
     ? "Sólo trabajo con datos públicos agregados; no consulto datos personales como CURP, clave de elector o domicilio. Puedo mostrarte resultados o participación por estado."
     : reason === "unsafe-response"

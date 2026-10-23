@@ -31,6 +31,7 @@
     "agent:login:stream:start": "node --env-file=.env dist/agent/login-stream-index.js",
     "auth:jwt": "node --env-file=.env --import tsx src/agent/jwt-index.ts",
     "auth:jwt:start": "node --env-file=.env dist/agent/jwt-index.js",
+    "eval:planner": "node --env-file-if-exists=.env --import tsx scripts/planner-evaluation/run.ts",
     "api": "node --env-file=.env --import tsx src/http/api-index.ts",
     "api:start": "node --env-file=.env dist/http/api-index.js",
     "trace": "node --import tsx src/observability/trace-cli.ts"
