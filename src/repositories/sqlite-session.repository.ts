@@ -31,6 +31,7 @@ const SnapshotSchema = z.object({
   dataRevision: z.number().int().nonnegative(),
   dataKeys: z.array(z.string().regex(/^[a-z][a-z0-9_]{0,63}$/u)).max(100),
   specification: uiSpecificationSchema.optional(),
+  previousSpecification: uiSpecificationSchema.optional(),
   dataRegistry: dataRegistrySchema.optional(),
   invalidatedKeys: z.array(z.string().min(1).max(64)).max(20).optional(),
   turns: z.array(z.object({

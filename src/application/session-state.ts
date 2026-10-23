@@ -24,6 +24,10 @@ export function applySessionCompletion(
     interactionState[input.interaction.name] = input.interaction.value ?? null;
   }
 
+  const replacesView = input.specification !== undefined && current.specification !== undefined
+    && JSON.stringify(input.specification) !== JSON.stringify(current.specification);
+  const previousSpecification = replacesView ? current.specification : current.previousSpecification;
+
   return {
     sessionId: input.sessionId,
     interfaceRevision: input.interfaceRevision,
@@ -36,6 +40,7 @@ export function applySessionCompletion(
     ...(input.specification
       ? { specification: input.specification }
       : current.specification ? { specification: current.specification } : {}),
+    ...(previousSpecification ? { previousSpecification } : {}),
     turns,
     interactionState,
   };

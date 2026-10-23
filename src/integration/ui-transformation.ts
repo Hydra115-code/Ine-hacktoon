@@ -10,8 +10,11 @@ import {
 export interface UiTransformationResult {
   specification: UISpecification;
   answer: string;
-  operation: "remove" | "preserve" | "replace" | "configure" | "reorder";
+  operation: "remove" | "preserve" | "replace" | "configure" | "reorder" | "restore";
 }
+
+type ChartMark = VisualizationNode["mark"];
+type SortDirection = "ascending" | "descending";
 
 /**
  * Applies presentation-only follow-ups to the persisted shared UI contract.
@@ -21,8 +24,22 @@ export function transformPersistedUi(options: {
   specification: UISpecification;
   dataRegistry: DataRegistryValue;
   prompt: string;
+  previousSpecification?: UISpecification;
 }): UiTransformationResult | null {
   const request = normalize(options.prompt);
+  const unchanged = (answer: string): UiTransformationResult => ({ specification: options.specification, answer, operation: "preserve" });
+  if (requestsUndo(request)) {
+    const previous = options.previousSpecification;
+    if (!previous || !bindingsResolve(previous.root, options.dataRegistry)) {
+      return unchanged("No hay una vista anterior disponible en esta conversación; dejé la vista actual igual.");
+    }
+    return { specification: previous, answer: "Regresé a la vista anterior con los mismos datos.", operation: "restore" };
+  }
+  const chartMark = requestedChartMark(request);
+  const removeMap = requestsRemoval(request, /\bmapa(?:s)?\b/u);
+  const sortDirection = requestedSortDirection(request);
+  const showSource = /\b(?:fuente|origen|procedencia)\b/u.test(request)
+    && /\b(?:muestr|ensen|dame|ver|cual|donde|agreg|pon|incluy|anad)[a-z]*\b/u.test(request);
   const removeCharts = requestsRemoval(request, /\bgrafic[a-z]*\b|\bvisualiz[a-z]*\b/u);
   const removeTables = requestsRemoval(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
   const onlyTables = requestsOnly(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
@@ -43,6 +60,20 @@ export function transformPersistedUi(options: {
     nextRoot = createLargestChangeView(options.specification.root, options.dataRegistry);
     answer = "Dejé únicamente la evidencia del cambio más grande, sin volver a consultar ni modificar los datos.";
     operation = "preserve";
+  } else if (chartMark) {
+    if (!findFirst(options.specification.root, isCartesianChart)) {
+      return unchanged("Esta vista no tiene una gráfica que se pueda cambiar; pide primero una gráfica.");
+    }
+    nextRoot = mapTree(options.specification.root, (node) => (
+      isCartesianChart(node) ? { ...node, mark: chartMark } : node
+    ));
+    answer = `Cambié la gráfica a ${CHART_MARK_NAMES[chartMark]} con los mismos datos.`;
+    operation = "configure";
+  } else if (removeMap) {
+    if (!findFirst(options.specification.root, isMapNode)) return unchanged("Esta vista no incluye un mapa; la dejé igual.");
+    nextRoot = filterTree(options.specification.root, (node) => !isMapNode(node));
+    answer = "Quité el mapa y conservé el resto del análisis con los mismos datos.";
+    operation = "remove";
   } else if (convertToTable) {
     nextRoot = mapTree(options.specification.root, (node) => (
       node.type === "visualization" ? visualizationToTable(node) : node
@@ -72,6 +103,15 @@ export function transformPersistedUi(options: {
     nextRoot = reorderEvidence(options.specification.root, reorder.target, reorder.position);
     answer = `Reordené ${reorder.target === "table" ? "las tablas" : "las gráficas"} en la interfaz sin modificar los datos.`;
     operation = "reorder";
+  } else if (sortDirection) {
+    const hasSortableEvidence = findFirst(options.specification.root, (node) => (
+      (node.type === "table" && valueColumn(node.columns) !== undefined)
+      || (node.type === "visualization" && node.encoding.y !== undefined)
+    ));
+    if (!hasSortableEvidence) return unchanged("Esta vista no tiene una tabla o gráfica con valores para ordenar.");
+    nextRoot = mapTree(options.specification.root, (node) => sortNode(node, sortDirection));
+    answer = `Ordené los datos de ${sortDirection === "ascending" ? "menor a mayor" : "mayor a menor"} sin cambiarlos.`;
+    operation = "configure";
   } else if (sortable) {
     nextRoot = mapTree(options.specification.root, (node) => node.type === "table"
       ? {
@@ -81,6 +121,17 @@ export function transformPersistedUi(options: {
         }
       : node);
     answer = "Habilité el ordenamiento de la tabla sin cambiar los datos mostrados.";
+    operation = "configure";
+  } else if (showSource) {
+    const existing = findFirst(options.specification.root, isSourceNotice);
+    if (existing) return unchanged(`${describeSource(existing)} Está al final de la vista.`);
+    const names = sourceNames(options.dataRegistry);
+    if (names.length === 0) return unchanged("No encontré la fuente en los datos de esta vista.");
+    const sourceNode: UINode = { type: "text", id: "fuente", variant: "caption", content: `Fuente: ${names.join("; ")}.`.slice(0, 600) };
+    nextRoot = "children" in options.specification.root
+      ? { ...options.specification.root, children: [...options.specification.root.children, sourceNode] } as UINode
+      : { type: "section", id: "vista-con-fuente", ariaLabel: "Vista con fuente", children: [options.specification.root, sourceNode] };
+    answer = `Agregué la fuente de los datos: ${names.join("; ")}.`;
     operation = "configure";
   } else {
     return null;
@@ -105,6 +156,80 @@ export function transformPersistedUi(options: {
     root: nextRoot,
   });
   return { specification: parsed, answer, operation };
+}
+
+const CHART_MARK_NAMES: Partial<Record<ChartMark, string>> = { line: "líneas", bar: "barras", area: "área" };
+
+function requestsUndo(request: string): boolean {
+  return /\b(?:regres|vuelv|volv|deshaz|deshac)[a-z]*\b/u.test(request)
+    && /\b(?:anterior|antes|previa|cambio)\b/u.test(request);
+}
+
+function requestedChartMark(request: string): ChartMark | undefined {
+  if (!/\b(?:cambi|conviert|convert|haz|hazl|pon|muestr|usa|pas)[a-z]*\b/u.test(request)) return undefined;
+  const match = /\b(?:grafic[a-z]*|visualiz[a-z]*)\s+(?:de\s+)?(lineas?|barras?|areas?)\b|\ba\s+(lineas?|barras?)\b/u.exec(request);
+  const kind = match?.[1] ?? match?.[2];
+  if (!kind) return undefined;
+  return kind.startsWith("linea") ? "line" : kind.startsWith("barra") ? "bar" : "area";
+}
+
+function requestedSortDirection(request: string): SortDirection | undefined {
+  if (/\b(?:de\s+menor\s+a\s+mayor|ascendente|menor\s+primero)\b/u.test(request)) return "ascending";
+  if (/\b(?:de\s+mayor\s+a\s+menor|descendente|mayor\s+primero)\b/u.test(request)) return "descending";
+  return undefined;
+}
+
+function isCartesianChart(node: UINode): node is VisualizationNode {
+  return node.type === "visualization" && ["line", "bar", "area"].includes(node.mark);
+}
+
+function isMapNode(node: UINode): boolean {
+  if (node.id && /(?:^|-)map(?:a|as)?(?:-|$)/u.test(node.id)) return true;
+  return (node.type === "alert" || node.type === "text") && /\bmapa(?:s)?\b/u.test(normalize(JSON.stringify(node)));
+}
+
+function valueColumn(columns: readonly TableColumn[]): TableColumn | undefined {
+  return columns.find((column) => column.format === "percentage") ?? columns.find((column) => column.format === "number");
+}
+
+function sortNode(node: UINode, direction: SortDirection): UINode {
+  if (node.type === "visualization" && node.encoding.y) return { ...node, sort: { by: "y", direction } };
+  if (node.type !== "table") return node;
+  const column = valueColumn(node.columns);
+  if (!column) return node;
+  return {
+    ...node,
+    columns: node.columns.map((candidate) => candidate.field === column.field ? { ...candidate, sortable: true } : candidate),
+    sorting: { ...node.sorting, enabled: true, default: { field: column.field, direction } },
+  };
+}
+
+function describeSource(node: UINode): string {
+  const text = node.type === "text" ? node.content : node.type === "alert" ? node.message : "";
+  return text || "La vista ya muestra su fuente.";
+}
+
+function sourceNames(registry: DataRegistryValue): string[] {
+  const names = Object.values(registry).flatMap((value) => {
+    const source = isRecord(value) && isRecord(value.source) ? value.source : undefined;
+    return typeof source?.name === "string" ? [source.name] : [];
+  });
+  return [...new Set(names)];
+}
+
+function bindingsResolve(root: UINode, registry: DataRegistryValue): boolean {
+  const bindings: string[] = [];
+  const walk = (value: unknown): void => {
+    if (Array.isArray(value)) value.forEach(walk);
+    else if (isRecord(value)) {
+      for (const [key, child] of Object.entries(value)) {
+        if (/binding$/iu.test(key) && typeof child === "string") bindings.push(child);
+        else walk(child);
+      }
+    }
+  };
+  walk(root);
+  return bindings.every((binding) => resolveRegistryPath(registry, binding) !== undefined);
 }
 
 function isSourceNotice(node: UINode): boolean {

@@ -16,9 +16,10 @@ const PARTISAN_REQUEST = [
   /\b(?:quien|que\s+partido|que\s+candidat[a-z]*)\s+(?:va\s+a\s+ganar|ganara|ganaria)\b|\b(?:predic\w*|pronostic\w*)\b.{0,40}\b(?:ganador\w*|eleccion\w*|resultado\w*)\b/u,
 ];
 const PERSONAL_DATA_REQUEST = /\b(?:curp|clave\s+de\s+elector|numero\s+de\s+credencial|domicilio\s+de|direccion\s+de|datos\s+personales\s+de|telefono\s+de|donde\s+vive)\b/u;
-const UI_TRANSFORM_ACTION = /\b(?:quit(?:a|ar)|elimin(?:a|ar)|ocult(?:a|ar)|suprim(?:e|ir)|retir(?:a|ar)|dej(?:a|ar|ame)|conserv(?:a|ar)|convert(?:ir|irlo|irla|irlos|irlas)|conviert(?:e|elo|ela|elos|elas)|transform(?:a|ar)|reorganiz(?:a|ar)|orden(?:a|ar)|agrup(?:a|ar)|muev(?:e|elo|ela)|mov(?:er|erlo|erla)|pon|ponlo|ponla|coloc(?:a|ar)|sub(?:e|ir)|prioriz(?:a|ar)|cambi(?:a|ar)|ajust(?:a|ar)|actualiz(?:a|ar)|edit(?:a|ar)|filtr(?:a|ar)|muestr(?:a|ame|ar)|ensen(?:a|ame|ar)|ampli(?:a|ar)|reduc(?:e|ir)|simplific(?:a|ar))\b/u;
-const UI_PRESENTATION_REFERENCE = /\b(?:grafic[a-z]*|tabl[a-z]*|tabal[a-z]*|vist[a-z]*|visualiz[a-z]*|mapa(?:s)?|timeline|linea\s+temporal|tarjet[a-z]*|indicador(?:es)?|metric[a-z]*|filtro(?:s)?|control(?:es)?|bloque(?:s)?|seccion(?:es)?|interfaz|ui|evidencia|resultado|comparacion(?:es)?|cambio(?:s)?|variacion(?:es)?|estos?\s+datos|lo\s+mismo|lo\s+anterior)\b/u;
+const UI_TRANSFORM_ACTION = /\b(?:quit(?:a|ar)|elimin(?:a|ar)|ocult(?:a|ar)|suprim(?:e|ir)|retir(?:a|ar)|dej(?:a|ar|ame)|conserv(?:a|ar)|convert(?:ir|irlo|irla|irlos|irlas)|conviert(?:e|elo|ela|elos|elas)|transform(?:a|ar)|reorganiz(?:a|ar)|orden[a-z]*|agrup(?:a|ar)|regres(?:a|ar)|vuelve|volver|deshaz|deshacer|muev(?:e|elo|ela)|mov(?:er|erlo|erla)|pon|ponlo|ponla|coloc(?:a|ar)|sub(?:e|ir)|prioriz(?:a|ar)|cambi(?:a|ar)|ajust(?:a|ar)|actualiz(?:a|ar)|edit(?:a|ar)|filtr(?:a|ar)|muestr(?:a|ame|ar)|ensen(?:a|ame|ar)|ampli(?:a|ar)|reduc(?:e|ir)|simplific(?:a|ar))\b/u;
+const UI_PRESENTATION_REFERENCE = /\b(?:grafic[a-z]*|tabl[a-z]*|tabal[a-z]*|vist[a-z]*|visualiz[a-z]*|mapa(?:s)?|timeline|linea\s+temporal|tarjet[a-z]*|indicador(?:es)?|metric[a-z]*|filtro(?:s)?|control(?:es)?|bloque(?:s)?|seccion(?:es)?|interfaz|ui|evidencia|resultado|comparacion(?:es)?|cambio(?:s)?|variacion(?:es)?|estos?\s+datos|lo\s+mismo|lo\s+anterior|fuente(?:s)?|origen|de\s+menor\s+a\s+mayor|de\s+mayor\s+a\s+menor|ascendente|descendente)\b/u;
 const UI_REPLAY_FOLLOW_UP = /\b(?:muestr(?:a|ame)|ensen(?:a|ame))\b.{0,45}\b(?:lo\s+mismo|lo\s+anterior|estos?\s+datos|de\s+nuevo|otra\s+vez)\b|\b(?:de\s+nuevo|otra\s+vez)\b.{0,45}\b(?:muestr(?:a|ame)|ensen(?:a|ame))\b/u;
+const CIVIC_FOLLOW_UP = /\b(?:mujer(?:es)?|hombre(?:s)?|sexo|genero|edad(?:es)?|joven(?:es)?|adult[oa]s\s+mayores|urban[ao]s?|rural(?:es)?|mixt[ao]s?|(?:19|20)\d{2}|compar[a-z]*|desglos[a-z]*|tendencia|evolucion|abstencion)\b/u;
 const GREETING = /^(?:hola|buen(?:os|as)?\s+(?:dias|tardes|noches)|hey|hello|hi|gracias|muchas\s+gracias|adios|hasta\s+luego)[!,.?\s]*$/u;
 const CAPABILITIES = /\b(?:que\s+(?:puedes|sabes)\s+hacer|como\s+(?:puedes\s+)?ayudarme|en\s+que\s+(?:puedes\s+)?ayudarme|tus\s+capacidades|quien\s+eres|what\s+can\s+you\s+do|how\s+can\s+you\s+help)\b/u;
 const SAFE_CONVERSATION = /\b(?:hola|gracias|con\s+gusto|puedo\s+ayudarte|como\s+puedo\s+ayudarte|hasta\s+luego)\b/u;
@@ -50,6 +51,7 @@ export function classifyCivicQuery(query: string): CivicScopeDecision {
     return { allowed: true, category: "ui-transform" };
   }
   if (CIVIC_INTENT.test(request)) return { allowed: true, category: "civic" };
+  if (hasPriorCivicSessionContext(normalized) && CIVIC_FOLLOW_UP.test(request)) return { allowed: true, category: "civic" };
   if (GREETING.test(request)) return { allowed: true, category: "greeting" };
   if (CAPABILITIES.test(request)) return { allowed: true, category: "capabilities" };
   return { allowed: false, reason: "out-of-scope" };

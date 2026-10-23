@@ -146,7 +146,7 @@ La fuente y el aviso de datos de muestra se agregan automáticamente. Si la resp
 
 Respeta preferencias como "sólo la tabla", "sin tabla" o "sólo la gráfica". Si se pide un mapa y el frontend aún no lo soporta, muestra un aviso y usa el ranking como alternativa. Cada documento se valida con Zod y con los validadores semánticos antes de enviarse. Si la composición falla, hay una interfaz de respaldo sin IA (`civic-ui-fallback.ts`).
 
-La edición de una vista ya mostrada ("deja sólo la tabla", "muéstrame la fuente", "ordénala") se resuelve en `src/integration/ui-transformation.ts` sin volver a consultar los datos.
+La edición de una vista ya mostrada se resuelve en `src/integration/ui-transformation.ts` sin volver a consultar los datos: "deja sólo la tabla", "quita la gráfica", "quita el mapa", "ordénalo de menor a mayor", "cambia a gráfica de líneas", "muéstrame la fuente" y "regresa a la vista anterior" (la sesión guarda la vista previa). Las preguntas de seguimiento que cambian datos, como "compara sólo mujeres y hombres", vuelven a consultar con el contexto de la conversación.
 
 ## Requisitos
 
@@ -255,7 +255,7 @@ pnpm build
 pnpm security:audit
 ```
 
-Estado actual: 134 pruebas (133 pasan y 1 se omite si no está configurado `CCPC_DATA_DIR`, porque usa el motor de datos real). Cubren, entre otras cosas:
+Estado actual: 142 pruebas (141 pasan y 1 se omite si no está configurado `CCPC_DATA_DIR`, porque usa el motor de datos real). Cubren, entre otras cosas:
 
 - paráfrasis que deben producir exactamente el mismo plan;
 - que el planificador no invente años, territorios ni filtros;
@@ -263,6 +263,7 @@ Estado actual: 134 pruebas (133 pasan y 1 se omite si no está configurado `CCPC
 - cada herramienta MCP por separado y en conjunto;
 - las reglas del validador de razonamiento y de interfaz;
 - las nueve composiciones, validadas contra el contrato compartido;
+- las ediciones conversacionales de la vista, incluida la vuelta a la vista anterior;
 - el respaldo del modelo local cuando falla o inventa;
 - que el sistema arranque sin Gemini.
 

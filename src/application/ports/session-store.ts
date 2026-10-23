@@ -15,6 +15,7 @@ export interface AgentSessionSnapshot extends SessionReference {
   invalidatedKeys?: readonly string[];
   sessionId: string;
   specification?: UISpecification;
+  previousSpecification?: UISpecification;
   turns: readonly SessionTurn[];
   interactionState: Readonly<Record<string, UIEvent["event"]["value"]>>;
 }

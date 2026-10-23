@@ -220,6 +220,7 @@ function snapshot(session: StoredSession): AgentSessionSnapshot {
       invalidatedKeys: [...(session.invalidatedKeys ?? [])],
     } : {}),
     ...(session.specification ? { specification: session.specification } : {}),
+    ...(session.previousSpecification ? { previousSpecification: session.previousSpecification } : {}),
     turns: session.turns.map((turn) => ({ ...turn })),
     interactionState: { ...session.interactionState },
   };

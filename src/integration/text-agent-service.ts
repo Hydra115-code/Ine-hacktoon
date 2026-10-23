@@ -276,6 +276,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
               specification: previousSpecification,
               dataRegistry: snapshotData,
               prompt: request.query,
+              ...(session.state.previousSpecification ? { previousSpecification: session.state.previousSpecification } : {}),
             })
           : null;
         if (transformation) {
