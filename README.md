@@ -1,187 +1,210 @@
-# Banorte GenUI — Backend
+# Backend — Consulta ciudadana de datos electorales con interfaz generativa
 
-Backend del agente de **banca personal con interfaz generativa**. Orquesta Gemini, expone datos y acciones financieras mediante MCP, aplica autenticación y RLS con Supabase y transmite texto, datos, especificaciones de UI y patches al frontend.
+Backend de un agente que responde preguntas en lenguaje natural sobre **participación electoral en México** (conteos censales de participación ciudadana, CCPC) y construye la interfaz para mostrarlas: indicadores, gráficas, tablas, filtros, notas metodológicas y la fuente de los datos.
 
-La UI no se elige desde una lista de pantallas fijas: el agente consulta herramientas financieras y genera una composición declarativa validada. Las interacciones posteriores regresan al mismo agente para ejecutar una acción o transformar la interfaz, cerrando el ciclo solicitado por el reto.
+La interfaz no sale de una lista de pantallas fijas. El agente entiende la pregunta, consulta herramientas MCP con datos agregados, valida las cifras y arma un documento declarativo de UI que el frontend renderiza. Las interacciones y ediciones posteriores ("deja sólo la tabla", elegir otra entidad en un filtro) regresan al mismo agente, que responde con una vista nueva o transformada.
 
-## Qué demuestra
+## Qué hace
 
-- Gemini es el centro de interpretación, razonamiento, selección de herramientas y composición de UI.
-- MCP separa al agente de las herramientas, servicios y repositorios financieros.
-- Una DSL tipada funciona como protocolo A2UI equivalente sin ejecutar código arbitrario.
-- Supabase Auth, RLS y RPC aíslan los datos sintéticos por usuario.
-- El stream NDJSON entrega progreso, texto, datos, UI y patches sin esperar una respuesta monolítica.
-- ElevenLabs ofrece sesiones de transcripción en tiempo real sin exponer la API key.
+- **Entiende preguntas abiertas** sobre participación, abstención y lista nominal, con faltas de ortografía, gentilicios ("neoleoneses"), alias ("CDMX"), rangos de años, "la elección anterior" y preguntas de seguimiento dentro de la misma conversación.
+- **Funciona sin conexión y sin claves de IA.** El planificador por defecto es determinista (por reglas). Gemini y un modelo local son opcionales.
+- **Consulta datos sólo a través de MCP**, con cuatro herramientas cívicas validadas con Zod.
+- **Valida lo que dice y lo que muestra**: no infiere causas, no inventa cifras, distingue porcentaje de puntos porcentuales, conserva la fuente y no mezcla el total nacional con entidades en una misma gráfica.
+- **Elige la composición de la interfaz** según la intención y la forma de los datos (ranking, línea de tiempo, pirámide de edad y sexo, comparación de dos elecciones, metodología, evidencia, etc.).
+- **Bloquea lo que está fuera de alcance**: recomendaciones de voto, predicciones de quién ganará, datos personales, intentos de cambiar sus instrucciones y temas que no son electorales.
+- **Transmite la respuesta por partes** (stream NDJSON): progreso, texto, datos, interfaz y cambios incrementales.
 
-## Arquitectura del backend
+## Arquitectura
 
 ```mermaid
 flowchart LR
-    F[Frontend Next.js] -->|POST /api/agent<br/>JWT + consulta o UIEvent| H[Capa HTTP]
-    H --> SEC[CORS, límite de cuerpo,<br/>rate limit y validación JWT]
-    SEC --> S[TextAgentService]
-    S --> O[Orquestador Gemini]
-    O <--> M[Cliente / servidor MCP]
-    M --> T[Herramientas financieras]
-    T --> SV[Servicios de dominio]
-    SV --> R[Repositorios]
-    R --> DB[(Supabase<br/>Postgres + RLS + RPC)]
-    O --> G[Generador de UI]
-    G --> V[Contratos Zod<br/>DSL segura]
-    V --> ST[Stream NDJSON<br/>texto, datos, UI, patches, estado]
+    F[Frontend] -->|POST /api/agent<br/>consulta o evento de UI| H[API HTTP]
+    H --> SEC[CORS, límite de cuerpo,<br/>rate limit y autenticación]
+    SEC --> S[Servicio del agente<br/>sesión y snapshot]
+    S --> SC[Política de alcance cívico]
+    SC --> O[Orquestador]
+    O --> P{Planificador<br/>UI_PLANNER_MODE}
+    P -->|rules| R[Intérprete por reglas]
+    P -->|local-model| L[Modelo local<br/>con respaldo a reglas]
+    P -->|gemini| G[Gemini]
+    O <--> M[Cliente MCP]
+    M --> T[4 herramientas cívicas]
+    T --> D[Servicio de datos]
+    D --> DS[(Fuente CCPC<br/>motor externo o muestra incluida)]
+    O --> V[Validador de razonamiento]
+    O --> C[Compositor de UI<br/>+ validadores semánticos]
+    C --> A[Adaptador al contrato compartido]
+    A --> ST[Stream NDJSON]
     ST --> F
-    S <--> SS[(Sesión y snapshot)]
-
-    F -. sesión STT .-> E[ElevenLabs realtime]
 ```
 
-### Flujo completo de consulta, render e interacción
+### Flujo de una pregunta
 
 ```mermaid
 sequenceDiagram
     participant Front as Frontend
     participant API as API HTTP
-    participant Auth as Supabase Auth
-    participant Agent as Gemini / agente
-    participant MCP as MCP financiero
-    participant DB as Supabase DB
+    participant Plan as Planificador
+    participant MCP as Herramientas MCP
+    participant UI as Compositor de UI
 
-    Front->>API: POST /api/agent + Bearer JWT
-    API->>Auth: Validar usuario
-    Auth-->>API: userId autenticado
-    API->>Agent: Mensaje + sesión + estado actual
-    Agent->>MCP: listTools / callTool
-    MCP->>DB: RPC o consulta bajo RLS
-    DB-->>MCP: Datos del usuario
-    MCP-->>Agent: Resultado estructurado
-    Agent-->>API: Texto + datos + UISpecification
-    API-->>Front: Stream NDJSON incremental
-    API->>DB: Persistir revisión/snapshot
-    Front->>API: UIEvent + uiRevision + dataRevision
-    API->>Agent: Continuar la misma experiencia
-    Agent-->>Front: Patch, acción o nueva UI
+    Front->>API: Pregunta o evento de UI + sesión
+    API->>API: Autenticación y política de alcance
+    API->>Plan: Pregunta + contexto de la conversación
+    Plan-->>API: Plan (intención, años, entidades, filtros)
+    API->>MCP: Llamadas a herramientas según el plan
+    MCP-->>API: Datos agregados con fuente y advertencias
+    API->>API: Respuesta en texto + validación de cifras
+    API->>UI: Datos + intención + preferencias
+    UI-->>API: Documento de UI validado
+    API-->>Front: Stream: texto, datos, UI por partes
+    Front->>API: Edición ("sólo la tabla") o filtro
+    API-->>Front: Vista transformada o nueva consulta
 ```
 
-## Tecnologías
+## Planificador
 
-| Capa | Implementación |
+El orquestador no depende de un proveedor concreto: recibe un `UiPlanner` y le pide, turno a turno, qué herramientas llamar o qué responder. El modo se elige con `UI_PLANNER_MODE`.
+
+| Modo | Qué usa | Cuándo conviene |
+|---|---|---|
+| `rules` (por defecto) | Intérprete determinista en TypeScript | Demo sin internet ni claves; respuestas repetibles en milisegundos |
+| `local-model` | Servidor compatible con OpenAI en el mismo equipo (por ejemplo Ollama) | Experimentos; si el modelo falla, tarda o inventa filtros, se usan las reglas |
+| `gemini` | API de Google Gemini | Cuando hay clave y se quiere generación abierta |
+
+El intérprete por reglas (`src/agent/planning/civic-query-interpreter.ts`) normaliza el texto y extrae:
+
+- **años** (sólo los que tienen conteo: 2009, 2012, 2015, 2018, 2021 y 2024), rangos ("de 2009 a 2024", "desde 2012") y "la elección anterior";
+- **entidades** por nombre, alias, gentilicio o clave INE;
+- **sexo, grupos de edad y tipo de sección** (urbana, mixta, rural);
+- **indicador**: participación, participación sobre lista nominal, abstención o lista nominal;
+- **tipo de análisis**, con puntuación ponderada: resumen, comparación, tendencia, desglose, evidencia o metodología;
+- **preferencias de presentación**: mapa, gráfica, tabla, ranking.
+
+Si falta información, el año no tiene conteo o la pregunta no es electoral, el planificador pide una aclaración en lugar de adivinar. El plan resultante se valida con Zod.
+
+El estado del planificador activo se informa en el encabezado `X-Ui-Planner` de `GET /api/system/status` (por ejemplo `rules; ready`).
+
+### Evaluación del modelo local
+
+`pnpm eval:planner` compara el modo `rules` contra el modelo local con 40 consultas: 34 del dominio electoral y 6 fuera de dominio. Mide intención, filtros correctos, filtros inventados, latencia, memoria y funcionamiento sin internet. El reporte se escribe en [`docs/evaluacion-modelo-local.md`](docs/evaluacion-modelo-local.md).
+
+Con un modelo de 1.5 B parámetros el resultado fue: reglas 38/40 filtros correctos, 0 inventados y 4 ms (p95); modelo local 16/40 filtros correctos, 21 inventados y 1.1 s (p95). Por eso el modo por defecto es `rules`.
+
+## Herramientas MCP
+
+| Herramienta | Qué devuelve |
 |---|---|
-| Runtime | Node.js 22 y TypeScript |
-| Modelo | Google Gemini por API REST |
-| Herramientas | Model Context Protocol SDK |
-| Datos/autenticación | Supabase Auth + PostgreSQL + RLS + RPC |
-| Contratos | Zod y paquete compartido `@banorte/contracts` |
-| Transporte web | API HTTP con stream NDJSON |
-| Transporte MCP | `stdio` |
-| Voz | ElevenLabs Scribe realtime |
+| `get_participation_summary` | Totales de un territorio y año: lista nominal, votaron, no votaron, no especificado, participación y abstención |
+| `compare_elections` | El mismo territorio en dos o más elecciones, con la diferencia en puntos porcentuales |
+| `get_participation_breakdown` | Desglose por entidad, sexo, grupo de edad o tipo de sección |
+| `get_supporting_records` | Registros de evidencia que respaldan una cifra, con su fuente |
+
+Además se exponen dos recursos: `civic://metric-definitions` (cómo se calcula cada indicador) y `civic://coverage` (qué años y dimensiones hay disponibles).
+
+Cada herramienta valida entrada y salida con Zod, tiene timeout por consulta, límite de llamadas por minuto y devuelve errores recuperables (`retryable`) en lugar de fallar en silencio. El flujo es `tool → servicio → fuente de datos`. El agente nunca lee los datos directamente.
+
+### Fuente de datos
+
+La lógica de datos está detrás de una interfaz (`CivicDataSource`, en `src/application/ports/civic-data.ts`), así que se puede cambiar el origen sin tocar las herramientas:
+
+- **Motor CCPC externo**: si `CCPC_DATA_DIR` apunta a la carpeta del módulo de datos, se carga dinámicamente (`src/infrastructure/ccpc/`).
+- **Muestra incluida**: si `CCPC_DATA_DIR` está vacío, se usa una muestra CCPC empaquetada en `src/fixtures/`, y las respuestas lo indican con un aviso.
+
+Indicadores oficiales: participación = votaron / (votaron + no votaron); abstención = no votaron / (votaron + no votaron). También se calculan la participación sobre lista nominal y el porcentaje no especificado.
+
+## Validación de respuestas
+
+**Texto** (`src/agent/reasoning/civic-reasoning-validator.ts`): se rechaza o se repara una respuesta que
+
+- afirma causas ("bajó porque…") que los datos no permiten;
+- menciona cifras, años o territorios que no vinieron de las herramientas;
+- confunde porcentaje con puntos porcentuales;
+- omite el numerador y el denominador cuando son necesarios;
+- compara elecciones sin advertir cambios metodológicos o de lista nominal;
+- habla de personas cuando los datos son agregados.
+
+La fuente y el aviso de datos de muestra se agregan automáticamente. Si la respuesta no se puede reparar, se devuelve un error recuperable y no se manda interfaz.
+
+**Interfaz** (`src/ui/generation/civic-semantic-ui-validator.ts` y `semantic-ui-validator.ts`): exige tabla o evidencia junto a las gráficas (salvo que el usuario pida "sin tabla" o "sólo la gráfica"), no mezcla el nivel nacional con entidades en una misma visualización y comprueba que títulos y textos hablen de los mismos territorios y años que los datos.
+
+## Composición de la interfaz
+
+`src/ui/generation/civic-ui-composer.ts` elige una de nueve composiciones según la intención y los campos que realmente traen los datos:
+
+| Composición | Cuándo | Componentes principales |
+|---|---|---|
+| `ranking` | Comparar entidades | Barras ordenadas + tabla |
+| `timeline` | Tres o más elecciones | Línea de tiempo + tabla |
+| `age-sex` | Edad y sexo juntos | Pirámide (barras por sexo) + tabla |
+| `two-elections` | Dos elecciones | Barras + indicador de diferencia + tabla |
+| `group-comparison` | Sexo o tipo de sección | Barras + tabla |
+| `summary` | Un territorio y un año | Indicadores + tabla |
+| `evidence` | Registros de respaldo | Tabla de evidencia con fuente |
+| `methodology` | Cómo se calcula algo | Texto metodológico y fuente |
+| `insufficient-data` | No hay datos suficientes | Explicación para la ciudadanía, sin gráficas vacías |
+
+Respeta preferencias como "sólo la tabla", "sin tabla" o "sólo la gráfica". Si se pide un mapa y el frontend aún no lo soporta, muestra un aviso y usa el ranking como alternativa. Cada documento se valida con Zod y con los validadores semánticos antes de enviarse. Si la composición falla, hay una interfaz de respaldo sin IA (`civic-ui-fallback.ts`).
+
+La edición de una vista ya mostrada ("deja sólo la tabla", "muéstrame la fuente", "ordénala") se resuelve en `src/integration/ui-transformation.ts` sin volver a consultar los datos.
 
 ## Requisitos
 
 - Git.
 - Node.js **22 o superior**.
 - Corepack y pnpm 10.34.5.
-- Proyecto de Supabase; para Supabase local también Docker y Supabase CLI.
-- API key de Google Gemini.
-- API key de ElevenLabs sólo si se habilita voz.
+- Opcional: clave de Google Gemini (modo `gemini`), Ollama u otro servidor compatible (modo `local-model`), clave de ElevenLabs (voz) y un proyecto de Supabase (modo de autenticación `supabase`).
 
-## Instalación desde cero
+## Instalación
 
 ```bash
-git clone git@github.com:Usualldude21/BanorteBackend.git
-cd BanorteBackend
-nvm install
-nvm use
+git clone -b Back-end <URL_DEL_REPOSITORIO>
+cd <carpeta-del-repositorio>
 corepack enable
 corepack prepare pnpm@10.34.5 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
 ```
 
-Los archivos `.nvmrc` y `.node-version` fijan Node 22. Comprueba la instalación con `node --version` y `pnpm --version`.
-
-## Preparar Supabase
-
-El esquema, migraciones, seed sintético y pruebas SQL están en `supabase/`. La guía detallada vive en [`supabase/README.md`](supabase/README.md).
-
-### Opción A — Supabase local reproducible
-
-```bash
-supabase start
-supabase db reset
-```
-
-`db reset` aplica todas las migraciones y `supabase/seed.sql`. Copia la URL y la clave pública informadas por la CLI al `.env` del backend y del frontend.
-
-### Opción B — Proyecto Supabase alojado
-
-```bash
-supabase login
-supabase link --project-ref TU_PROJECT_REF
-supabase db push
-```
-
-Para un proyecto nuevo, crea además un usuario normal de demostración desde Supabase Auth y carga únicamente datos sintéticos asociados a su UUID. No uses datos bancarios reales ni desactives RLS para simplificar la demo.
+En Windows (PowerShell) el último paso es `copy .env.example .env`. Comprueba la instalación con `node --version` y `pnpm --version`.
 
 ## Variables de entorno
 
-Parte de `.env.example`. Configuración mínima:
+Todo parte de `.env.example`. Con los valores por defecto (`AUTH_MODE=local_sqlite` y `UI_PLANNER_MODE=rules`) el backend arranca sin ninguna clave externa.
 
-```dotenv
-FINANCIAL_EXPERIENCE_SCOPE="personal_banking"
-SUPABASE_URL="https://TU_PROYECTO.supabase.co"
-SUPABASE_PUBLISHABLE_KEY="TU_CLAVE_PUBLICA"
-SUPABASE_ACCESS_TOKEN=""
+| Variable | Uso |
+|---|---|
+| `AUTH_MODE` | `local_sqlite` (sesiones en un archivo SQLite local, sin servicios externos) o `supabase` |
+| `AGENT_API_TOKEN` | Token de servicio que el frontend envía como `Bearer` en modo `local_sqlite` |
+| `SQLITE_DATABASE_PATH` / `LOCAL_ACTOR_ID` | Archivo de sesiones e identificador del actor local |
+| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` | Sólo en modo `supabase` |
+| `CCPC_DATA_DIR` / `CCPC_DATASET_PATH` | Carpeta y archivo del motor de datos CCPC; vacío = muestra incluida |
+| `UI_PLANNER_MODE` | `rules`, `local-model` o `gemini` |
+| `LOCAL_MODEL_URL` / `LOCAL_MODEL_NAME` / `LOCAL_MODEL_TIMEOUT_MS` | Modelo local; la URL debe ser `localhost` o `127.0.0.1` |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` / `GEMINI_TIMEOUT_MS` | Sólo en modo `gemini` |
+| `AGENT_API_HOST` / `AGENT_API_PORT` | Interfaz y puerto de la API (por defecto `127.0.0.1:3101`) |
+| `AGENT_API_ALLOWED_ORIGINS` | Orígenes exactos del frontend, separados por comas; no acepta `*` |
+| `AGENT_MAX_TOOL_CALLS` / `AGENT_TOOL_TIMEOUT_MS` / `AGENT_TOOL_MAX_RETRIES` | Límites del ciclo de herramientas |
+| `AGENT_AUTH_RATE_LIMIT_PER_MINUTE` / `AGENT_API_RATE_LIMIT_PER_MINUTE` / `MCP_RATE_LIMIT_PER_MINUTE` | Límites de uso |
+| `ELEVENLABS_API_KEY` y `ELEVENLABS_STT_*` | Transcripción de voz en tiempo real (opcional) |
 
-GEMINI_API_URL="https://generativelanguage.googleapis.com"
-GEMINI_API_KEY="TU_API_KEY"
-GEMINI_MODEL="gemini-3.7-flash"
+`.env` nunca se sube al repositorio.
 
-AGENT_API_HOST="127.0.0.1"
-AGENT_API_PORT="3101"
-AGENT_API_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
-AGENT_API_TOKEN=""
+## Ejecución
 
-ELEVENLABS_API_KEY=""
-```
-
-| Variable | Obligatoria | Uso |
-|---|---:|---|
-| `SUPABASE_URL` | Sí | URL del proyecto de datos y Auth. |
-| `SUPABASE_PUBLISHABLE_KEY` | Sí | Clave pública para validar sesiones y operar con RLS. |
-| `SUPABASE_ACCESS_TOKEN` | No | Token de usuario para herramientas/diagnóstico fuera de una petición HTTP. No es `service_role`. |
-| `GEMINI_API_KEY` | Sí | Credencial del modelo; sólo backend. |
-| `GEMINI_MODEL` | Sí | Modelo usado por el orquestador y generador. |
-| `AGENT_API_HOST` / `PORT` | Sí | Interfaz IPv4 y puerto del servidor HTTP. |
-| `AGENT_API_ALLOWED_ORIGINS` | Sí para navegador | Lista exacta separada por comas; no se acepta `*`. |
-| `AGENT_API_TOKEN` | No | Compatibilidad legada; nunca identifica por sí solo al usuario bancario. |
-| `ELEVENLABS_API_KEY` | Sólo voz | Se usa para emitir una sesión STT efímera. |
-| `AGENT_MAX_TOOL_CALLS` | No | Límite del ciclo de herramientas. |
-| `AGENT_TOOL_TIMEOUT_MS` | No | Timeout individual de herramienta. |
-| `AGENT_AUTH_RATE_LIMIT_PER_MINUTE` | No | Límite de validaciones JWT por dirección de red. |
-| `AGENT_API_RATE_LIMIT_PER_MINUTE` | No | Límite de operaciones costosas por usuario. |
-| `MCP_WRITE_RATE_LIMIT_PER_MINUTE` | No | Umbral reducido para herramientas con escritura. |
-
-No subas `.env`. No uses `service_role` y no registres JWT, contraseñas, audio o datos financieros completos en logs.
-
-## Ejecución local
-
-### API del agente para el frontend
+### API para el frontend
 
 ```bash
 pnpm api
 ```
 
-La API queda en `http://127.0.0.1:3101`. Comprueba el endpoint público:
+La API queda en `http://127.0.0.1:3101`. Para comprobarla:
 
 ```bash
-curl http://127.0.0.1:3101/api/system/status
+curl -i http://127.0.0.1:3101/api/system/status
 ```
 
-Después configura en el frontend:
-
-```dotenv
-AGENT_API_URL=http://127.0.0.1:3101/api/agent
-```
+En el frontend, la URL del agente es `http://127.0.0.1:3101/api/agent`.
 
 ### Servidor MCP por stdio
 
@@ -189,131 +212,94 @@ AGENT_API_URL=http://127.0.0.1:3101/api/agent
 pnpm dev
 ```
 
-Este comando expone las herramientas MCP para un host compatible; no inicia la API web.
+Expone las herramientas MCP para un host compatible; no levanta la API web.
 
-## Build y producción
+### Modelo local (opcional)
 
 ```bash
-pnpm build
-pnpm api:start
+ollama pull qwen2.5:1.5b
 ```
 
-El backend mantiene streaming, rate limits y sesiones en proceso, por lo que debe desplegarse como un servicio Node.js persistente compatible con respuestas largas; no como función de ejecución extremadamente corta.
+En `.env`: `UI_PLANNER_MODE=local-model`, `LOCAL_MODEL_URL=http://127.0.0.1:11434` y `LOCAL_MODEL_NAME=qwen2.5:1.5b`. Para medirlo contra las reglas: `pnpm eval:planner` (agrega `-- --sin-internet` si la prueba se hace desconectado).
 
 ## Endpoints HTTP
 
-| Método y ruta | Auth | Propósito |
+| Método y ruta | Autenticación | Propósito |
 |---|---:|---|
-| `GET /api/system/status` | No | Salud y capacidades sin exponer secretos. |
-| `POST /api/agent` | JWT | Consulta, interacción y stream generativo. |
-| `POST /api/agent/snapshot` | JWT | Recuperar la última revisión segura de una sesión. |
-| `POST /api/integration/financial-summary` | JWT | Verificación de integración de datos. |
-| `POST /api/transcription/realtime-session` | JWT | Crear sesión efímera de ElevenLabs STT. |
+| `GET /api/system/status` | No | Salud y capacidades, sin exponer secretos; planificador activo en `X-Ui-Planner` |
+| `POST /api/agent` | Sí | Pregunta, evento de UI o edición; responde con stream NDJSON |
+| `POST /api/agent/snapshot` | Sí | Recupera la última vista segura de una sesión |
+| `POST /api/transcription/realtime-session` | Sí | Crea una sesión efímera de transcripción de voz |
 
-Las peticiones protegidas usan `Authorization: Bearer <JWT_DE_SUPABASE>`. El cuerpo máximo es 16 KiB. El backend valida el JWT con Supabase, obtiene el `userId` y todas las operaciones de datos respetan ese contexto.
+El cuerpo máximo es 16 KiB. El stream de `/api/agent` lleva eventos de progreso, texto, resultados de herramientas, registros de datos, la interfaz (primero la raíz y luego cada bloque), cambios incrementales, estado, errores y cierre. Cada vista lleva número de revisión para descartar cambios obsoletos.
 
-El stream de `/api/agent` puede transportar eventos de progreso, deltas de texto, resultados de herramienta, registros de datos, UI completa, inicio de UI, patches, estado, errores y cierre. Frontend y backend deben mantener sincronizado el fingerprint de `@banorte/contracts`.
+Los porcentajes viajan al frontend como fracción (0.6122 = 61.22 %). El contrato compartido con el frontend vive en `packages/contracts/` y tiene una huella (fingerprint) que ambos lados deben compartir.
 
-## Datos y herramientas MCP
+## Seguridad
 
-Las herramientas cubren el giro elegido de banca personal, entre ellas:
+- CORS sólo con orígenes explícitos; límite de tamaño de cuerpo.
+- Rate limits separados para autenticación, operaciones costosas y herramientas MCP.
+- Política de alcance antes del planificador: bloquea recomendaciones de voto, predicciones, datos personales (CURP, clave de elector, domicilio), intentos de cambiar las instrucciones y temas ajenos.
+- Sólo datos públicos agregados; nada identifica a una persona.
+- La interfaz es una DSL tipada validada con Zod: no se ejecuta HTML ni JavaScript generado.
+- Timeouts, reintentos acotados y número máximo de herramientas por turno evitan ciclos.
+- Si falta el modelo o la voz, la API responde con un estado controlado y nunca inventa datos.
 
-- cuentas, saldos y resumen financiero;
-- movimientos y gasto por categoría;
-- flujo de efectivo y comparación de periodos;
-- patrones o importes atípicos con explicación de solidez;
-- estado de sesión y continuidad de la UI.
-
-Cada herramienta valida entrada y salida. El flujo general es `tool -> service -> repository -> RLS/RPC`; Gemini no consulta tablas directamente.
-
-## Seguridad y degradación
-
-- CORS sólo acepta orígenes explícitos.
-- Auth y operaciones costosas tienen rate limits separados.
-- Los JWT se validan contra Supabase antes de crear contexto financiero.
-- RLS aísla usuarios aun si una consulta se construye incorrectamente.
-- La DSL de UI se valida con Zod y no permite HTML/JavaScript arbitrario.
-- Sesiones, revisiones y snapshots evitan patches obsoletos y permiten recuperación.
-- Timeouts, reintentos acotados y número máximo de tools evitan bucles del agente.
-- Ante falta del modelo o voz, la API devuelve estado controlado; no inventa datos.
-
-## ¿Es obligatorio subirlo a la nube?
-
-**No.** El reto permite elegir libremente la infraestructura. Lo obligatorio es presentar una demo en vivo y entregar repositorio ejecutable, datos/APIs y documentación técnica con arquitectura y trade-offs.
-
-Para evaluación remota, una topología recomendable es:
-
-```mermaid
-flowchart LR
-    Front[Next.js HTTPS] -->|JWT + stream HTTPS| API[Backend Node]
-    API --> Supabase[(Supabase alojado)]
-    API --> Gemini[Google Gemini]
-    API --> Eleven[ElevenLabs]
-```
-
-En la plataforma elegida:
-
-1. Define `AGENT_API_HOST=0.0.0.0` si el proveedor lo requiere y asigna su puerto en `AGENT_API_PORT`.
-2. Guarda Gemini, ElevenLabs y Supabase como secretos, nunca variables públicas.
-3. Registra el dominio HTTPS exacto del frontend en `AGENT_API_ALLOWED_ORIGINS`.
-4. Configura el frontend con la URL HTTPS pública terminada en `/api/agent`.
-5. Verifica que el proxy no almacene ni corte el stream NDJSON.
-
-## Validación
+## Pruebas
 
 ```bash
 pnpm typecheck
+pnpm test           # todas las pruebas
+pnpm test:civic     # sólo planificador, herramientas, validadores y composición
 pnpm build
-pnpm test:challenge
-pnpm test:i4
 pnpm security:audit
 ```
 
-`test:challenge` cubre los escenarios del reto y `test:i4` valida contratos/flujo integrado. Algunas pruebas reales necesitan `.env`, Supabase accesible y credenciales vigentes.
+Estado actual: 134 pruebas (133 pasan y 1 se omite si no está configurado `CCPC_DATA_DIR`, porque usa el motor de datos real). Cubren, entre otras cosas:
 
-## Correspondencia con los entregables del reto
+- paráfrasis que deben producir exactamente el mismo plan;
+- que el planificador no invente años, territorios ni filtros;
+- aclaraciones y herencia de filtros en conversación;
+- cada herramienta MCP por separado y en conjunto;
+- las reglas del validador de razonamiento y de interfaz;
+- las nueve composiciones, validadas contra el contrato compartido;
+- el respaldo del modelo local cuando falla o inventa;
+- que el sistema arranque sin Gemini.
 
-| Entregable | Evidencia en este repositorio |
-|---|---|
-| Servidor MCP | `src/server.ts`, herramientas en `src/tools` y cliente en `src/agent/mcp-client` |
-| Datos/APIs | API HTTP, migraciones, RPC, RLS, seed y pruebas de Supabase |
-| Capa A2UI o equivalente | DSL, generación, runtime, patches y contratos en `src/ui` |
-| Ciclo cerrado | `UIEvent` con revisiones vuelve al agente y genera acción o UI |
-| Repositorio ejecutable | Instalación, entorno, comandos y pruebas documentados aquí |
-| Arquitectura/trade-offs | Diagramas, seguridad y decisiones documentadas en ambos README |
+## Estructura
+
+```text
+src/http/                    API HTTP: endpoints, CORS, límites y estado del sistema
+src/agent/orchestrator.ts    ciclo pregunta → plan → herramientas → respuesta → UI
+src/agent/planning/          planificadores (reglas, modelo local, Gemini) y plan cívico
+src/agent/security/          política de alcance cívico
+src/agent/reasoning/         preparación de datos y validador de razonamiento
+src/agent/mcp-client/        cliente MCP y validación de salidas
+src/agent/prompts/           instrucciones para el modo Gemini
+src/agent/stream/            eventos del stream NDJSON
+src/server.ts                servidor MCP: registra herramientas y recursos
+src/tools/                   las cuatro herramientas cívicas
+src/services/                servicio de datos cívicos (timeouts, cálculo de indicadores)
+src/application/ports/       interfaz de la fuente de datos
+src/infrastructure/ccpc/     adaptador al motor de datos CCPC
+src/fixtures/                muestra CCPC incluida
+src/resources/               recursos MCP (definiciones y cobertura)
+src/domain/                  catálogo de entidades con su clave INE
+src/ui/                      DSL de interfaz, composición, validadores y respaldo
+src/integration/             sesiones, snapshots, adaptador al contrato y ediciones de vista
+src/repositories/            sesiones en SQLite o Supabase
+src/transcription/           voz en tiempo real
+packages/contracts/          contrato compartido con el frontend
+scripts/planner-evaluation/  evaluación del planificador (40 consultas)
+tests/                       pruebas automatizadas
+```
 
 ## Decisiones y trade-offs
 
-- **MCP frente a acceso directo del LLM:** añade una capa, pero vuelve herramientas auditables, tipadas y reemplazables.
-- **DSL segura frente a código generado:** reduce libertad absoluta de layout, pero evita ejecución arbitraria y conserva identidad visual.
-- **NDJSON frente a JSON único:** mejora la respuesta percibida y habilita patches, a cambio de manejo explícito de continuidad.
-- **Supabase/RLS frente a datos en memoria:** exige migraciones y credenciales, pero demuestra aislamiento y consultas realistas.
-- **Dos procesos frente a monolito:** frontend y agente escalan/securizan por separado, a cambio de CORS y contratos compartidos.
-- **Banca personal enfocada:** prioriza profundidad y calidad sobre cubrir pagos y educación financiera superficialmente.
-
-## Estructura relevante
-
-```text
-src/http/                 servidor HTTP, auth, CORS, límites y endpoints
-src/agent/                orquestación del modelo y ciclo de herramientas
-src/agent/mcp-client/     cliente Model Context Protocol del agente
-src/server.ts             servidor MCP y transporte stdio
-src/tools/                herramientas financieras expuestas al agente
-src/services/             reglas de negocio
-src/repositories/         acceso a Supabase bajo contexto de usuario
-src/ui/                   DSL, generación, interacción, runtime y streaming
-src/transcription/        integración de ElevenLabs
-packages/contracts/       contrato compartido con el frontend
-supabase/migrations/      esquema, RLS, RPC y persistencia de sesiones/UI
-supabase/seed.sql         datos exclusivamente sintéticos
-supabase/tests/            verificaciones SQL y de políticas
-```
-
-## Checklist de demo
-
-1. `GET /api/system/status` confirma modelo, datos y voz sin revelar claves.
-2. El JWT pertenece a un usuario demo con datos sintéticos y RLS activa.
-3. Una pregunta abierta obliga al agente a seleccionar tools y una composición adecuada.
-4. Una interacción o edición produce patch/nueva UI en la misma sesión.
-5. Las conclusiones se sustentan con movimientos visibles y no con datos inventados.
-6. Los logs y el repositorio no contienen secretos ni información financiera real.
+- **Reglas por defecto en lugar de un modelo:** cubren menos variedad de lenguaje que un modelo grande, pero son repetibles, explicables, instantáneas, funcionan sin internet y nunca inventan filtros.
+- **Planificador intercambiable:** el orquestador no sabe qué proveedor hay detrás, así que cambiar de reglas a Gemini o a un modelo local es configuración, no código.
+- **MCP entre el agente y los datos:** añade una capa, pero las herramientas quedan tipadas, auditables y reemplazables.
+- **Fuente de datos detrás de una interfaz:** se puede pasar de la muestra al motor CCPC completo sin tocar herramientas ni agente.
+- **DSL validada en lugar de código generado:** limita la libertad de diseño, pero evita ejecutar código arbitrario y permite validar la interfaz antes de mostrarla.
+- **Validar texto e interfaz por separado:** cuesta reintentos, pero evita que una cifra mal dicha o una gráfica engañosa llegue a la ciudadanía.
+- **Stream NDJSON:** la respuesta se percibe más rápido y habilita cambios incrementales, a cambio de manejar revisiones.
