@@ -13,3 +13,6 @@ packages/*/dist/
 Thumbs.db
 .vscode/
 .idea/
+/docs/
+/fixtures/financial-demo.json
+/supabase/README.md

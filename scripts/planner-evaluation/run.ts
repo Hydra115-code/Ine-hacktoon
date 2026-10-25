@@ -21,7 +21,7 @@ const url = process.env.LOCAL_MODEL_URL || "http://127.0.0.1:11434";
 const model = process.env.LOCAL_MODEL_NAME || "";
 const timeoutMs = Number(process.env.LOCAL_MODEL_TIMEOUT_MS || 8_000);
 const withoutInternet = process.argv.includes("--sin-internet");
-const reportPath = path.resolve("docs/evaluacion-modelo-local.md");
+const reportPath = path.resolve(".local/planner-evaluation.md");
 
 const available = model ? await isModelAvailable() : false;
 let lastOutcome: LocalModelOutcome = "fallback";
