@@ -75,13 +75,12 @@ test("F4 representa no_data como ausencia y nunca como participación cero", () 
   assert.doesNotMatch(serialized, /mexicoChoropleth/u);
 });
 
-test("F4 degrada sólo el nodo mapa al cruzar el contrato del backend de lectura", () => {
+test("F4 conserva el nodo mapa al cruzar el contrato cívico compartido", () => {
   const fallback = createCivicStreamFallback(patch(sharedBreakdown));
   assert.ok(fallback);
   const outbound = normalizeFrontendContractPayloadForBackend(fallback.specification) as Record<string, unknown>;
   const serialized = JSON.stringify(outbound);
-  assert.doesNotMatch(serialized, /mexicoChoropleth/u);
-  assert.match(serialized, /"type":"table"/u);
+  assert.match(serialized, /mexicoChoropleth/u);
   assert.match(serialized, /participationPct/u);
 });
 
@@ -95,10 +94,10 @@ test("F4 preserva la UI territorial progresiva frente al layout genérico del pl
   assert.match(source, /type: "ui-completed", revision: initial\.state\.revision/u);
 });
 
-test("F4 convierte la selección del mapa en refinamiento ciudadano compatible", () => {
+test("F4 envía la selección del mapa como interacción dentro de la sesión vigente", () => {
   const source = readFileSync(new URL("../src/features/agent/components/AgentSessionProvider.tsx", import.meta.url), "utf8");
-  assert.match(source, /event\.name === "map\.entity_selected"/u);
-  assert.match(source, /Profundiza en la participación de \$\{entity\}/u);
-  assert.match(source, /sessionIdRef\.current = undefined/u);
-  assert.match(source, /dataStateRef\.current = createDataRegistryPatchState\(\)/u);
+  assert.match(source, /dispatchAgentInteraction\(intent\.data\)/u);
+  assert.match(source, /dataKeys: \[\.\.\.authoritativeDataKeysRef\.current\]/u);
+  assert.doesNotMatch(source, /dataKeys: Object\.keys\(dataStateRef\.current\.data\)/u);
+  assert.doesNotMatch(source, /Profundiza en la participación de \$\{entity\}/u);
 });

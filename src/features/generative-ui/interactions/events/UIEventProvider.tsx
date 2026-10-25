@@ -9,6 +9,7 @@ import {
 
 const UIEventContext = createContext<LocalUIEventBus | null>(null);
 const TextDraftContext = createContext<Map<string, string> | null>(null);
+const InteractionValueContext = createContext<ReadonlyMap<string, InteractionValue | undefined>>(new Map());
 const EMPTY_PENDING_NODE_IDS: ReadonlySet<string> = new Set();
 const PendingNodeContext = createContext<ReadonlySet<string>>(EMPTY_PENDING_NODE_IDS);
 
@@ -23,14 +24,25 @@ export function UIEventProvider({ children, onEvent, pendingNodeIds = EMPTY_PEND
   const parentTextDrafts = useContext(TextDraftContext);
   const [localEventBus] = useState(() => new LocalUIEventBus());
   const [textDrafts] = useState(() => new Map<string, string>());
+  const [interactionValues, setInteractionValues] = useState<ReadonlyMap<string, InteractionValue | undefined>>(() => new Map());
   const eventBus = parentEventBus ?? localEventBus;
 
   useEffect(() => onEvent ? eventBus.subscribe(onEvent) : undefined, [eventBus, onEvent]);
+  useEffect(() => eventBus.subscribe((event) => {
+    if (!event.isValid) return;
+    setInteractionValues((current) => {
+      const next = new Map(current);
+      next.set(event.name, event.value);
+      return next;
+    });
+  }), [eventBus]);
 
   return (
     <UIEventContext.Provider value={eventBus}>
       <TextDraftContext.Provider value={parentTextDrafts ?? textDrafts}>
-        <PendingNodeContext.Provider value={pendingNodeIds}>{children}</PendingNodeContext.Provider>
+        <InteractionValueContext.Provider value={interactionValues}>
+          <PendingNodeContext.Provider value={pendingNodeIds}>{children}</PendingNodeContext.Provider>
+        </InteractionValueContext.Provider>
       </TextDraftContext.Provider>
     </UIEventContext.Provider>
   );
@@ -56,6 +68,10 @@ export function useNodePending(sourceId: string | undefined) {
 
 export function useUIEventBus() {
   return useContext(UIEventContext);
+}
+
+export function useInteractionValue(name: string) {
+  return useContext(InteractionValueContext).get(name);
 }
 
 export function useInteractionEvent(sourceId: string, name: string) {

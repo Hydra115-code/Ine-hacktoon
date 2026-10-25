@@ -66,6 +66,7 @@ import {
   type FrontendPerformanceSummary,
 } from "../performance/frontend-performance-sampler";
 import { isGuidanceOnly } from "../../workspace/presentation/is-guidance-only";
+import { citizenProgressMessage } from "../../../shared/citizen-language";
 
 interface GeneratedInterface {
   specification: UISpecification | null;
@@ -119,6 +120,7 @@ export interface AnalysisHistoryItem {
 
 interface AnalysisSnapshot extends AnalysisHistoryItem {
   answer: string;
+  authoritativeDataKeys: string[];
   changeSummary?: UIChangeSummary;
   correlationId?: string;
   dataState: DataRegistryPatchState;
@@ -221,6 +223,7 @@ function restoreAnalysisSnapshot(snapshot: PersistedAnalysisSnapshot): AnalysisS
       title: snapshot.title,
       updatedAt: snapshot.updatedAt,
       answer: snapshot.answer,
+      authoritativeDataKeys: snapshot.authoritativeDataKeys ?? [],
       changeSummary: snapshot.changeSummary,
       dataState,
       generatedInterface: {
@@ -258,6 +261,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
   const [generatedInterface, setGeneratedInterface] = useState<GeneratedInterface>();
   const patchStateRef = useRef<UIPatchState | undefined>(undefined);
   const dataStateRef = useRef<DataRegistryPatchState>(createDataRegistryPatchState());
+  const authoritativeDataKeysRef = useRef(new Set<string>());
   const synchronizationBlockedRef = useRef(false);
   const conflictedSessionIdsRef = useRef(new Set<string>());
   const recoveryEpochRef = useRef(0);
@@ -368,8 +372,8 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     const presentation = presentAgentFailure({ code, message, recoverable, hasPartialData: hasUsablePartialData });
     setCanRetry(presentation.canRetry);
     setFailure(presentation);
-    setActivityMessage(hasUsablePartialData ? "Conservamos la información disponible" : "La consulta necesita atención");
-    setError(message, scope);
+    setActivityMessage(hasUsablePartialData ? "Conservé la información que ya estaba lista" : "Necesito que intentemos de nuevo");
+    setError(presentation.message, scope);
   }, [discardBatchedCommit, preserveForDegradation, setError]);
 
   const { messages, sendMessage, setMessages, status, stop } = useChat<AgentUIMessage>({
@@ -392,6 +396,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
           synchronizationBlockedRef.current = false;
           patchStateRef.current = undefined;
           dataStateRef.current = createDataRegistryPatchState();
+          authoritativeDataKeysRef.current.clear();
           interactionRegistryRef.current.clear();
         }
       } else if (part.type === "data-interaction") {
@@ -412,6 +417,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         setActivityMessage(part.data.label);
         dispatchExperience({ type: "DATA_REQUESTED" });
       } else if (part.type === "data-dataAvailable") {
+        authoritativeDataKeysRef.current.add(part.data.key);
         dataStateRef.current = createDataRegistryPatchState({
           ...dataStateRef.current.data,
           [part.data.key]: part.data.value,
@@ -427,10 +433,12 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
           return;
         }
         dataStateRef.current = result.state;
+        if (part.data.op === "remove") authoritativeDataKeysRef.current.delete(part.data.key);
+        else authoritativeDataKeysRef.current.add(part.data.key);
         if (isFollowUpRequestRef.current) recordPendingChange("Se actualizaron los datos vinculados.");
         if (!isFollowUpRequestRef.current) scheduleCurrentInterface();
       } else if (part.type === "data-status") {
-        setActivityMessage(part.data.message);
+        setActivityMessage(citizenProgressMessage(part.data.message));
         if (part.data.stage === "retrieving_data") dispatchExperience({ type: "DATA_REQUESTED" });
         else if (part.data.stage === "generating_ui") dispatchExperience({ type: "UI_GENERATION_STARTED" });
         else if (part.data.stage === "updating") dispatchExperience({ type: "UI_UPDATE_STARTED" });
@@ -451,6 +459,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         }
         renderStartedAtRef.current ??= globalThis.performance.now();
         patchStateRef.current = initial.state;
+        for (const key of Object.keys(part.data.data ?? {})) authoritativeDataKeysRef.current.add(key);
         dataStateRef.current = createDataRegistryPatchState(
           { ...dataStateRef.current.data, ...(part.data.data ?? {}) },
           dataStateRef.current.revision,
@@ -478,6 +487,10 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         }
         renderStartedAtRef.current ??= globalThis.performance.now();
         patchStateRef.current = initial.state;
+        // Inline data included with the initial UI is authoritative too. If its
+        // keys are omitted from the next SessionReference, the backend correctly
+        // rejects an otherwise current follow-up as a revision conflict.
+        for (const key of Object.keys(part.data.data ?? {})) authoritativeDataKeysRef.current.add(key);
         dataStateRef.current = createDataRegistryPatchState(
           { ...dataStateRef.current.data, ...(part.data.data ?? {}) },
           dataStateRef.current.revision,
@@ -526,11 +539,11 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
           setCanRetry(false);
           setFailure(presentAgentFailure({
             code: "ui_revision_conflict",
-            message: "La interfaz terminó con una versión inconsistente.",
+            message: "La vista cambió mientras trabajábamos.",
             recoverable: true,
             hasPartialData: true,
           }));
-          setActivityMessage("Conservamos la última versión válida; falta sincronizar el snapshot vigente");
+          setActivityMessage("Conservé la última vista disponible. Intenta el cambio de nuevo.");
           return;
         }
         setCanRetry(false);
@@ -601,6 +614,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     sessionIdRef.current = activeSnapshot.id;
     patchStateRef.current = activeSnapshot.patchState;
     dataStateRef.current = activeSnapshot.dataState;
+    authoritativeDataKeysRef.current = new Set(activeSnapshot.authoritativeDataKeys);
     setActiveAnalysisId(activeSnapshot.id);
     setSessionTitle(activeSnapshot.title);
     setMessages(activeSnapshot.messages);
@@ -714,6 +728,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       title,
       updatedAt: generatedInterface.updatedAt,
       answer,
+      authoritativeDataKeys: [...authoritativeDataKeysRef.current],
       changeSummary,
       correlationId,
       dataState: dataStateRef.current,
@@ -747,6 +762,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         data: snapshot.dataState.data,
         interfaceRevision: snapshot.patchState.revision,
         dataRevision: snapshot.dataState.revision,
+        authoritativeDataKeys: snapshot.authoritativeDataKeys,
         invalidatedKeys: [...snapshot.dataState.invalidatedKeys],
         ...(snapshot.changeSummary ? {
           changeSummary: { ...snapshot.changeSummary, items: [...snapshot.changeSummary.items] },
@@ -809,7 +825,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
           sessionState: {
             interfaceRevision: patchState.revision,
             dataRevision: dataStateRef.current.revision,
-            dataKeys: Object.keys(dataStateRef.current.data),
+            dataKeys: [...authoritativeDataKeysRef.current],
           },
           currentSpecification: patchState.specification,
         },
@@ -828,6 +844,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     frontendRenderLatencyRef.current = undefined;
     patchStateRef.current = undefined;
     dataStateRef.current = createDataRegistryPatchState();
+    authoritativeDataKeysRef.current.clear();
     setTurnResults({});
     setTurnDetails({});
     updateGeneratedInterface(undefined);
@@ -852,6 +869,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     frontendRenderLatencyRef.current = undefined;
     patchStateRef.current = undefined;
     dataStateRef.current = createDataRegistryPatchState();
+    authoritativeDataKeysRef.current.clear();
     setPendingNodeIds(new Set());
     setPerformance(undefined);
     setRuntimeDiagnostics(undefined);
@@ -885,6 +903,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
     synchronizationBlockedRef.current = conflictedSessionIdsRef.current.has(snapshot.id);
     patchStateRef.current = snapshot.patchState;
     dataStateRef.current = snapshot.dataState;
+    authoritativeDataKeysRef.current = new Set(snapshot.authoritativeDataKeys);
     isInteractionRequestRef.current = false;
     interactionRegistryRef.current.clear();
     setActiveAnalysisId(snapshot.id);
@@ -952,7 +971,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         hasPartialData: Boolean(patchStateRef.current),
       }));
       setCanRetry(false);
-      setActivityMessage("Acción autoritativa protegida");
+      setActivityMessage("Esta acción necesita confirmación");
       return;
     }
 
@@ -966,27 +985,6 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       || status !== "ready"
       || interactionRegistryRef.current.isPending(event.sourceId)
     ) {
-      return;
-    }
-
-    if (event.name === "map.entity_selected" && typeof event.value === "string") {
-      const groups = dataStateRef.current.data.groups;
-      const selected = Array.isArray(groups)
-        ? groups.find((group) => group !== null
-          && typeof group === "object"
-          && !Array.isArray(group)
-          && (group as Record<string, unknown>).value === event.value) as Record<string, unknown> | undefined
-        : undefined;
-      const entity = typeof selected?.group === "string" ? selected.group : `la entidad con clave ${event.value}`;
-
-      // The current backend contract does not yet persist the frontend-only
-      // choropleth node. Start a normal conversational refinement instead of
-      // submitting an unsupported UI control against that stored snapshot.
-      sessionIdRef.current = undefined;
-      patchStateRef.current = undefined;
-      dataStateRef.current = createDataRegistryPatchState();
-      isFollowUpRequestRef.current = false;
-      void sendPrompt(`Profundiza en la participación de ${entity} para 2024 y muestra la evidencia disponible sin ocultar las limitaciones de la fuente.`);
       return;
     }
 
@@ -1010,14 +1008,14 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
       sessionId,
       interfaceRevision: patchState.revision,
       dataRevision: dataStateRef.current.revision,
-      dataKeys: Object.keys(dataStateRef.current.data),
+      dataKeys: [...authoritativeDataKeysRef.current],
       currentSpecification: patchState.specification,
       event: formValues ? { name: event.name, sourceId: event.sourceId, formValues } : event.value === undefined
         ? { name: event.name, sourceId: event.sourceId }
         : { name: event.name, sourceId: event.sourceId, value: event.value },
     });
     if (!intent.success) {
-      setError("La interacción no cumple el contrato esperado.", "ui");
+      setError("No pude aplicar ese cambio. Intenta pedirlo con otras palabras.", "ui");
       return;
     }
     dispatchAgentInteraction(intent.data);
@@ -1082,6 +1080,7 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         discardBatchedCommit();
         patchStateRef.current = restored.ui;
         dataStateRef.current = restored.data;
+        authoritativeDataKeysRef.current = new Set(Object.keys(restored.data.data));
         updateGeneratedInterface({ specification: restored.ui.specification,
           data: restored.data.data, revision: restored.ui.revision, updatedAt: Date.now() });
         synchronizationBlockedRef.current = false;

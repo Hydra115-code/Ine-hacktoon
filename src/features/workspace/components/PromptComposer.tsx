@@ -149,12 +149,12 @@ export function PromptComposer() {
       {generatedInterface ? (
         <div className="composer-context">
           <span><i aria-hidden="true" />{isBusy
-            ? "Vista anterior disponible · Preparando cambios"
+            ? "La vista anterior sigue disponible · Paper prepara el cambio"
             : guidanceOnly
-              ? "Respuesta en el chat · Pide un análisis"
+              ? "Paper espera tu respuesta"
             : status === "ready"
-              ? "Resultado listo · Puedes pedir más detalle"
-              : "Última vista válida disponible"}</span>
+              ? "La respuesta está lista · Puedes pedir más detalle"
+              : "Puedes seguir explorando"}</span>
         </div>
       ) : null}
       <span className="sr-only" id="civic-prompt-guidance">

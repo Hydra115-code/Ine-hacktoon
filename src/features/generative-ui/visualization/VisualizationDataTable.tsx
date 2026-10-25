@@ -5,6 +5,7 @@ import type { VisualizationDataRow } from "./VisualizationCompiler";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { formatDataValue, localizeDisplayValue } from "../data-binding/formatting/format-data-value";
 import type { BindingFormat } from "../data-binding/schemas/binding-schema";
+import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 interface VisualizationDataTableProps {
   rows: VisualizationDataRow[];
@@ -26,7 +27,7 @@ function getAccessibleColumns(spec: VisualizationNode): AccessibleColumn[] {
     if (!channel || columns.has(channel.field)) return;
     columns.set(channel.field, {
       field: channel.field,
-      label: channel.label ?? channel.field,
+      label: cleanGeneratedCopy(channel.label ?? channel.field),
       ...(channel.format ? { format: channel.format } : {}),
     });
   });
@@ -59,18 +60,19 @@ function accessibleCellAlignment(column: AccessibleColumn) {
 export function VisualizationDataTable({ rows, spec }: VisualizationDataTableProps) {
   const columns = getAccessibleColumns(spec);
   const visibleRows = rows.slice(0, MAX_ACCESSIBLE_ROWS);
+  const accessibleTitle = cleanGeneratedCopy(spec.ariaLabel);
 
   return (
     <details className="ui-visualization__data">
       <summary>Consultar datos de la gráfica</summary>
       <div
-        aria-label={`Datos de ${spec.ariaLabel}`}
+        aria-label={`Datos de ${accessibleTitle}`}
         className="ui-visualization__data-viewport"
         role="region"
         tabIndex={0}
       >
         <table>
-          <caption className="sr-only">Datos utilizados para {spec.ariaLabel}</caption>
+          <caption className="sr-only">Datos utilizados para {accessibleTitle}</caption>
           <thead>
             <tr>{columns.map((column) => <th className={accessibleCellAlignment(column)} key={column.field} scope="col">{column.label}</th>)}</tr>
           </thead>

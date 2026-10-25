@@ -49,10 +49,10 @@ test("un conflicto conserva exactamente el snapshot e índice vigentes", () => {
 test("el conflicto no ofrece reintento ciego ni repite una operación", () => {
   assert.deepEqual(presentAgentFailure({ code: "ui_revision_conflict", recoverable: true, hasPartialData: true }), {
     code: "ui_revision_conflict",
-    title: "La interfaz necesita sincronizarse",
-    message: "Conservamos la última revisión válida. No repetiremos la operación; la integración debe recuperar el snapshot vigente antes de aceptar más patches.",
+    title: "Paper necesita recuperar la última vista",
+    message: "Conservamos el resultado anterior. Recupéralo antes de pedir otro cambio; no repetiremos la operación automáticamente.",
     canRetry: false,
-    canContinue: true,
+    canContinue: false,
   });
 });
 

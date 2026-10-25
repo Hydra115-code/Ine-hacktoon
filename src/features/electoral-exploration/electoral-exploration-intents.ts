@@ -30,7 +30,7 @@ export const electoralExplorationIntents = [
     label: "Territorio",
     title: "Comparar lugares",
     description: "Contrasta territorios equivalentes dentro del mismo proceso y conserva el contexto de lectura.",
-    prompt: "Compara la participación entre municipios de una misma entidad para el proceso disponible y explica qué diferencias son relevantes.",
+    prompt: "Compara la participación entre entidades para el proceso disponible y explica qué diferencias son relevantes.",
     focus: "territory",
   },
   {

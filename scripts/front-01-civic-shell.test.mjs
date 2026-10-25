@@ -51,6 +51,39 @@ test("el shell móvil conserva navegación y composición accesibles", async () 
   assert.match(css, /\.workspace\s*\{\s*grid-template-rows:\s*auto minmax\(0, 1fr\);/u);
 });
 
+test("la conversación puede ocultarse para ampliar la vista generada", async () => {
+  const appShell = await source("src/features/workspace/components/AppShell.tsx");
+  const css = await source("src/features/workspace/styles/workspace.css");
+
+  assert.match(appShell, /aria-label=\{isSidebarCollapsed \? "Mostrar conversación" : "Ocultar conversación"\}/u);
+  assert.match(appShell, /aria-expanded=\{!isSidebarCollapsed\}/u);
+  assert.match(appShell, /inert=\{isSidebarCollapsed \|\| undefined\}/u);
+  assert.match(appShell, /onShowChat=\{showConversation\}/u);
+  assert.match(css, /data-sidebar-collapsed="true"[^}]+grid-template-columns:\s*0 minmax\(0, 1fr\)/u);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/u);
+});
+
+test("el resultado evita exponer explicaciones técnicas de adaptación", async () => {
+  const canvas = await source("src/features/workspace/components/GenerativeCanvas.tsx");
+  assert.doesNotMatch(canvas, /Cómo se adaptó esta vista/u);
+  assert.doesNotMatch(canvas, /canvas-result__changes/u);
+});
+
+test("los controles deslizables usan identidad visual y no el aspecto nativo", async () => {
+  const slider = await source("src/features/generative-ui/interactions/components/Slider.tsx");
+  const interactions = await source("src/features/generative-ui/styles/interactions.css");
+  const globals = await source("src/app/globals.css");
+
+  assert.match(slider, /--ui-slider-progress/u);
+  assert.match(slider, /ui-slider__scale/u);
+  assert.match(interactions, /::-webkit-slider-thumb/u);
+  assert.match(interactions, /::-moz-range-thumb/u);
+  assert.match(interactions, /:focus-visible::-webkit-slider-thumb/u);
+  assert.match(globals, /::-webkit-scrollbar-thumb/u);
+  assert.match(globals, /scrollbar-color:\s*transparent transparent/u);
+  assert.match(globals, /:hover::?-webkit-scrollbar-thumb|:hover::-webkit-scrollbar-thumb/u);
+});
+
 test("Paper se renderiza únicamente con recursos 2D", async () => {
   const avatar = await source("src/features/paper/components/PaperAvatar.tsx");
   const packageJson = await source("package.json");

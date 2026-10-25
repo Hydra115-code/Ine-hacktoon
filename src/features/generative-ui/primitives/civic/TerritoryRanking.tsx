@@ -1,6 +1,7 @@
 import type { TerritoryRankingNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { formatCivicValue, isDataRecord, readCivicLabel, readCivicNumber } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface TerritoryRankingProps {
   data?: DataValue[];
@@ -28,11 +29,11 @@ export function TerritoryRanking({ data, locale = "es-MX", spec }: TerritoryRank
   const discardedRows = (data?.length ?? 0) - rows.length;
 
   return (
-    <section aria-label={spec.ariaLabel} className="ui-territory-ranking">
+    <section aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-territory-ranking">
       <header className="ui-civic-component__header">
         <span className="ui-civic-component__eyebrow">Ranking territorial</span>
-        <h3>{spec.title}</h3>
-        {spec.valueLabel ? <p>{spec.valueLabel}</p> : null}
+        <h3>{cleanGeneratedCopy(spec.title)}</h3>
+        {spec.valueLabel ? <p>{cleanGeneratedCopy(spec.valueLabel)}</p> : null}
       </header>
       <ol className="ui-territory-ranking__list">
         {visibleRows.map((row, index) => (
@@ -46,7 +47,7 @@ export function TerritoryRanking({ data, locale = "es-MX", spec }: TerritoryRank
           </li>
         ))}
       </ol>
-      {discardedRows > 0 ? <p className="ui-civic-component__notice">Se omitieron {discardedRows} registros incompletos.</p> : null}
+      {discardedRows > 0 ? <p className="ui-civic-component__notice">{discardedRows === 1 ? "Una entidad" : `${discardedRows} entidades`} no {discardedRows === 1 ? "tenía" : "tenían"} información suficiente para aparecer aquí.</p> : null}
     </section>
   );
 }

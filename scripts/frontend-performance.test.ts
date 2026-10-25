@@ -142,3 +142,11 @@ test("el runtime evita revalidación y rerender de ramas confiables", () => {
   assert.match(provider, /FrameCommitBatcher/u);
   assert.match(provider, /startTransition/u);
 });
+
+test("mapas y motor de gráficas se cargan de forma diferida", () => {
+  const layoutRenderer = readFileSync(new URL("../src/features/generative-ui/runtime/LayoutRenderer.tsx", import.meta.url), "utf8");
+  const visualization = readFileSync(new URL("../src/features/generative-ui/visualization/Visualization.tsx", import.meta.url), "utf8");
+  assert.match(layoutRenderer, /lazy\(\(\) => import\("\.\.\/primitives\/civic\/MexicoChoropleth"\)/u);
+  assert.match(layoutRenderer, /<Suspense fallback=/u);
+  assert.match(visualization, /import\("\.\/echarts-runtime"\)/u);
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWorkspaceStore } from "../state/workspace-store";
 import { isWorkspaceBusy, type WorkspaceStatus } from "../types/workspace-status";
 import { useAgentSession } from "../../agent/components/AgentSessionProvider";
@@ -11,7 +11,17 @@ import { ElectoralExplorationStart } from "../../electoral-exploration/component
 import { electoralExplorationIntents } from "../../electoral-exploration/electoral-exploration-intents";
 import { PaperAvatar } from "../../paper/components/PaperAvatar";
 import { PaperDialogue } from "../../paper/components/PaperDialogue";
-import { paperStatusVoices } from "../../paper/paper-voice";
+import { PaperGuide } from "../../paper/components/PaperGuide";
+import { PaperResultIntro } from "../../paper/components/PaperResultIntro";
+import { buildPaperResultIntro } from "../../paper/presentation/build-paper-result-intro";
+import { usePaperGuide } from "../../paper/state/use-paper-guide";
+import { usePaperReaction } from "../../paper/state/use-paper-reaction";
+import { PaperReaction } from "../../paper/components/PaperReaction";
+import type { LocalUIEvent } from "../../generative-ui/interactions/events/local-ui-event";
+import { buildPaperSuggestions } from "../../paper/presentation/build-paper-suggestions";
+import { PaperSuggestions } from "../../paper/components/PaperSuggestions";
+import type { PaperSuggestion } from "../../paper/types/paper-suggestion";
+import { GuidanceContextForm } from "./GuidanceContextForm";
 
 interface StatusContent {
   detail: string;
@@ -26,29 +36,29 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
     detail: "Explora participación, territorio e indicadores públicos sin navegar entre reportes rígidos.",
   },
   submitting: {
-    label: "Analizando",
+    label: "Entendiendo tu pregunta",
     title: "Entendiendo tu consulta",
-    detail: "Estamos enviando la consulta y determinando qué información necesita.",
+    detail: "Paper está identificando qué quieres conocer.",
   },
   retrieving_data: {
     label: "Consultando datos",
     title: "Reuniendo la información necesaria",
-    detail: "Solo se consultarán las fuentes relevantes para tu petición.",
+    detail: "Paper está buscando la información que corresponde a tu pregunta.",
   },
   generating_ui: {
-    label: "Preparando la vista",
-    title: "Preparando la vista",
-    detail: "Mostraremos la interfaz cuando el análisis esté listo.",
+    label: "Organizando la información",
+    title: "Organizando la información",
+    detail: "Paper está preparando una respuesta clara y explorable.",
   },
   ready: {
     label: "Actualizado",
-    title: "Interfaz preparada",
-    detail: "El contenido generado se mostrará aquí.",
+    title: "Vista preparada",
+    detail: "Puedes revisar los datos, aplicar filtros o hacer otra pregunta.",
   },
   updating: {
     label: "Preparando cambios",
     title: "Preparando la vista",
-    detail: "La última vista válida sigue disponible mientras aplicamos el cambio.",
+    detail: "La vista anterior sigue disponible mientras Paper prepara el cambio.",
   },
   awaiting_confirmation: {
     label: "Requiere confirmación",
@@ -61,9 +71,9 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
     detail: "Conservaremos la interfaz visible mientras termina el proceso.",
   },
   partial: {
-    label: "Resultado parcial",
+    label: "Vista disponible",
     title: "Mostrando la información disponible",
-    detail: "La última interfaz válida permanece disponible mientras decides cómo continuar.",
+    detail: "Puedes revisar lo que sí encontramos o intentar la consulta de nuevo.",
   },
   cancelled: {
     label: "Cancelado",
@@ -72,8 +82,8 @@ const statusContent: Record<WorkspaceStatus, StatusContent> = {
   },
   error: {
     label: "Necesita atención",
-    title: "No pudimos completar la consulta",
-    detail: "Puedes iniciar una nueva consulta e intentarlo otra vez.",
+    title: "Paper no pudo terminar la consulta",
+    detail: "Ajusta la pregunta o inténtalo otra vez.",
   },
 };
 
@@ -106,16 +116,22 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   const runtimeRef = useRef<HTMLDivElement>(null);
   const failureRef = useRef<HTMLDivElement>(null);
   const previousRevisionRef = useRef<number | undefined>(undefined);
+  const previousPromptRef = useRef<string | null>(null);
+  const resetScrollForPromptRef = useRef(false);
+  const wasRecoveringSnapshotRef = useRef(false);
+  const paperHelpPanelRef = useRef<HTMLElement>(null);
+  const paperHelpButtonRef = useRef<HTMLButtonElement>(null);
   const [isPaperHelpOpen, setIsPaperHelpOpen] = useState(false);
   const status = useWorkspaceStore((state) => state.experience.status);
+  const paperGuide = usePaperGuide();
+  const { dismissReaction, observeUIEvent, reaction: paperReaction, showReaction } = usePaperReaction();
   const activePrompt = useWorkspaceStore((state) => state.activePrompt);
   const errorMessage = useWorkspaceStore((state) => state.errorMessage);
   const setDraft = useWorkspaceStore((state) => state.setDraft);
   const {
-    activityMessage,
     activeAnalysisId,
+    answer,
     canRetry,
-    changeSummary,
     correlationId,
     continueWithPartialData,
     failure,
@@ -129,6 +145,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     recoverSnapshot,
     isRecoveringSnapshot,
     runtimeDiagnostics,
+    sendPrompt,
     sessionTitle,
   } = useAgentSession();
   const content = statusContent[status];
@@ -137,15 +154,18 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   const isPreviousResult = isProcessing || status === "error" || status === "cancelled" || status === "partial";
   const activeProcessStep = getActiveProcessStep(status);
   const hasBoundData = Object.keys(generatedInterface?.data ?? {}).length > 0;
+  const paperResultIntro = useMemo(
+    () => buildPaperResultIntro(generatedInterface?.specification, { hasBoundData }),
+    [generatedInterface?.specification, hasBoundData],
+  );
+  const paperSuggestions = useMemo(
+    () => buildPaperSuggestions(generatedInterface?.specification, { hasBoundData }),
+    [generatedInterface?.specification, hasBoundData],
+  );
   const guidanceOnly = status === "ready" && !failure && !errorMessage
     && isGuidanceOnly(generatedInterface?.specification, hasBoundData);
   const hasAnyFailure = status === "error" || Boolean(failure) || Boolean(errorMessage);
   const hasBlockingFailure = hasAnyFailure && !generatedInterface;
-  const processPaperMood = status === "retrieving_data"
-    ? "pointing"
-    : status === "generating_ui" || status === "updating"
-      ? "presenting"
-      : "thinking";
   const failureCode = failure?.code.toLowerCase() ?? "";
   const paperErrorMessage = failureCode.includes("evidence-validation") || failureCode.includes("financial-reasoning")
     ? "No encontré información suficiente para responderte con confianza. Prueba cambiando el periodo, el lugar o el grupo que quieres comparar."
@@ -168,23 +188,52 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     window.requestAnimationFrame(() => document.getElementById("civic-prompt")?.focus());
   };
 
-  const askPaperForHelp = () => {
-    setIsPaperHelpOpen((open) => !open);
+  const focusConversation = () => {
+    onShowChat?.();
+    window.requestAnimationFrame(() => document.getElementById("civic-prompt")?.focus());
   };
+
+  const prepareSuggestion = (suggestion: PaperSuggestion) => {
+    preparePrompt(suggestion.prompt);
+  };
+
+  const closePaperHelp = useCallback((restoreFocus = true) => {
+    setIsPaperHelpOpen(false);
+    if (restoreFocus) window.requestAnimationFrame(() => paperHelpButtonRef.current?.focus());
+  }, []);
+
+  const askPaperForHelp = () => {
+    dismissReaction();
+    if (isPaperHelpOpen) closePaperHelp();
+    else setIsPaperHelpOpen(true);
+  };
+
+  const handleCanvasUIEvent = useCallback((event: LocalUIEvent) => {
+    observeUIEvent(event);
+    handleUIEvent(event);
+  }, [handleUIEvent, observeUIEvent]);
 
   useEffect(() => {
     if (!isPaperHelpOpen) return;
+    window.requestAnimationFrame(() => paperHelpPanelRef.current?.focus());
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsPaperHelpOpen(false);
+      if (event.key === "Escape") closePaperHelp();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [isPaperHelpOpen]);
+  }, [closePaperHelp, isPaperHelpOpen]);
 
   useEffect(() => {
     if (!failure && !errorMessage && status !== "partial" && status !== "cancelled") return;
     requestAnimationFrame(() => failureRef.current?.focus({ preventScroll: true }));
   }, [errorMessage, failure, status]);
+
+  useEffect(() => {
+    if (!activePrompt || activePrompt === previousPromptRef.current) return;
+    previousPromptRef.current = activePrompt;
+    resetScrollForPromptRef.current = true;
+    requestAnimationFrame(() => runtimeRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" }));
+  }, [activePrompt]);
 
   useEffect(() => {
     const revision = generatedInterface?.revision;
@@ -194,6 +243,10 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
 
     const runtime = runtimeRef.current;
     if (!runtime) return;
+    if (resetScrollForPromptRef.current) {
+      requestAnimationFrame(() => runtime.scrollTo({ top: 0, left: 0, behavior: "auto" }));
+      return;
+    }
     const distanceFromBottom = runtime.scrollHeight - runtime.scrollTop - runtime.clientHeight;
     if (distanceFromBottom > 120) return;
 
@@ -205,6 +258,25 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     }));
   }, [generatedInterface?.revision]);
 
+  useEffect(() => {
+    if (!resetScrollForPromptRef.current || !isSettled) return;
+    requestAnimationFrame(() => {
+      runtimeRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      resetScrollForPromptRef.current = false;
+    });
+  }, [generatedInterface?.updatedAt, isSettled]);
+
+  useEffect(() => {
+    const wasRecovering = wasRecoveringSnapshotRef.current;
+    wasRecoveringSnapshotRef.current = isRecoveringSnapshot;
+    if (!wasRecovering || isRecoveringSnapshot || failure) return;
+    showReaction({
+      kind: "view.restored",
+      message: "Recuperé la última vista válida sin cambiar sus datos.",
+      mood: "approving",
+    });
+  }, [failure, isRecoveringSnapshot, showReaction]);
+
   return (
     <section className="canvas" aria-labelledby="canvas-title" data-has-result={Boolean(generatedInterface && !guidanceOnly && !hasBlockingFailure)} data-guidance-only={guidanceOnly || undefined}>
       <header className="canvas__header">
@@ -215,7 +287,13 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
         {status !== "empty" ? (
           <span className="canvas__status" data-status={status}>
             <span aria-hidden="true" />
-            {isHistoricalView ? "Revisión anterior" : content.label}
+            {isHistoricalView
+              ? "Revisión anterior"
+              : guidanceOnly
+                ? "Esperando tu respuesta"
+                : generatedInterface && hasAnyFailure
+                  ? "Vista disponible"
+                  : content.label}
           </span>
         ) : null}
       </header>
@@ -226,7 +304,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
         data-status={status}
         aria-busy={!isSettled}
       >
-        <p className="sr-only" role="status">{isHistoricalView ? "Revisión anterior de solo lectura" : isProcessing ? activityMessage : content.title}</p>
+        {!isProcessing ? <p className="sr-only" role="status">{isHistoricalView ? "Revisión anterior de solo lectura" : guidanceOnly ? "Paper necesita más contexto" : content.title}</p> : null}
         {hasBlockingFailure ? (
           <div ref={failureRef} className="canvas-paper-error" role="alert" tabIndex={-1}>
             <div className="canvas-paper-error__character" aria-hidden="true">
@@ -244,21 +322,22 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
           </div>
         ) : guidanceOnly ? (
           <div className="canvas-guidance">
-            <p className="canvas-result__overline">Respuesta en la conversación</p>
-            <h2>Construyamos una vista con evidencia pública</h2>
-            <p>Esta petición no produjo un análisis visual. Puedes pedir una comparación, una distribución territorial o un cambio concreto en una interfaz existente.</p>
-            <div className="canvas-guidance__actions">
-              {electoralExplorationIntents.slice(0, 2).map(({ id, prompt }) => (
-                <button key={id} type="button" onClick={() => preparePrompt(prompt)}>{prompt}</button>
-              ))}
+            <div className="canvas-guidance__paper" aria-hidden="true">
+              <PaperAvatar mood="thinking" size="md" interactive={false} followPointer={false} />
+            </div>
+            <div className="paper-dialogue canvas-guidance__bubble">
+              <small className="paper-dialogue__label">Paper pregunta</small>
+              <h2>¿Puedes darme estos datos para continuar?</h2>
+              <p className="canvas-guidance__instruction">Puedes elegirlos aquí o responderme con tus propias palabras.</p>
+              <GuidanceContextForm onFallback={focusConversation} onSubmit={sendPrompt} request={answer} />
             </div>
           </div>
         ) : generatedInterface ? (
           <div className="canvas-result">
             <header className="canvas-result__header">
               <div>
-                <p className="canvas-result__overline">Análisis activo</p>
-                <h2>{isHistoricalView ? "Revisión anterior" : isPreviousResult ? "Última vista válida disponible" : "Tu exploración de datos"}</h2>
+                <p className="canvas-result__overline">Tu consulta</p>
+                <h2>{isHistoricalView ? "Consulta anterior" : isPreviousResult ? "Vista disponible" : "Tu exploración de datos"}</h2>
                 {(activePrompt ?? sessionTitle) && !isHistoricalView ? (
                   <details className="canvas-result__query">
                     <summary>Ver petición original</summary>
@@ -272,11 +351,13 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
               </div>
             </header>
             {isProcessing ? (
-              <div className="canvas-result__activity">
-                <span className="canvas-result__activity-indicator" aria-hidden="true" />
+              <div className="canvas-result__activity" data-paper-state={paperGuide.state} role="status" aria-live="polite" aria-atomic="true">
+                <span className="canvas-result__activity-paper" aria-hidden="true">
+                  <PaperAvatar mood={paperReaction?.mood ?? paperGuide.mood} size="sm" interactive={false} followPointer={false} />
+                </span>
                 <div>
-                  <strong>Preparando cambios</strong>
-                  <p>{activityMessage}</p>
+                  <strong>{paperReaction ? "Paper ajusta la vista" : paperGuide.title}</strong>
+                  <p>{paperReaction?.message ?? paperGuide.detail}</p>
                 </div>
               </div>
             ) : null}
@@ -294,7 +375,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 <div className="canvas-result__degradation-actions">
                   {failure?.canContinue ? (
                     <button className="canvas-result__degradation-secondary" type="button" onClick={continueWithPartialData}>
-                      Continuar con datos parciales
+                      Usar lo que sí está disponible
                     </button>
                   ) : null}
                   {(failure?.canRetry ?? canRetry) ? <button type="button" onClick={retryLastRequest}>Reintentar</button> : null}
@@ -306,24 +387,22 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 </div>
               </div>
             ) : null}
+            {status === "ready" && hasBoundData && paperResultIntro ? (
+              <PaperResultIntro intro={paperResultIntro} announce={!isHistoricalView} />
+            ) : null}
             <div className="canvas-result__surface" inert={isHistoricalView} aria-label={isHistoricalView ? "Interfaz anterior de solo lectura" : undefined}>
               <UIEventProvider key={activeAnalysisId}>
               <UIRenderer
                 data={generatedInterface.data}
                 degradationReason={generatedInterface.degradationReason}
-                onEvent={handleUIEvent}
+                onEvent={handleCanvasUIEvent}
                 pendingNodeIds={pendingNodeIds}
                 specification={generatedInterface.specification}
               />
               </UIEventProvider>
             </div>
-            {changeSummary && !isProcessing && !isHistoricalView ? (
-              <details className="canvas-result__changes">
-                <summary>Cómo se adaptó esta vista</summary>
-                <ul>
-                  {changeSummary.items.map((item) => <li key={item}>{item}</li>)}
-                </ul>
-              </details>
+            {!isProcessing && !isHistoricalView ? (
+              <PaperSuggestions suggestions={paperSuggestions} onSelect={prepareSuggestion} />
             ) : null}
             {showRuntimeDiagnostics && (performance || runtimeDiagnostics) ? (
               <details className="canvas-performance">
@@ -394,15 +473,15 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             ) : showRuntimeDiagnostics && correlationId ? <p className="canvas-trace" title={correlationId}>Traza {correlationId.slice(0, 8)}</p> : null}
           </div>
         ) : isProcessing ? (
-          <div className="canvas-process" data-step={activeProcessStep}>
-            <div className="canvas-process__copy" key={status}>
-              <p>{activePrompt}</p>
-              <h2>{paperStatusVoices[status]?.title ?? content.title}</h2>
-              <span>{paperStatusVoices[status]?.detail ?? activityMessage}</span>
-            </div>
-            <div className="canvas-process__paper" aria-hidden="true">
-              <PaperAvatar mood={processPaperMood} size="hero" interactive={false} followPointer={false} />
-            </div>
+          <div className="canvas-process" data-step={activeProcessStep} data-paper-state={paperGuide.state}>
+            <PaperGuide
+              key={paperGuide.state}
+              announce
+              className="canvas-process__guide"
+              context={activePrompt ?? undefined}
+              presentation={paperGuide}
+              size="hero"
+            />
             <div className="canvas-process__progress">
               <div
                 className="canvas-process__progress-track"
@@ -440,7 +519,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             ) : (
               <div className="canvas-state__copy">
                 <div className="canvas-state__label">
-                  Interfaz generativa
+                  Vista personalizada
                 </div>
                 {activePrompt ? <p className="canvas-state__prompt">{activePrompt}</p> : null}
                 <h2>{failure?.title ?? content.title}</h2>
@@ -455,33 +534,46 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
       </div>
       {status !== "empty" && !isProcessing && !hasBlockingFailure ? (
         <>
+          {paperReaction && !isPaperHelpOpen ? (
+            <PaperReaction reaction={paperReaction} onDismiss={dismissReaction} />
+          ) : null}
           {isPaperHelpOpen ? (
-            <aside id="paper-context-help" className="canvas-paper-help-panel" role="dialog" aria-label="Ayuda de Paper">
+            <aside ref={paperHelpPanelRef} id="paper-context-help" className="canvas-paper-help-panel" role="dialog" aria-label="Ayuda de Paper" tabIndex={-1}>
               <div className="canvas-paper-help-panel__header">
                 <div>
                   <span>Paper te ayuda</span>
-                  <strong>¿Qué quieres descubrir?</strong>
+                  <strong>{paperGuide.title}</strong>
                 </div>
-                <button type="button" onClick={() => setIsPaperHelpOpen(false)} aria-label="Cerrar ayuda">×</button>
+                <button type="button" onClick={() => closePaperHelp()} aria-label="Cerrar ayuda">×</button>
               </div>
-              <p>Elige un punto de partida. Puedes editar la pregunta antes de enviarla.</p>
+              <p>{paperGuide.detail}</p>
               <div className="canvas-paper-help-panel__actions">
-                {electoralExplorationIntents.map(({ id, title, prompt }) => (
-                  <button key={id} type="button" onClick={() => preparePrompt(prompt)}>{title}</button>
-                ))}
+                {paperSuggestions.length > 0
+                  ? paperSuggestions.map((suggestion) => (
+                    <button key={suggestion.id} type="button" onClick={() => prepareSuggestion(suggestion)}>
+                      <strong>{suggestion.title}</strong>
+                      <small>{suggestion.description}</small>
+                    </button>
+                  ))
+                  : electoralExplorationIntents.map(({ id, title, prompt }) => (
+                    <button key={id} type="button" onClick={() => preparePrompt(prompt)}>{title}</button>
+                  ))}
               </div>
             </aside>
           ) : null}
           <button
+            ref={paperHelpButtonRef}
             className="canvas-paper-help"
+            data-paper-state={paperGuide.state}
             type="button"
             onClick={askPaperForHelp}
-            aria-label={isPaperHelpOpen ? "Cerrar ayuda de Paper" : "Pedir ayuda a Paper"}
+            aria-label={isPaperHelpOpen ? "Cerrar ayuda de Paper" : `Pedir ayuda a Paper: ${paperGuide.title}`}
             aria-controls="paper-context-help"
             aria-expanded={isPaperHelpOpen}
+            aria-haspopup="dialog"
           >
             <span className="canvas-paper-help__portrait" aria-hidden="true">
-              <PaperAvatar mood={isProcessing ? "thinking" : "idle"} size="md" interactive={false} followPointer={false} />
+              <PaperAvatar mood={paperReaction?.mood ?? paperGuide.mood} size="md" interactive={false} followPointer={false} />
             </span>
             <span className="canvas-paper-help__badge" aria-hidden="true">?</span>
           </button>

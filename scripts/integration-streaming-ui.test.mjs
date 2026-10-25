@@ -11,8 +11,10 @@ const harness = readFileSync(new URL("../src/app/dev/streaming-ui-harness/Stream
 
 test("la ruta productiva exige cookie HttpOnly y propaga el JWT individual", () => {
   assert.match(route, /readSessionCookies\(request\)/u);
-  assert.match(route, /if \(!accessToken\)/u);
-  assert.match(route, /streamPlannedAgent\(\{\s*accessToken: token,/u);
+  assert.match(route, /const usesLocalServiceSession = process\.env\.AGENT_SESSION_MODE === "local_service"/u);
+  assert.match(route, /if \(!usesLocalServiceSession && !accessToken\)/u);
+  assert.match(route, /const createAgentStream = \(token\?: string\)/u);
+  assert.match(route, /\.\.\.\(token \? \{ accessToken: token \} : \{\}\)/u);
   assert.match(route, /createAgentStream\(accessToken\)/u);
   assert.match(route, /"X-Correlation-ID": correlationId/u);
 });

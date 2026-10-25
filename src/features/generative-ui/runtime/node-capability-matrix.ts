@@ -29,7 +29,7 @@ export const nodeCapabilityMatrix = [
   { type: "list", component: "List", binding: "none", event: "none" },
   { type: "electionDelta", component: "ElectionDelta", binding: "required", event: "none" },
   { type: "territoryRanking", component: "TerritoryRanking", binding: "required", event: "none" },
-  { type: "participationTimeline", component: "ParticipationTimeline", binding: "required", event: "local" },
+  { type: "participationTimeline", component: "ParticipationTimeline", binding: "required", event: "configured" },
   { type: "dataQualityBadge", component: "DataQualityBadge", binding: "required", event: "none" },
   { type: "demographicBreakdown", component: "DemographicBreakdown", binding: "required", event: "none" },
   { type: "comparisonMatrix", component: "ComparisonMatrix", binding: "required", event: "none" },

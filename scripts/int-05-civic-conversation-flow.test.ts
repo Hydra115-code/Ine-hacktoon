@@ -56,7 +56,8 @@ test("conserva evidencia parcial cuando el adaptador compartido ocultó sólo el
   assert.ok(fallback);
   assert.equal(fallback.adaptation.status, "partial");
   assert.equal((fallback.data.records as unknown[]).length, 3);
-  assert.match(JSON.stringify(fallback.specification), /Información parcial/u);
+  assert.doesNotMatch(JSON.stringify(fallback.specification), /Información parcial/u);
+  assert.doesNotMatch(JSON.stringify(fallback.specification), /campos válidos/u);
   assert.doesNotMatch(JSON.stringify(fallback.data), /recordId/u);
 });
 

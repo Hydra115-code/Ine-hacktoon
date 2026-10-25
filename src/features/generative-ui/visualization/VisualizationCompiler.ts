@@ -4,6 +4,7 @@ import type { VisualizationNode } from "../schemas/visualization-node";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { formatDataValue } from "../data-binding/formatting/format-data-value";
+import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 export interface VisualizationDataRow {
   [key: string]: DataValue;
@@ -45,6 +46,10 @@ function unique(values: string[]) {
   return [...new Set(values)];
 }
 
+function channelLabel(channel: { field: string; label?: string }) {
+  return cleanGeneratedCopy(channel.label ?? channel.field);
+}
+
 function formatTemporalCategories(values: string[], declaredTemporal: boolean) {
   const containsOnlyDates = values.every((value) => /^\d{4}-\d{2}(?:-\d{2})?$/u.test(value));
   if (!declaredTemporal && !containsOnlyDates) return values;
@@ -77,7 +82,7 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
   const groupField = spec.encoding.group?.field;
   let groups = groupField
     ? unique(rows.map((row) => asCategory(readDataField(row, groupField), groupField)))
-    : [y.label ?? y.field];
+    : [channelLabel(y)];
 
   const valuesByCategory = new Map<string, Map<string, Array<DataValue | undefined>>>();
   rows.forEach((row) => {
@@ -119,16 +124,23 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
     areaStyle: spec.mark === "area" ? {} : undefined,
     stack: spec.mark === "stacked-bar" ? "total" : undefined,
     symbol: spec.mark === "line" || spec.mark === "area" ? "circle" : undefined,
-    symbolSize: spec.mark === "scatter" ? 8 : undefined,
+    symbolSize: spec.mark === "scatter" ? 11 : spec.mark === "line" || spec.mark === "area" ? 9 : undefined,
+    showSymbol: spec.mark === "line" || spec.mark === "area" ? true : undefined,
+    lineStyle: spec.mark === "line" || spec.mark === "area" ? { width: 3 } : undefined,
+    barMaxWidth: seriesType === "bar" ? 44 : undefined,
+    label: seriesType === "bar" ? { show: true, position: "top", fontWeight: 600 } : undefined,
+    emphasis: { focus: "series" },
   }));
 
   if (spec.mark === "scatter") {
     return {
-      xAxis: { type: "value", name: x.label ?? x.field },
-      yAxis: { type: "value", name: y.label ?? y.field },
+      xAxis: { type: "value", name: channelLabel(x) },
+      yAxis: { type: "value", name: channelLabel(y) },
       series: groups.map((group) => ({
         name: group,
         type: "scatter",
+        symbolSize: 11,
+        emphasis: { focus: "series", scale: 1.25 },
         data: rows
           .filter((row) => !groupField || asCategory(readDataField(row, groupField), groupField) === group)
           .map((row) => [readDataField(row, x.field), readDataField(row, y.field)])
@@ -140,11 +152,11 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
   return {
     xAxis: {
       type: "category",
-      name: x.label,
+      name: channelLabel(x),
       data: formatTemporalCategories(categories, x.type === "temporal"),
       boundaryGap: seriesType === "bar",
     },
-    yAxis: { type: "value", name: y.label },
+    yAxis: { type: "value", name: channelLabel(y) },
     series,
   };
 }
@@ -173,12 +185,14 @@ function donutOption(spec: VisualizationNode, rows: VisualizationDataRow[]) {
 
   return {
     series: [{
-      name: group.label ?? group.field,
+      name: channelLabel(group),
       type: "pie",
       radius: ["48%", "72%"],
       avoidLabelOverlap: true,
-      label: { show: false },
-      emphasis: { label: { show: true, formatter: "{b}: {d}%" } },
+      label: { show: true, formatter: "{b}\n{d}%", fontWeight: 600 },
+      labelLine: { length: 10, length2: 8 },
+      itemStyle: { borderWidth: 2 },
+      emphasis: { scale: true, label: { show: true, formatter: "{b}: {d}%" } },
       data,
     }],
   };
@@ -200,8 +214,8 @@ function heatmapOption(spec: VisualizationNode, rows: VisualizationDataRow[]) {
   const numericValues = data.map((item) => item[2]).filter((item): item is number => typeof item === "number");
 
   return {
-    xAxis: { type: "category", name: x.label, data: formatTemporalCategories(xValues, x.type === "temporal") },
-    yAxis: { type: "category", name: y.label, data: formatTemporalCategories(yValues, y.type === "temporal") },
+    xAxis: { type: "category", name: channelLabel(x), data: formatTemporalCategories(xValues, x.type === "temporal") },
+    yAxis: { type: "category", name: channelLabel(y), data: formatTemporalCategories(yValues, y.type === "temporal") },
     visualMap: {
       min: numericValues.length ? Math.min(...numericValues) : 0,
       max: numericValues.length ? Math.max(...numericValues) : 0,
@@ -217,9 +231,10 @@ function heatmapOption(spec: VisualizationNode, rows: VisualizationDataRow[]) {
 function applyThemeToMarkOption(markOption: object, theme: VisualizationTheme) {
   const option = markOption as Record<string, unknown>;
   const axisTheme = {
-    axisLabel: { color: theme.mutedText },
+    axisLabel: { color: theme.mutedText, fontSize: 11, margin: 12 },
     axisLine: { lineStyle: { color: theme.border } },
-    splitLine: { lineStyle: { color: theme.border } },
+    axisTick: { show: false },
+    splitLine: { lineStyle: { color: theme.border, type: "dashed" } },
     nameTextStyle: { color: theme.mutedText },
   };
   const themed: Record<string, unknown> = { ...option };
@@ -236,6 +251,26 @@ function applyThemeToMarkOption(markOption: object, theme: VisualizationTheme) {
       textStyle: { color: theme.mutedText },
       inRange: { color: theme.palette.toReversed() },
     };
+  }
+
+  if (Array.isArray(option.series)) {
+    themed.series = option.series.map((candidate) => {
+      if (!candidate || typeof candidate !== "object") return candidate;
+      const series = candidate as Record<string, unknown>;
+      const isBar = series.type === "bar";
+      const isPie = series.type === "pie";
+      return {
+        ...series,
+        itemStyle: {
+          ...(series.itemStyle && typeof series.itemStyle === "object" ? series.itemStyle : {}),
+          ...(isBar ? { borderRadius: [3, 3, 0, 0] } : {}),
+          ...(isPie ? { borderColor: theme.surface } : { borderColor: theme.surface, borderWidth: 2 }),
+        },
+        label: series.label && typeof series.label === "object"
+          ? { ...series.label, color: theme.text }
+          : series.label,
+      };
+    });
   }
 
   return themed;
@@ -259,27 +294,33 @@ export function compileVisualizationOption(
 
   return {
     animation: !options.reducedMotion,
-    aria: { enabled: true, description: spec.description ?? spec.ariaLabel },
+    aria: { enabled: true, description: cleanGeneratedCopy(spec.description ?? spec.ariaLabel) },
     color: theme.palette,
     backgroundColor: "transparent",
     textStyle: { color: theme.text, fontFamily: "inherit" },
     grid: spec.mark === "donut" ? undefined : {
-      top: 40,
-      right: 24,
-      bottom: 48,
-      left: 56,
+      top: 54,
+      right: 28,
+      bottom: 54,
+      left: 62,
       outerBoundsMode: "same",
       outerBoundsContain: "axisLabel",
     },
     legend: {
       show: spec.legend?.show ?? Boolean(spec.encoding.group),
-      textStyle: { color: theme.mutedText },
+      textStyle: { color: theme.mutedText, fontSize: 12 },
+      itemWidth: 12,
+      itemHeight: 12,
+      itemGap: 18,
       ...positionLegend(spec.legend?.position),
     },
     tooltip: {
       trigger: spec.mark === "donut" ? "item" : "axis",
       backgroundColor: theme.surface,
       borderColor: theme.border,
+      borderWidth: 1,
+      padding: 12,
+      extraCssText: "box-shadow: 3px 3px 0 rgba(0,0,0,.12); border-radius: 4px;",
       textStyle: { color: theme.text },
       valueFormatter: quantitativeChannel?.format
         ? (value) => typeof value === "number"

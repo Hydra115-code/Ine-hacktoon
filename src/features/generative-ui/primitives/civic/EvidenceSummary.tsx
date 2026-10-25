@@ -1,6 +1,7 @@
 import type { EvidenceSummaryNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { formatCivicValue, isDataRecord, readCivicNumber } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface EvidenceSummaryProps {
   data?: DataValue;
@@ -24,19 +25,19 @@ export function EvidenceSummary({ data, locale = "es-MX", spec }: EvidenceSummar
   const isPartial = numerator === undefined || denominator === undefined;
 
   return (
-    <article aria-label={spec.ariaLabel} className="ui-evidence-summary">
+    <article aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-evidence-summary">
       <header className="ui-civic-component__header">
         <span className="ui-civic-component__eyebrow">Evidencia verificable</span>
-        <h3>{spec.title}</h3>
+        <h3>{cleanGeneratedCopy(spec.title)}</h3>
       </header>
       <div className="ui-evidence-summary__equation">
-        <div><span>{spec.numeratorLabel ?? "Casos observados"}</span><strong>{formatCivicValue(numerator, "number", undefined, locale)}</strong></div>
+        <div><span>{cleanGeneratedCopy(spec.numeratorLabel ?? "Casos observados")}</span><strong>{formatCivicValue(numerator, "number", undefined, locale)}</strong></div>
         <span aria-hidden="true">÷</span>
-        <div><span>{spec.denominatorLabel ?? "Universo analizado"}</span><strong>{formatCivicValue(denominator, "number", undefined, locale)}</strong></div>
+        <div><span>{cleanGeneratedCopy(spec.denominatorLabel ?? "Universo analizado")}</span><strong>{formatCivicValue(denominator, "number", undefined, locale)}</strong></div>
         <span aria-hidden="true">=</span>
-        <div className="ui-evidence-summary__result"><span>{spec.resultLabel ?? "Resultado"}</span><strong>{formatCivicValue(result, spec.format, spec.unit, locale)}</strong></div>
+        <div className="ui-evidence-summary__result"><span>{cleanGeneratedCopy(spec.resultLabel ?? "Resultado")}</span><strong>{formatCivicValue(result, spec.format, spec.unit, locale)}</strong></div>
       </div>
-      {isPartial ? <p className="ui-civic-component__notice">El cálculo es parcial porque falta el numerador o denominador.</p> : null}
+      {isPartial ? <p className="ui-civic-component__notice">No puedo completar el cálculo porque falta una de las cantidades necesarias.</p> : null}
     </article>
   );
 }

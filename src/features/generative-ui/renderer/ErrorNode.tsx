@@ -4,6 +4,7 @@ interface ErrorNodeProps {
   title?: string;
   message?: string;
   errors?: UIValidationError[];
+  showTechnicalDetails?: boolean;
   isRecovering?: boolean;
   onRegenerate?: () => void;
   onRetry?: () => void;
@@ -13,6 +14,7 @@ export function ErrorNode({
   title = "No se pudo mostrar este contenido",
   message,
   errors = [],
+  showTechnicalDetails = false,
   isRecovering = false,
   onRegenerate,
   onRetry,
@@ -21,7 +23,7 @@ export function ErrorNode({
     <div className="ui-renderer-message ui-renderer-message--error" role="alert">
       <p className="ui-renderer-message__title">{title}</p>
       {message ? <p className="ui-renderer-message__body">{message}</p> : null}
-      {errors.length > 0 ? (
+      {showTechnicalDetails && errors.length > 0 ? (
         <ul className="ui-renderer-message__details">
           {errors.slice(0, 3).map((error, index) => (
             <li key={`${error.code}-${error.path.join(".")}-${index}`}>{error.message}</li>
@@ -33,7 +35,7 @@ export function ErrorNode({
           {onRetry ? <button type="button" onClick={onRetry}>Reintentar</button> : null}
           {onRegenerate ? (
             <button type="button" disabled={isRecovering} onClick={onRegenerate}>
-              {isRecovering ? "Reconstruyendo…" : "Regenerar sección"}
+              {isRecovering ? "Preparando…" : "Volver a preparar"}
             </button>
           ) : null}
         </div>

@@ -6,7 +6,7 @@ import { CONTRACT_FINGERPRINT } from "@ine/contracts";
  * adapts the two known legacy wire differences only at the HTTP boundary.
  */
 export const BRYAN_BACKEND_CONTRACT_FINGERPRINT =
-  "7dcd9760845160aa1915ecc5cf1707379f32afc990982499647a03296f453482" as const;
+  "1d5ca770e9c1e26dd437e04038a70477d3498b64a27f886eb0f1667b4b9976e5" as const;
 
 const supportedBackendFingerprints = new Set<string>([
   CONTRACT_FINGERPRINT,
@@ -76,36 +76,7 @@ function adaptContractValue(
     adapted.encoding = stripUnsupportedVisualizationFormats(adapted.encoding);
   }
 
-  // Bryan's current backend contract predates the frontend-only Mexico map
-  // node. Keep the user's evidence and current selection context by sending a
-  // semantically equivalent table snapshot at the wire boundary. The local
-  // interface remains a choropleth and the backend stays untouched/read-only.
-  if (direction === "to-backend" && adapted.type === "mexicoChoropleth") {
-    return downgradeMexicoMapForBackend(adapted);
-  }
-
   return adapted;
-}
-
-function downgradeMexicoMapForBackend(node: Record<string, unknown>) {
-  const entityNameField = typeof node.entityNameField === "string" ? node.entityNameField : "group";
-  const numeratorField = typeof node.numeratorField === "string" ? node.numeratorField : "voted";
-  const denominatorField = typeof node.denominatorField === "string" ? node.denominatorField : "classified";
-  const valueField = typeof node.valueField === "string" ? node.valueField : "participationPct";
-  return {
-    type: "table",
-    id: node.id,
-    ariaLabel: node.ariaLabel,
-    dataBinding: node.dataBinding,
-    columns: [
-      { field: entityNameField, label: "Entidad", format: "text", sortable: true },
-      { field: numeratorField, label: "Personas que votaron", format: "number", align: "end" },
-      { field: denominatorField, label: "Votaron + no votaron", format: "number", align: "end" },
-      { field: valueField, label: "Participación (%)", format: "number", align: "end", sortable: true },
-    ],
-    sorting: { enabled: true },
-    pagination: { pageSize: 10 },
-  };
 }
 
 function stripUnsupportedVisualizationFormats(encoding: Record<string, unknown>) {

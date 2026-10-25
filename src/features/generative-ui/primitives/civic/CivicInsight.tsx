@@ -1,6 +1,7 @@
 import type { CivicInsightNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { isDataRecord, readCivicLabel } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface CivicInsightProps {
   data?: DataValue;
@@ -22,12 +23,12 @@ export function CivicInsight({ data, spec }: CivicInsightProps) {
   }
 
   return (
-    <aside aria-label={spec.ariaLabel} className="ui-civic-insight" data-tone={spec.tone ?? "neutral"}>
+    <aside aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-civic-insight" data-tone={spec.tone ?? "neutral"}>
       <span className="ui-civic-insight__label">Lectura ciudadana</span>
       <div>
-        <h3>{title}</h3>
-        <p>{explanation}</p>
-        {source ? <small>Fuente: {source}</small> : null}
+        <h3>{cleanGeneratedCopy(title)}</h3>
+        <p>{cleanGeneratedCopy(explanation)}</p>
+        {source ? <small>Fuente: {cleanGeneratedCopy(source)}</small> : null}
       </div>
       {statistic ? <strong className="ui-civic-insight__statistic">{statistic}</strong> : null}
     </aside>

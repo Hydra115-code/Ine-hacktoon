@@ -15,25 +15,43 @@ export function MultiSelect({ id, label, event, options, initialValue = [], minS
   const messageId = `${id}-message`;
 
   return (
-    <div className="ui-field">
-      <label htmlFor={id}>{label}</label>
-      <select
-        aria-describedby={helpText || error ? messageId : undefined}
-        aria-invalid={Boolean(error)}
-        disabled={disabled}
-        id={id}
-        multiple
-        value={value}
-        onChange={(changeEvent) => {
-          const nextValue = Array.from(changeEvent.target.selectedOptions, (option) => option.value);
-          const nextError = validateSelectionCount(nextValue.length, minSelections, maxSelections);
-          setValue(nextValue);
-          emit(nextValue, !nextError);
-        }}
-      >
-        {options.map((option) => <option disabled={option.disabled} key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+    <fieldset
+      aria-describedby={helpText || error ? messageId : undefined}
+      aria-invalid={Boolean(error)}
+      className="ui-field ui-multi-select"
+      disabled={disabled}
+      id={id}
+    >
+      <legend>{label}</legend>
+      <div className="ui-multi-select__options">
+        {options.map((option) => {
+          const checked = value.includes(option.value);
+          const optionId = `${id}-${option.value}`;
+          return (
+            <label data-selected={checked || undefined} htmlFor={optionId} key={option.value}>
+              <input
+                checked={checked}
+                disabled={option.disabled || (!checked && maxSelections !== undefined && value.length >= maxSelections)}
+                id={optionId}
+                type="checkbox"
+                value={option.value}
+                onChange={(changeEvent) => {
+                  const nextValue = changeEvent.target.checked
+                    ? [...value, option.value]
+                    : value.filter((item) => item !== option.value);
+                  const nextError = validateSelectionCount(nextValue.length, minSelections, maxSelections);
+                  setValue(nextValue);
+                  emit(nextValue, !nextError);
+                }}
+              />
+              <span aria-hidden="true" className="ui-multi-select__mark">{checked ? "✓" : "+"}</span>
+              <span>{option.label}</span>
+            </label>
+          );
+        })}
+      </div>
+      <p className="ui-multi-select__count">{value.length} {value.length === 1 ? "selección" : "selecciones"}{maxSelections ? ` de ${maxSelections}` : ""}</p>
       <FieldMessage error={error} helpText={helpText} id={messageId} />
-    </div>
+    </fieldset>
   );
 }

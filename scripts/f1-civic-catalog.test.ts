@@ -77,3 +77,20 @@ test("el layout conserva respiración entre visualizaciones y tarjetas", () => {
   assert.match(layoutCss, /\[data-node-type="comparisonMatrix"\]/u);
   assert.match(layoutCss, /margin-block-start:\s*var\(--space-6\)/u);
 });
+
+test("el catálogo cívico comparte estados accesibles de carga, vacío y error", () => {
+  const renderer = readFileSync(new URL("../src/features/generative-ui/runtime/LayoutRenderer.tsx", import.meta.url), "utf8");
+  assert.match(renderer, /function CivicBindingState/u);
+  assert.match(renderer, /data-state="loading"/u);
+  assert.match(renderer, /data-state="empty"/u);
+  assert.match(renderer, /data-state="error"/u);
+  assert.match(renderer, /role="alert"/u);
+  assert.match(renderer, /aria-live="polite"/u);
+});
+
+test("las comparaciones y series avisan cuando sólo pueden mostrar datos parciales", () => {
+  const timeline = readFileSync(new URL("../src/features/generative-ui/primitives/civic/ParticipationTimeline.tsx", import.meta.url), "utf8");
+  const matrix = readFileSync(new URL("../src/features/generative-ui/primitives/civic/ComparisonMatrix.tsx", import.meta.url), "utf8");
+  assert.match(timeline, /La evolución es parcial/u);
+  assert.match(matrix, /La comparación es parcial/u);
+});

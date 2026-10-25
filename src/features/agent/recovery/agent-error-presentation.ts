@@ -42,8 +42,8 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("duplicate_payment") || code.includes("duplicate_action")) {
     return {
       code: input.code,
-      title: "La operación ya fue recibida",
-      message: "No enviaremos la operación otra vez. Verifica su estado autoritativo antes de intentar una acción nueva.",
+      title: "La solicitud ya fue recibida",
+      message: "Paper no la repetirá. El resultado que ya tienes permanece disponible.",
       canRetry: false,
       canContinue,
     };
@@ -53,7 +53,7 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
     return {
       code: input.code,
       title: "Esta acción requiere confirmación",
-      message: "La interfaz no ejecutará esta acción sin validación del servicio correspondiente.",
+      message: "Antes de continuar necesito que confirmes esta acción.",
       canRetry: false,
       canContinue,
     };
@@ -62,18 +62,62 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("revision_conflict")) {
     return {
       code: input.code,
-      title: "Paper necesita recuperar la última vista",
-      message: "Conservamos el resultado anterior. Recupéralo antes de pedir otro cambio; no repetiremos la operación automáticamente.",
+      title: "La vista cambió mientras trabajábamos",
+      message: "Tu resultado anterior sigue disponible. Recupéralo antes de pedir otro cambio.",
       canRetry: false,
       canContinue: false,
+    };
+  }
+
+  if (code.includes("session_busy")) {
+    return {
+      code: input.code,
+      title: "Paper todavía está trabajando",
+      message: "Conservamos el resultado visible. Espera a que termine la consulta en curso antes de pedir otro cambio.",
+      canRetry: false,
+      canContinue,
+    };
+  }
+
+  if (code.includes("session_not_found")) {
+    return {
+      code: input.code,
+      title: "Esta exploración necesita reiniciarse",
+      message: canContinue
+        ? "El resultado anterior sigue visible, pero Paper ya no puede modificar esa exploración. Inicia una consulta nueva para continuar."
+        : "Inicia una consulta nueva para volver a explorar los datos.",
+      canRetry: false,
+      canContinue,
+    };
+  }
+
+  if (code.includes("session_forbidden")) {
+    return {
+      code: input.code,
+      title: "Esta exploración no está disponible",
+      message: "Conservamos tu resultado visible. Inicia una consulta nueva dentro de tu sesión para continuar.",
+      canRetry: false,
+      canContinue,
+    };
+  }
+
+  if (code.includes("ui_event_invalid")) {
+    return {
+      code: input.code,
+      title: "Paper no pudo aplicar ese cambio",
+      message: canContinue
+        ? "La vista anterior sigue intacta. Puedes seguir explorándola o pedir el ajuste con otras palabras."
+        : "La vista no cambió. Intenta pedir el ajuste con otras palabras.",
+      canRetry: false,
+      canContinue,
     };
   }
 
   if (code.includes("semantic-ui")) {
     return {
       code: input.code,
-      title: "No encontramos una presentación que respetara tu solicitud",
-      message: "Tus datos se consultaron correctamente, pero descartamos la interfaz porque contradecía una indicación explícita. Puedes reintentar o ajustar la forma solicitada.",
+      title: "No pude acomodar los datos como lo pediste",
+      message: "Sí encontré la información, pero la forma de mostrarla no respetaba una de tus indicaciones. Ajusta la petición o inténtalo de nuevo.",
       canRetry: input.recoverable,
       canContinue: false,
     };
@@ -82,8 +126,8 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("evidence-validation") || code.includes("financial-reasoning")) {
     return {
       code: input.code,
-      title: "No pudimos respaldar el análisis con suficiente evidencia",
-      message: "Descartamos una conclusión que no estaba suficientemente respaldada. Puedes reintentar o precisar el periodo, territorio, indicador o escenario que quieres analizar.",
+      title: "Me falta información para responder con confianza",
+      message: "Indica el periodo, el territorio o el grupo que quieres revisar y lo intentaré de nuevo.",
       canRetry: input.recoverable,
       canContinue: false,
     };
@@ -105,7 +149,9 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
     return {
       code: input.code,
       title: "El análisis tardó más de lo esperado",
-      message: "Detuvimos la espera de forma segura. Puedes intentarlo de nuevo sin modificar tu consulta.",
+      message: canContinue
+        ? "Detuvimos la espera de forma segura y conservamos el resultado anterior. Puedes intentarlo de nuevo."
+        : "Detuvimos la espera de forma segura. Puedes intentarlo de nuevo sin modificar tu consulta.",
       canRetry: input.recoverable,
       canContinue,
     };
@@ -114,10 +160,10 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("ui_") || code.includes("binding") || code.includes("visualization")) {
     return {
       code: input.code,
-      title: "Una parte de la interfaz necesita reconstruirse",
+      title: "No pude mostrar una parte de la respuesta",
       message: canContinue
-        ? "Conservamos los elementos válidos mientras aislamos la parte que no pudo mostrarse."
-        : "No pudimos construir una representación segura. Puedes intentarlo nuevamente.",
+        ? "El resto de la información sigue disponible. Puedes continuar o intentarlo de nuevo."
+        : "Inténtalo nuevamente o pide otra forma de mostrar la información.",
       canRetry: input.recoverable,
       canContinue,
     };
@@ -126,8 +172,10 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("network") || code.includes("connection")) {
     return {
       code: input.code,
-      title: "Se perdió la conexión con el agente",
-      message: "Tu consulta sigue disponible. Revisa la conexión e inténtalo nuevamente.",
+      title: "Se interrumpió la conexión con Paper",
+      message: canContinue
+        ? "Conservamos el resultado anterior. Revisa la conexión e inténtalo nuevamente."
+        : "Tu consulta sigue disponible. Revisa la conexión e inténtalo nuevamente.",
       canRetry: input.recoverable,
       canContinue,
     };
@@ -136,8 +184,8 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
   if (code.includes("partial_data") || code.includes("partial_result")) {
     return {
       code: input.code,
-      title: "La información llegó parcialmente",
-      message: "Conservamos los datos disponibles. Puedes continuar con ellos o solicitar nuevamente la consulta.",
+      title: "Faltan algunos datos",
+      message: "Conservé lo que sí encontré. Puedes continuar con ello o intentarlo de nuevo.",
       canRetry: input.recoverable,
       canContinue,
     };
@@ -145,7 +193,7 @@ export function presentAgentFailure(input: AgentFailureInput): AgentFailurePrese
 
   return {
     code: input.code,
-    title: "No pudimos completar toda la consulta",
+    title: "No pude terminar esta consulta",
     message: canContinue
       ? "Puedes reintentar o continuar con la información que ya está disponible."
       : "La consulta se detuvo de forma segura. Puedes intentarlo nuevamente.",

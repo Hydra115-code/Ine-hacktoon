@@ -37,7 +37,7 @@ export class NodeErrorBoundary extends Component<NodeErrorBoundaryProps, NodeErr
       return (
         <ErrorNode
           isRecovering={this.props.isRecovering}
-          message="El resto de la interfaz continúa disponible. Puedes volver a intentarlo o pedir al agente que reconstruya esta sección."
+          message="El resto de la vista continúa disponible. Puedes volver a intentarlo o pedirle a Paper que prepare de nuevo esta sección."
           onRegenerate={this.props.onRegenerate}
           onRetry={this.retry}
           title={this.props.title ?? "No se pudo mostrar esta sección"}

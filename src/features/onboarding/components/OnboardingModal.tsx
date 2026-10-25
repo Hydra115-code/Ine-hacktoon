@@ -237,9 +237,9 @@ export function OnboardingModal() {
 
             {state.step === 4 && (
               <div className="onboarding-screen__inner">
-                <span className="onboarding-kicker">Una pregunta, una interfaz generativa</span>
-                <h2 id="onboarding-step-title" ref={titleRef} tabIndex={-1}>No eliges secciones.<br /><em>La UI se adapta.</em></h2>
-                <p className="onboarding-lead">Escribe lo que quieres entender. Paper consulta la evidencia y presenta únicamente la interfaz y los datos necesarios para responder.</p>
+                <span className="onboarding-kicker">Una pregunta, una vista hecha para ti</span>
+                <h2 id="onboarding-step-title" ref={titleRef} tabIndex={-1}>No eliges secciones.<br /><em>La vista se adapta.</em></h2>
+                <p className="onboarding-lead">Escribe lo que quieres entender. Paper consulta la evidencia y presenta únicamente la información necesaria para responder.</p>
                 <div className="onboarding-genui">
                   <span>Tu pregunta</span><b aria-hidden="true">→</b><span>Paper investiga</span><b aria-hidden="true">→</b><strong>La respuesta toma forma</strong>
                 </div>

@@ -9,11 +9,23 @@ import {
   type VisualizationTheme,
 } from "./VisualizationCompiler";
 import { VisualizationDataTable } from "./VisualizationDataTable";
+import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 interface VisualizationProps {
   spec: VisualizationNode;
   data?: DataValue[];
 }
+
+const markLabels: Record<VisualizationNode["mark"], string> = {
+  line: "Evolución",
+  area: "Volumen",
+  bar: "Comparación",
+  "grouped-bar": "Comparación cruzada",
+  "stacked-bar": "Composición",
+  scatter: "Relación",
+  donut: "Distribución",
+  heatmap: "Intensidad territorial",
+};
 
 function isDataRow(value: DataValue): value is VisualizationDataRow {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -43,6 +55,8 @@ export function Visualization({ spec, data }: VisualizationProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const descriptionId = useId();
   const rows = useMemo(() => data?.filter(isDataRow) ?? [], [data]);
+  const accessibleTitle = cleanGeneratedCopy(spec.ariaLabel);
+  const accessibleDescription = spec.description ? cleanGeneratedCopy(spec.description) : undefined;
 
   useEffect(() => {
     const element = chartRef.current;
@@ -98,15 +112,19 @@ export function Visualization({ spec, data }: VisualizationProps) {
   }
 
   return (
-    <figure className={`ui-visualization ui-visualization--${spec.height ?? "md"}`}>
+    <figure className={`ui-visualization ui-visualization--${spec.height ?? "md"}`} data-mark={spec.mark}>
+      <header className="ui-visualization__header">
+        <span>{markLabels[spec.mark]}</span>
+        <h3>{accessibleTitle}</h3>
+        {accessibleDescription ? <p id={descriptionId}>{accessibleDescription}</p> : null}
+      </header>
       <div
-        aria-describedby={spec.description ? descriptionId : undefined}
-        aria-label={spec.ariaLabel}
+        aria-describedby={accessibleDescription ? descriptionId : undefined}
+        aria-label={accessibleTitle}
         className="ui-visualization__chart"
         ref={chartRef}
         role="img"
       />
-      {spec.description ? <figcaption className="sr-only" id={descriptionId}>{spec.description}</figcaption> : null}
       <VisualizationDataTable rows={rows} spec={spec} />
     </figure>
   );

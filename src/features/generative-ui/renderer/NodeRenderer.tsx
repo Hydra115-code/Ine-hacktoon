@@ -34,7 +34,7 @@ export function NodeRenderer({ node, dataRegistry, bindingOptions, onEvent, pend
   if (!result.success) {
     const nodeType = readNodeType(node);
     if (nodeType && !knownNodeTypes.has(nodeType)) return <UnknownNode nodeType={nodeType} />;
-    return <ErrorNode title="El elemento no cumple el contrato de interfaz" />;
+    return <ErrorNode title="Una parte de la vista no pudo mostrarse" message="El resto del resultado sigue disponible." />;
   }
 
   const validatedNode = isTrustedUINode(node) ? node : result.data.root;

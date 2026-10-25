@@ -6,6 +6,7 @@ import type { DataValue } from "../../data-binding/schemas/data-registry-schema"
 import { useInteractionEvent } from "../../interactions/events/UIEventProvider";
 import mexicoMapAsset from "../../geography/mexico-states.paths.json" with { type: "json" };
 import { formatCivicValue, isDataRecord, readCivicLabel, readCivicNumber } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface MexicoChoroplethProps {
   data?: DataValue[];
@@ -133,15 +134,15 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
   };
 
   if (parsedRows.length === 0) {
-    return <div className="ui-civic-state" role="status">No hay datos territoriales compatibles para dibujar el mapa.</div>;
+    return <div className="ui-civic-state" role="status">No hay información por entidad para mostrar el mapa.</div>;
   }
 
   return (
-    <section aria-label={spec.ariaLabel} className="ui-mexico-map">
+    <section aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-mexico-map">
       <header className="ui-civic-component__header">
         <span className="ui-civic-component__eyebrow">Mapa de México</span>
-        <h3 id={titleId}>{spec.title}</h3>
-        {spec.valueLabel ? <p id={descriptionId}>{spec.valueLabel}</p> : null}
+        <h3 id={titleId}>{cleanGeneratedCopy(spec.title)}</h3>
+        {spec.valueLabel ? <p id={descriptionId}>{cleanGeneratedCopy(spec.valueLabel)}</p> : null}
       </header>
 
       <div className="ui-mexico-map__toolbar">
@@ -220,8 +221,8 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
             <>
               <strong>{formatCivicValue(activeRow.value, spec.format, spec.unit, locale)}</strong>
               {activeRow.period ? <p>Periodo: {activeRow.period}</p> : null}
-              {activeRow.numerator !== undefined ? <p>Numerador: {formatCivicValue(activeRow.numerator, "number", undefined, locale)}</p> : null}
-              {activeRow.denominator !== undefined ? <p>Denominador: {formatCivicValue(activeRow.denominator, "number", undefined, locale)}</p> : null}
+              {activeRow.numerator !== undefined ? <p>Cantidad observada: {formatCivicValue(activeRow.numerator, "number", undefined, locale)}</p> : null}
+              {activeRow.denominator !== undefined ? <p>Total de referencia: {formatCivicValue(activeRow.denominator, "number", undefined, locale)}</p> : null}
             </>
           ) : <p>{activeGeometry ? "No hay un valor disponible para esta entidad." : "Puedes usar el buscador o seleccionar una entidad en el mapa."}</p>}
         </aside>
@@ -259,8 +260,8 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
         <summary>Ver los datos del mapa en tabla</summary>
         <div tabIndex={0}>
           <table>
-            <caption>{spec.title}. Alternativa tabular accesible.</caption>
-            <thead><tr><th scope="col">Clave</th><th scope="col">Entidad</th><th scope="col">{spec.valueLabel ?? "Valor"}</th></tr></thead>
+            <caption>{cleanGeneratedCopy(spec.title)}. Los mismos datos en una tabla.</caption>
+            <thead><tr><th scope="col">Clave</th><th scope="col">Entidad</th><th scope="col">{cleanGeneratedCopy(spec.valueLabel ?? "Valor")}</th></tr></thead>
             <tbody>
               {mexicoMapAsset.states.map((state) => {
                 const row = rowsByCode.get(state.code);
@@ -273,7 +274,7 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
         </div>
       </details>
 
-      <p className="ui-civic-component__notice">Geometría: {mexicoMapAsset.source}. Los valores provienen de la fuente enlazada a esta vista.</p>
+      <p className="ui-civic-component__notice">Mapa base: {mexicoMapAsset.source}. Los valores provienen de la fuente indicada en esta vista.</p>
     </section>
   );
 }

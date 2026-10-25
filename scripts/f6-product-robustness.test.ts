@@ -25,7 +25,7 @@ test("F6 no muestra mensajes técnicos crudos en errores públicos", () => {
 test("F6 conserva la última UI válida cuando falla una actualización", () => {
   const canvas = read("src/features/workspace/components/GenerativeCanvas.tsx");
   assert.match(canvas, /hasBlockingFailure = hasAnyFailure && !generatedInterface/u);
-  assert.match(canvas, /Última vista válida disponible/u);
+  assert.match(canvas, /Vista disponible/u);
   assert.match(canvas, /canvas-result__degradation-paper/u);
   assert.match(canvas, /PaperAvatar mood=\{status === "partial" \? "thinking" : "surprised"\}/u);
 });
@@ -53,8 +53,8 @@ test("F6 mantiene controles táctiles, layout móvil, foco y movimiento reducido
 
 test("F6 conserva una recuperación ciudadana ante una caída total de React", () => {
   const boundary = read("src/features/workspace/components/WorkspaceErrorBoundary.tsx");
-  assert.match(boundary, /Tu consulta permanece intacta/u);
-  assert.match(boundary, /Restaurar interfaz/u);
+  assert.match(boundary, /Tu consulta sigue guardada/u);
+  assert.match(boundary, /Intentar de nuevo/u);
   assert.doesNotMatch(boundary, /error\.message|error\.stack|digest/u);
 });
 

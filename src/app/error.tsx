@@ -4,9 +4,9 @@ export default function ApplicationError({ reset }: { error: Error & { digest?: 
   return (
     <main className="workspace-failure">
       <div className="workspace-failure__mark" aria-hidden="true">!</div>
-      <p className="canvas__eyebrow">Recuperación segura</p>
-      <h1>No pudimos cargar el espacio de trabajo</h1>
-      <p>La sesión permanece protegida. Intenta cargar nuevamente la interfaz.</p>
+      <p className="canvas__eyebrow">Paper conserva tu consulta</p>
+      <h1>No pude abrir esta página</h1>
+      <p>Inténtalo de nuevo. Si el problema continúa, vuelve al inicio y abre una consulta nueva.</p>
       <button type="button" onClick={reset}>Reintentar</button>
     </main>
   );

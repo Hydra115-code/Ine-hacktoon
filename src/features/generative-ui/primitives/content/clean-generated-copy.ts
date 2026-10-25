@@ -1,6 +1,8 @@
+import { toCitizenLanguage } from "../../../../shared/citizen-language.ts";
+
 /** Removes internal answer markers and unrendered Markdown from user-facing copy. */
 export function cleanGeneratedCopy(content: string): string {
-  return content
+  return toCitizenLanguage(content
     .replace(/\r\n?/gu, "\n")
     .replace(/[*`]/gu, "")
     .replace(/^#{1,6}[ \t]+/gmu, "")
@@ -10,6 +12,7 @@ export function cleanGeneratedCopy(content: string): string {
     .replace(/\bnumerator\b/giu, "personas que votaron")
     .replace(/\bdenominator\b/giu, "lista nominal")
     .replace(/\bconfidence interval\b/giu, "intervalo de confianza")
+    .replace(/\bstack trace\b/giu, "detalle de la incidencia")
     .replace(/\(\s*sin registros adicionales pendientes de paginación,?\s*hasMore\s*:\s*false\s*\)/giu, "con el historial completo")
-    .trim();
+    .trim());
 }

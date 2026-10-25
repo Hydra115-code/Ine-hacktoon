@@ -21,6 +21,7 @@ const persistedSnapshotSchema = z.object({
   data: dataRegistrySchema,
   interfaceRevision: z.number().int().nonnegative().max(1_000_000),
   dataRevision: z.number().int().nonnegative().max(1_000_000),
+  authoritativeDataKeys: z.array(z.string().min(1).max(64).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/)).max(100).optional(),
   invalidatedKeys: z.array(z.string().min(1).max(64).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/)).max(100),
   degradationReason: z.enum(["generation_interrupted", "partial_data"]).optional(),
   changeSummary: z.object({

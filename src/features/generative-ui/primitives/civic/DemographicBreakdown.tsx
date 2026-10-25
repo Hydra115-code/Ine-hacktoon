@@ -1,6 +1,7 @@
 import type { DemographicBreakdownNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { formatCivicValue, isDataRecord, readCivicLabel, readCivicNumber } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface DemographicBreakdownProps {
   data?: DataValue[];
@@ -27,11 +28,11 @@ export function DemographicBreakdown({ data, locale = "es-MX", spec }: Demograph
   const maxValue = Math.max(...visibleRows.map((row) => Math.abs(row.value)), 1);
 
   return (
-    <section aria-label={spec.ariaLabel} className="ui-demographic-breakdown">
+    <section aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-demographic-breakdown">
       <header className="ui-civic-component__header">
         <span className="ui-civic-component__eyebrow">Lectura por segmento</span>
-        <h3>{spec.title}</h3>
-        {spec.valueLabel ? <p>{spec.valueLabel}</p> : null}
+        <h3>{cleanGeneratedCopy(spec.title)}</h3>
+        {spec.valueLabel ? <p>{cleanGeneratedCopy(spec.valueLabel)}</p> : null}
       </header>
       <ul className="ui-demographic-breakdown__list">
         {visibleRows.map((row) => (
@@ -46,7 +47,7 @@ export function DemographicBreakdown({ data, locale = "es-MX", spec }: Demograph
           </li>
         ))}
       </ul>
-      {rows.length < (data?.length ?? 0) ? <p className="ui-civic-component__notice">Se omitieron registros sin segmento o valor.</p> : null}
+      {rows.length < (data?.length ?? 0) ? <p className="ui-civic-component__notice">Algunos grupos no tenían información suficiente y no aparecen aquí.</p> : null}
     </section>
   );
 }

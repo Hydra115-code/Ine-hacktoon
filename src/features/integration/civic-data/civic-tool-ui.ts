@@ -13,13 +13,13 @@ export function buildCivicToolUISpecification(adaptation: CivicToolAdaptation): 
     { type: "heading", id: "civic-tool-title", content: titles[adaptation.toolName], level: 2, size: "title" },
   ];
 
-  if (adaptation.status !== "complete") {
+  if (adaptation.status === "invalid") {
     children.push({
       type: "alert",
       id: "civic-tool-status",
-      title: adaptation.status === "partial" ? "Información parcial" : "Datos no disponibles",
+      title: "Datos no disponibles",
       message: adaptation.citizenMessage,
-      semanticState: adaptation.status === "partial" ? "status.warning" : "status.error",
+      semanticState: "status.error",
     });
   }
 
@@ -166,6 +166,7 @@ function addComparison(children: UINode[], data: DataRegistryValue) {
       valueLabel: "Usa las flechas izquierda y derecha para recorrer los años",
       format: "number",
       unit: "%",
+      selectionEvent: "timeline.period_selected",
     });
     children.push({ type: "table", id: "comparison-table", ariaLabel: "Cifras de los procesos comparados", dataBinding: "elections", columns: currentContract ? [
       { field: "year", label: "Año", format: "number", sortable: true },

@@ -22,6 +22,7 @@ import {
 import { createUIPatchState, type UIPatchState } from "@/features/generative-ui/patches/ui-patch-engine";
 import { UI_PLANNER_CONTEXT } from "@/features/agent/planner/ui-planner";
 import { GenerationObserver } from "@/features/agent/performance/generation-observer";
+import { classifyInteractionEvent } from "@/features/agent/interactions/interaction-policy";
 import { MAX_AGENT_REQUEST_BYTES } from "@/shared/security/request-limits";
 import { accessTokenNeedsRefresh } from "@/features/auth/server/access-token-expiry";
 import {
@@ -226,6 +227,39 @@ export async function POST(request: NextRequest) {
 
   const sessionId = input.type === "prompt" ? (input.session?.id ?? crypto.randomUUID()) : input.intent.sessionId;
   const correlationId = input.type === "prompt" ? crypto.randomUUID() : input.intent.correlationId;
+  if (input.type === "ui-event" && classifyInteractionEvent(input.intent.event.name).delivery === "local") {
+    const localStream = createUIMessageStream<AgentUIMessage>({
+      execute: async ({ writer }) => {
+        writer.write({ type: "data-trace", data: { correlationId }, transient: true });
+        writer.write({
+          type: "data-interaction",
+          data: { correlationId, sourceId: input.intent.event.sourceId, status: "pending" },
+          transient: true,
+        });
+        writer.write({
+          type: "data-status",
+          data: { stage: "ready", message: "Cambio visual aplicado" },
+          transient: true,
+        });
+        writer.write({
+          type: "data-interaction",
+          data: { correlationId, sourceId: input.intent.event.sourceId, status: "completed" },
+          transient: true,
+        });
+      },
+      onError: () => "No pude aplicar el cambio visual",
+    });
+    return createUIMessageStreamResponse({
+      stream: localStream,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+        "X-Correlation-ID": correlationId,
+        "X-Session-ID": sessionId,
+        "X-INE-Interaction": "local",
+      },
+    });
+  }
   const cookies = readSessionCookies(request);
   let accessToken = usesLocalServiceSession ? undefined : cookies.accessToken;
   let refreshedSession: SupabaseUserSession | undefined;

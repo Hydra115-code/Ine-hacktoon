@@ -20,6 +20,12 @@ interface AppShellProps {
 export function AppShell({ diagnostics, showDeveloperDiagnostics = false }: AppShellProps = {}) {
   const diagnosticsEnabled = shouldExposeRuntimeDiagnostics(process.env.NODE_ENV, showDeveloperDiagnostics);
   const [mobilePane, setMobilePane] = useState<"conversation" | "result">("result");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const showConversation = () => {
+    setIsSidebarCollapsed(false);
+    setMobilePane("conversation");
+  };
 
   return (
     <WorkspaceErrorBoundary>
@@ -39,13 +45,35 @@ export function AppShell({ diagnostics, showDeveloperDiagnostics = false }: AppS
               <button type="button" role="tab" id="conversation-tab" aria-controls="conversation-pane" aria-selected={mobilePane === "conversation"} tabIndex={mobilePane === "conversation" ? 0 : -1} onClick={() => setMobilePane("conversation")}>Conversación</button>
               <button type="button" role="tab" id="result-tab" aria-controls="result-pane" aria-selected={mobilePane === "result"} tabIndex={mobilePane === "result" ? 0 : -1} onClick={() => setMobilePane("result")}>Vista generada</button>
             </div>
-            <div className="workspace__main" data-mobile-pane={mobilePane}>
-              <div className="workspace__pane workspace__pane--conversation" id="conversation-pane" role="tabpanel" aria-labelledby="conversation-tab" tabIndex={0}>
+            <div className="workspace__main" data-mobile-pane={mobilePane} data-sidebar-collapsed={isSidebarCollapsed}>
+              <button
+                aria-controls="conversation-pane"
+                aria-expanded={!isSidebarCollapsed}
+                aria-label={isSidebarCollapsed ? "Mostrar conversación" : "Ocultar conversación"}
+                className="workspace__sidebar-toggle"
+                data-collapsed={isSidebarCollapsed || undefined}
+                onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
+                title={isSidebarCollapsed ? "Mostrar conversación" : "Ocultar conversación"}
+                type="button"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d={isSidebarCollapsed ? "m9 5 7 7-7 7" : "m15 5-7 7 7 7"} />
+                </svg>
+              </button>
+              <div
+                aria-hidden={isSidebarCollapsed || undefined}
+                className="workspace__pane workspace__pane--conversation"
+                id="conversation-pane"
+                inert={isSidebarCollapsed || undefined}
+                role="tabpanel"
+                aria-labelledby="conversation-tab"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
+              >
                 <AnalysisHistory />
                 <ConversationPanel onShowResult={() => setMobilePane("result")} />
               </div>
               <div className="workspace__pane workspace__pane--result" id="result-pane" role="tabpanel" aria-labelledby="result-tab" tabIndex={0}>
-                <GenerativeCanvas showRuntimeDiagnostics={diagnosticsEnabled} onShowChat={() => setMobilePane("conversation")} />
+                <GenerativeCanvas showRuntimeDiagnostics={diagnosticsEnabled} onShowChat={showConversation} />
               </div>
             </div>
           </div>

@@ -24,7 +24,21 @@ const knownLabels: Record<string, string> = {
   year: "Año",
 };
 
-const metadataFields = new Set(["methodology", "officialUrl", "source", "sourceUrl"]);
+const metadataFields = new Set([
+  "dataType",
+  "isSampleData",
+  "level",
+  "metadata",
+  "methodology",
+  "officialUrl",
+  "provenance",
+  "quality",
+  "source",
+  "sourceUrl",
+  "status",
+  "toolName",
+  "warnings",
+]);
 
 function labelFromKey(key: string) {
   const knownLabel = knownLabels[key];
@@ -91,12 +105,12 @@ function buildCollectionNodes(data: DataRegistryValue) {
   let visualizationCount = 0;
 
   for (const [key, value] of Object.entries(data)) {
-    if (!isSafeField(key) || !Array.isArray(value) || value.length === 0) continue;
+    if (!isSafeField(key) || metadataFields.has(key) || !Array.isArray(value) || value.length === 0) continue;
     const records = value.filter(isRecord);
     if (records.length !== value.length) continue;
 
     const fields = [...new Set(records.slice(0, 20).flatMap((record) => Object.keys(record)))]
-      .filter(isSafeField)
+      .filter((field) => isSafeField(field) && !metadataFields.has(field))
       .filter((field) => records.some((record) => {
         const fieldValue = record[field];
         return fieldValue === null || ["string", "number", "boolean"].includes(typeof fieldValue);
@@ -146,7 +160,7 @@ export function buildGenericUISpecification(data: DataRegistryValue): UISpecific
   const children: UINode[] = [{
     type: "text",
     id: "fallback-explanation",
-    content: "La vista solicitada no está disponible. Conservamos y mostramos los datos recuperados en un formato compatible.",
+    content: "No pude preparar la vista que pediste, pero aquí están los datos que sí encontré.",
     tone: "secondary",
   }];
   if (metrics.length > 0) {

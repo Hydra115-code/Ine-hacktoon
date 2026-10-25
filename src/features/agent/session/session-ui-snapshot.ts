@@ -10,15 +10,15 @@ export const sessionUiSnapshotSchema = sessionReferenceSchema.extend({
 }).strict().superRefine((snapshot, context) => {
   if (JSON.stringify(Object.keys(snapshot.data).sort()) !== JSON.stringify([...snapshot.dataKeys].sort())
     || snapshot.invalidatedKeys.some((key) => !Object.hasOwn(snapshot.data, key))) {
-    context.addIssue({ code: "custom", message: "Snapshot de datos incompleto" });
+    context.addIssue({ code: "custom", message: "La vista guardada está incompleta" });
   }
 });
 
 export function restoreSessionUiSnapshot(input: unknown, expectedSessionId: string) {
   const snapshot = sessionUiSnapshotSchema.parse(input);
-  if (snapshot.sessionId !== expectedSessionId) throw new Error("Identidad de snapshot inválida");
+  if (snapshot.sessionId !== expectedSessionId) throw new Error("Esta vista guardada pertenece a otra consulta");
   const ui = createUIPatchState(snapshot.specification, snapshot.interfaceRevision);
-  if (!ui.success) throw new Error("UI de snapshot inválida");
+  if (!ui.success) throw new Error("No pude recuperar la vista guardada");
   const data = createDataRegistryPatchState(snapshot.data, snapshot.dataRevision);
   return { ui: ui.state, data: { ...data, invalidatedKeys: new Set(snapshot.invalidatedKeys) } };
 }

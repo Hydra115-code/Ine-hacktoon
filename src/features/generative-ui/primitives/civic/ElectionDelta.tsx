@@ -1,6 +1,7 @@
 import type { ElectionDeltaNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { formatCivicValue, isDataRecord, readCivicLabel, readCivicNumber } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface ElectionDeltaProps {
   data?: DataValue;
@@ -25,10 +26,10 @@ export function ElectionDelta({ data, locale = "es-MX", spec }: ElectionDeltaPro
   const isPartial = previousValue === undefined || currentValue === undefined;
 
   return (
-    <article aria-label={spec.ariaLabel} className="ui-election-delta" data-direction={direction}>
+    <article aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-election-delta" data-direction={direction}>
       <header className="ui-civic-component__header">
         <span className="ui-civic-component__eyebrow">Comparación electoral</span>
-        <h3>{spec.title}</h3>
+        <h3>{cleanGeneratedCopy(spec.title)}</h3>
       </header>
       <div className="ui-election-delta__periods">
         <div>
@@ -45,7 +46,7 @@ export function ElectionDelta({ data, locale = "es-MX", spec }: ElectionDeltaPro
         <span>{direction === "increase" ? "Aumentó" : direction === "decrease" ? "Disminuyó" : "Sin cambio"}</span>
         <strong>{difference !== undefined && difference > 0 ? "+" : ""}{formatCivicValue(difference, "number", spec.differenceUnit ?? spec.unit, locale)}</strong>
       </footer>
-      {isPartial ? <p className="ui-civic-component__notice">Comparación parcial: falta un valor del periodo.</p> : null}
+      {isPartial ? <p className="ui-civic-component__notice">Falta el dato de uno de los periodos, así que no puedo completar la comparación.</p> : null}
     </article>
   );
 }

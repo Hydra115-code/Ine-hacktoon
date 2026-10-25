@@ -66,6 +66,9 @@ test("separa visuales, simulaciones, análisis y acciones autoritativas", () => 
   assert.deepEqual(classifyInteractionEvent("form.submit"), { kind: "analysis", delivery: "agent" });
   assert.deepEqual(classifyInteractionEvent("ui.tab.changed"), { kind: "visual", delivery: "local" });
   assert.deepEqual(classifyInteractionEvent("ui.section.regenerate"), { kind: "analysis", delivery: "agent" });
+  assert.deepEqual(classifyInteractionEvent("timeline.period_selected"), { kind: "visual", delivery: "local" });
+  assert.deepEqual(classifyInteractionEvent("map.entity_selected"), { kind: "visual", delivery: "local" });
+  assert.deepEqual(classifyInteractionEvent("territory.selected"), { kind: "visual", delivery: "local" });
   assert.deepEqual(classifyInteractionEvent("scenario.sample.changed"), { kind: "simulation", delivery: "agent" });
   assert.deepEqual(classifyInteractionEvent("report.review.edit_requested"), { kind: "analysis", delivery: "agent" });
   assert.deepEqual(classifyInteractionEvent("report.publish.requested"), { kind: "authoritative_action", delivery: "blocked" });
@@ -79,6 +82,13 @@ test("el provider usa registro síncrono, correlación y reintento del intent", 
   assert.match(provider, /lastInteractionIntentRef\.current/u);
   assert.match(provider, /dispatchAgentInteraction\(intent\)/u);
   assert.match(provider, /classifyInteractionEvent\(event\.name\)/u);
+});
+
+test("la ruta impide que una interacción visual alcance al agente aunque el cliente esté desactualizado", () => {
+  const route = readFileSync(new URL("../src/app/api/agent/route.ts", import.meta.url), "utf8");
+  assert.match(route, /classifyInteractionEvent\(input\.intent\.event\.name\)\.delivery === "local"/u);
+  assert.match(route, /"X-INE-Interaction": "local"/u);
+  assert.match(route, /message: "Cambio visual aplicado"/u);
 });
 
 test("el diagnóstico obsoleto se limita al harness en desarrollo y a simulaciones de la misma sesión", () => {

@@ -45,6 +45,7 @@ export interface ParticipationTimelineNode extends DataBoundCivicNode {
   valueLabel?: string;
   format?: BindingFormat;
   unit?: string;
+  selectionEvent: string;
 }
 
 export interface DataQualityBadgeNode extends DataBoundCivicNode {
@@ -170,6 +171,7 @@ export const participationTimelineNodeSchema = z.object({
   valueLabel: shortTextSchema.optional(),
   format: displayFormatSchema.optional(),
   unit: z.string().trim().min(1).max(12).optional(),
+  selectionEvent: interactionEventNameSchema,
 }).strict();
 
 export const dataQualityBadgeNodeSchema = z.object({

@@ -61,6 +61,7 @@ export function Tabs({ ariaLabel, defaultValue, id, items }: TabsProps) {
               onClick={() => setActiveValue(item.value)}
               onKeyDown={(event) => moveFocus(event, index)}
             >
+              <span aria-hidden="true" className="ui-tabs__index">{String(index + 1).padStart(2, "0")}</span>
               {item.label}
             </button>
           );

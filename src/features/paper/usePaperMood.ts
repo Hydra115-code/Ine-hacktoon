@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useWorkspaceStore } from "../workspace/state/workspace-store";
-import { paperStatusVoices } from "./paper-voice";
+import { resolvePaperGuide } from "./state/paper-guide-state";
 import type { PaperMood } from "./paper-mood";
 
 interface UsePaperMoodOptions {
@@ -18,7 +18,7 @@ export function usePaperMood(options: UsePaperMoodOptions = {}) {
     setTemporaryMood(null);
   }, [status]);
 
-  const defaultVoice = paperStatusVoices[status] ?? paperStatusVoices.empty;
+  const defaultVoice = resolvePaperGuide(status);
   const activeMood: PaperMood = options.overrideMood ?? temporaryMood ?? defaultVoice.mood;
 
   const triggerMood = (mood: PaperMood, durationMs = 2400) => {

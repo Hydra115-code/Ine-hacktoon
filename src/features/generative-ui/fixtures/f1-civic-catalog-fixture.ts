@@ -128,6 +128,7 @@ export const f1CivicCatalogSpecification = uiSpecificationSchema.parse({
         valueLabel: "Usa flechas izquierda y derecha para recorrer los periodos",
         format: "number",
         unit: "%",
+        selectionEvent: "timeline.period_selected",
       },
       {
         type: "grid",

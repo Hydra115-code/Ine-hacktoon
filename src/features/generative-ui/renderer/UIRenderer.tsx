@@ -54,24 +54,6 @@ export function UIRenderer({
     : undefined;
 
   if (canRenderIdeal) {
-    if (degradationReason) {
-      return (
-        <section className="ui-degradation ui-degradation--preserved" data-degradation-level="1" data-generated-ui-root>
-          <p className="ui-renderer-message__title" role="status">
-            {degradationReason === "generation_interrupted"
-              ? "La actualización se interrumpió; conservamos el último resultado válido."
-              : "La actualización quedó parcial; conservamos el contenido válido recibido."}
-          </p>
-          <NodeRenderer
-            bindingOptions={bindingOptions}
-            dataRegistry={registry}
-            node={validatedSpecification!.root}
-            onEvent={onEvent}
-            pendingNodeIds={pendingNodeIds}
-          />
-        </section>
-      );
-    }
     return (
       <div data-generated-ui-root>
         <NodeRenderer
@@ -102,11 +84,11 @@ export function UIRenderer({
   }
 
   const message = degradationReason === "generation_interrupted"
-    ? "La generación se interrumpió antes de construir una vista compatible."
+    ? "No alcancé a terminar la vista."
     : !isValid
-      ? "Parte de los datos recibidos no cumplió el contrato seguro."
+      ? "Una parte de la información no se pudo mostrar."
       : hasIncompleteBindings
-        ? "La respuesta no incluyó todos los datos requeridos por la interfaz."
-        : "La interfaz recibida no es válida o utiliza capacidades no compatibles.";
+        ? "Faltan algunos datos para completar la respuesta."
+        : "No pude preparar el resultado que pediste.";
   return <StructuredResultFallback data={recoveredData} message={message} />;
 }

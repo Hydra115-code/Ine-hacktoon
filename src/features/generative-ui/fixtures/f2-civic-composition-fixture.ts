@@ -36,6 +36,7 @@ const civicNodeFactories: Record<CivicComponentType, () => UINode> = {
     type: "participationTimeline", id: "f2-participation-timeline", ariaLabel: "Evolución de la participación entre elecciones",
     title: "Participación a través del tiempo", dataBinding: "timeline", periodField: "election",
     valueField: "participation", valueLabel: "Recorre los periodos con las flechas del teclado", format: "number", unit: "%",
+    selectionEvent: "timeline.period_selected",
   }),
   dataQualityBadge: () => ({
     type: "dataQualityBadge", id: "f2-data-quality", ariaLabel: "Cobertura de los datos usados",

@@ -6,8 +6,9 @@ import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { TableNode } from "../schemas/table-node";
 import { buildTablePage, formatTableCell, tableStatus, type IndexedTableRow, type TableSortState } from "./table-model";
 import { TablePagination } from "./TablePagination";
-import { useInteractionEvent } from "../interactions/events/UIEventProvider";
+import { useInteractionEvent, useInteractionValue } from "../interactions/events/UIEventProvider";
 import { localizeDisplayValue } from "../data-binding/formatting/format-data-value";
+import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 const localizedColumnLabels: Readonly<Record<string, string>> = {
   recordtype: "Tipo de registro",
@@ -24,7 +25,7 @@ const localizedColumnLabels: Readonly<Record<string, string>> = {
 
 function columnLabel(label: string) {
   const key = label.replace(/[\s_-]/gu, "").toLocaleLowerCase("es-MX");
-  return localizedColumnLabels[key] ?? localizeDisplayValue(label);
+  return cleanGeneratedCopy(localizedColumnLabels[key] ?? localizeDisplayValue(label));
 }
 
 interface TableProps {
@@ -48,13 +49,24 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
     spec.id ?? "generated-table",
     selection?.event ?? "table.selection_changed",
   );
+  const emitFilter = useInteractionEvent(spec.id ?? "generated-table", "table.filter.changed");
+  const emitSort = useInteractionEvent(spec.id ?? "generated-table", "table.sort.changed");
+  const clearTimelinePeriod = useInteractionEvent(spec.id ?? "generated-table", "timeline.period_selected");
+  const selectedTimelinePeriod = useInteractionValue("timeline.period_selected");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<TableSortState | undefined>(spec.sorting?.default);
   const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => new Set());
+  const periodColumn = useMemo(() => spec.columns.find((column) => /^(?:year|period|año|anio)$/iu.test(column.field)), [spec.columns]);
+  const periodFilteredData = useMemo(() => {
+    if (!data || !periodColumn || (typeof selectedTimelinePeriod !== "string" && typeof selectedTimelinePeriod !== "number")) return undefined;
+    const selected = String(selectedTimelinePeriod);
+    const matches = data.filter((row) => String(readDataField(row, periodColumn.field) ?? "") === selected);
+    return matches.length > 0 ? matches : undefined;
+  }, [data, periodColumn, selectedTimelinePeriod]);
   const model = useMemo(
-    () => buildTablePage(data ?? [], spec, { query, sort, page }, { locale, currency }),
-    [currency, data, locale, page, query, sort, spec],
+    () => buildTablePage(periodFilteredData ?? data ?? [], spec, { query, sort, page }, { locale, currency }),
+    [currency, data, locale, page, periodFilteredData, query, sort, spec],
   );
   const visibleSelectionKeys = selection
     ? model.rows.map((row) => rowSelectionKey(row, selection.rowIdField))
@@ -70,6 +82,7 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
         : "ascending",
     }));
     setPage(1);
+    emitSort(field);
   }
 
   function toggleRow(key: string) {
@@ -100,30 +113,53 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
 
   return (
     <div className={`ui-table ui-table--${spec.density ?? "comfortable"}`} data-column-count={selection ? undefined : spec.columns.length}>
-      {spec.filtering?.enabled ? (
+      {spec.filtering?.enabled || periodFilteredData ? (
         <div className="ui-table__toolbar">
-          <label className="sr-only" htmlFor={`${selectionName}-filter`}>Filtrar tabla</label>
-          <input
-            id={`${selectionName}-filter`}
-            placeholder={spec.filtering.placeholder ?? "Filtrar resultados"}
-            type="search"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(1);
-            }}
-          />
+          <div className="ui-table__active-filters">
+            {selection ? <p aria-live="polite"><strong>{selectedRows.size}</strong> {selectedRows.size === 1 ? "fila seleccionada" : "filas seleccionadas"}</p> : null}
+            {periodFilteredData ? (
+              <button
+                aria-label={`Mostrar todos los años; actualmente se muestra ${String(selectedTimelinePeriod)}`}
+                className="ui-table__period-filter"
+                type="button"
+                onClick={() => {
+                  setPage(1);
+                  clearTimelinePeriod(null);
+                }}
+              >
+                <span>Periodo: <strong>{String(selectedTimelinePeriod)}</strong></span>
+                <span aria-hidden="true">×</span>
+              </button>
+            ) : null}
+          </div>
+          {spec.filtering?.enabled ? (
+            <label className="ui-table__search" htmlFor={`${selectionName}-filter`}>
+              <span aria-hidden="true">⌕</span>
+              <span className="sr-only">Filtrar tabla</span>
+              <input
+                id={`${selectionName}-filter`}
+                placeholder={cleanGeneratedCopy(spec.filtering.placeholder ?? "Filtrar resultados")}
+                type="search"
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                  emitFilter(event.target.value);
+                }}
+              />
+            </label>
+          ) : null}
         </div>
       ) : null}
 
       <div
-        aria-label={`Tabla desplazable: ${spec.ariaLabel}`}
+        aria-label={`Tabla desplazable: ${cleanGeneratedCopy(spec.ariaLabel)}`}
         className="ui-table__viewport"
         role="region"
         tabIndex={0}
       >
-        <table aria-label={spec.ariaLabel}>
-          {spec.caption ? <caption>{spec.caption}</caption> : null}
+        <table aria-label={cleanGeneratedCopy(spec.ariaLabel)}>
+          {spec.caption ? <caption>{cleanGeneratedCopy(spec.caption)}</caption> : null}
           <thead className={spec.stickyHeader ? "ui-table__head--sticky" : undefined}>
             <tr>
               {selection ? (
@@ -166,7 +202,7 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
             {model.rows.map((row) => {
               const selectionKey = selection ? rowSelectionKey(row, selection.rowIdField) : "";
               return (
-                <tr key={`row-${row.sourceIndex}`}>
+                <tr data-selected={selectedRows.has(selectionKey) || undefined} key={`row-${row.sourceIndex}`}>
                   {selection ? (
                     <td className="ui-table__selection">
                       <label>

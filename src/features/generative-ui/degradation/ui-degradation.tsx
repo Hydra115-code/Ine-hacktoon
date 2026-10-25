@@ -20,9 +20,9 @@ export function StructuredResultFallback({ data, message }: { data: DataRegistry
   const sourceCount = data ? Object.keys(data).length : 0;
   return (
     <section className="ui-degradation ui-degradation--structured" role="alert">
-      <p className="ui-renderer-message__title">No pudimos mostrar esta vista</p>
+      <p className="ui-renderer-message__title">No pude preparar esta vista</p>
       <p>{message}</p>
-      {sourceCount > 0 ? <p>Conservamos {sourceCount} {sourceCount === 1 ? "fuente válida" : "fuentes válidas"} para reintentar sin perder la consulta.</p> : null}
+      {sourceCount > 0 ? <p>Conservé la información encontrada para que puedas intentarlo de nuevo sin perder tu consulta.</p> : null}
     </section>
   );
 }

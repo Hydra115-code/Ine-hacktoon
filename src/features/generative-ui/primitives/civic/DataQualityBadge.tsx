@@ -1,6 +1,7 @@
 import type { DataQualityBadgeNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
 import { isDataRecord, readCivicField, readCivicLabel } from "./civic-data";
+import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 
 interface DataQualityBadgeProps {
   data?: DataValue;
@@ -34,11 +35,11 @@ export function DataQualityBadge({ data, locale = "es-MX", spec }: DataQualityBa
     : undefined;
 
   return (
-    <aside aria-label={spec.ariaLabel} className="ui-data-quality" data-tone={mappedStatus.tone}>
+    <aside aria-label={cleanGeneratedCopy(spec.ariaLabel)} className="ui-data-quality" data-tone={mappedStatus.tone}>
       <span aria-hidden="true" className="ui-data-quality__signal" />
       <div>
-        <span className="ui-data-quality__title">{spec.title ?? "Calidad del dato"}</span>
-        <strong>{customLabel ?? mappedStatus.label}</strong>
+        <span className="ui-data-quality__title">{cleanGeneratedCopy(spec.title ?? "Calidad del dato")}</span>
+        <strong>{cleanGeneratedCopy(customLabel ?? mappedStatus.label)}</strong>
       </div>
       <div className="ui-data-quality__meta">
         {formattedCount ? <span>{formattedCount} registros</span> : null}

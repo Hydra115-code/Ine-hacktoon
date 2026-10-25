@@ -103,7 +103,7 @@ export async function* streamPlannedAgent(
       if (event.type === "data-patch" && !dataGuard.apply(event.patch)) {
         yield {
           type: "error", code: "data_revision_conflict",
-          message: "El agente envió datos fuera de la secuencia vigente",
+          message: "Los datos llegaron desordenados. Conservé la última vista disponible.",
           recoverable: true, hasPartialData, correlationId,
         };
         return;
@@ -148,7 +148,7 @@ export async function* streamPlannedAgent(
         for (const key of Object.keys(validation.event.data ?? {})) dataGuard.available(key);
         if (!dataGuard.dependenciesReady(validation.event.specification)) {
           yield { type: "error", code: "data_dependency_missing",
-            message: "La interfaz depende de datos que todavía no llegaron",
+            message: "Todavía falta información para mostrar esta respuesta.",
             recoverable: false, hasPartialData, correlationId };
           return;
         }
@@ -174,7 +174,7 @@ export async function* streamPlannedAgent(
           yield {
             type: "error",
             code: "ui_patch_without_root",
-            message: "El agente envió cambios antes de iniciar la interfaz",
+            message: "No pude aplicar el cambio. Conservé la vista anterior.",
             recoverable: true,
             hasPartialData,
             correlationId,
@@ -186,7 +186,7 @@ export async function* streamPlannedAgent(
           yield {
             type: "error",
             code: result.error.code === "version_conflict" ? "ui_revision_conflict" : "ui_patch_invalid",
-            message: "El agente intentó aplicar un cambio de interfaz inválido",
+            message: "No pude aplicar el cambio. Conservé la vista anterior.",
             recoverable: true,
             hasPartialData,
             correlationId,
@@ -195,7 +195,7 @@ export async function* streamPlannedAgent(
         }
         if (!dataGuard.dependenciesReady(result.state.specification)) {
           yield { type: "error", code: "data_dependency_missing",
-            message: "El cambio de interfaz llegó antes de sus datos",
+            message: "Todavía falta información para aplicar este cambio.",
             recoverable: false, hasPartialData, correlationId };
           return;
         }
@@ -211,7 +211,7 @@ export async function* streamPlannedAgent(
           yield {
             type: "error",
             code: "ui_revision_conflict",
-            message: "La interfaz terminó con una revisión inconsistente",
+            message: "La vista cambió mientras trabajábamos. Conservé la última versión disponible.",
             recoverable: true,
             hasPartialData,
             correlationId,
@@ -247,7 +247,7 @@ export async function* streamPlannedAgent(
       yield {
         type: "error",
         code: "ui_specification_invalid",
-        message: "El agente no pudo generar una interfaz válida",
+        message: "Paper no pudo preparar una vista clara con esta información.",
         recoverable: true,
         hasPartialData,
         correlationId,
@@ -259,7 +259,7 @@ export async function* streamPlannedAgent(
     yield {
       type: "status",
       stage: "generating_ui",
-      message: "Ajustando la interfaz generada",
+      message: "Estoy organizando la información",
     };
   }
 }

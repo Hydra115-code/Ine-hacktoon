@@ -1,9 +1,13 @@
 "use client";
 
-import { memo, useMemo, type ReactNode } from "react";
+import { lazy, memo, Suspense, useMemo, type ReactNode } from "react";
 import { LazyMotion, MotionConfig } from "motion/react";
 import type { UINode } from "../schemas/layout-node";
-import { BindingResolver, type BindingResolverOptions } from "../data-binding/resolver/BindingResolver";
+import {
+  BindingResolver,
+  type BindingResolution,
+  type BindingResolverOptions,
+} from "../data-binding/resolver/BindingResolver";
 import { DataRegistry } from "../data-binding/registry/DataRegistry";
 import { Alert } from "../primitives/content/Alert";
 import { Badge } from "../primitives/content/Badge";
@@ -21,7 +25,6 @@ import { CivicInsight } from "../primitives/civic/CivicInsight";
 import { ElectionDelta } from "../primitives/civic/ElectionDelta";
 import { ParticipationTimeline } from "../primitives/civic/ParticipationTimeline";
 import { TerritoryRanking } from "../primitives/civic/TerritoryRanking";
-import { MexicoChoropleth } from "../primitives/civic/MexicoChoropleth";
 import { Accordion } from "../primitives/layout/Accordion";
 import { Container } from "../primitives/layout/Container";
 import { Divider } from "../primitives/layout/Divider";
@@ -53,8 +56,13 @@ import { NodeErrorBoundary } from "../renderer/NodeErrorBoundary";
 import { UnknownNode } from "../renderer/UnknownNode";
 import { RuntimeMotionNode } from "./RuntimeMotionNode";
 import { controlCompatibilityKey } from "../interactions/reconciliation/control-compatibility-key";
+import type { InteractionNode } from "../schemas/interaction-node";
+import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 const loadRuntimeMotionFeatures = () => import("./runtime-motion-features").then((module) => module.default);
+const MexicoChoropleth = lazy(() => import("../primitives/civic/MexicoChoropleth").then((module) => ({
+  default: module.MexicoChoropleth,
+})));
 
 interface UINodeRendererProps {
   node: UINode;
@@ -62,6 +70,20 @@ interface UINodeRendererProps {
   bindingOptions?: BindingResolverOptions;
   onEvent?: LocalUIEventListener;
   pendingNodeIds?: ReadonlySet<string>;
+}
+
+function citizenControlCopy<T extends InteractionNode>(node: T): T {
+  return {
+    ...node,
+    label: cleanGeneratedCopy(node.label),
+    ...(node.helpText ? { helpText: cleanGeneratedCopy(node.helpText) } : {}),
+    ...("placeholder" in node && node.placeholder
+      ? { placeholder: cleanGeneratedCopy(node.placeholder) }
+      : {}),
+    ...("options" in node
+      ? { options: node.options.map((option) => ({ ...option, label: cleanGeneratedCopy(option.label) })) }
+      : {}),
+  } as T;
 }
 
 function renderChildren(
@@ -91,7 +113,32 @@ interface ResolvedNodeProps {
   resolver?: BindingResolver;
   bindingOptions?: BindingResolverOptions;
   instanceSuffix?: string;
+  isPending?: boolean;
   position?: number;
+}
+
+function CivicBindingState({
+  children,
+  isPending,
+  resolution,
+}: {
+  children: ReactNode;
+  isPending?: boolean;
+  resolution?: BindingResolution;
+}) {
+  if (isPending) {
+    return <div aria-live="polite" className="ui-civic-state" data-state="loading" role="status">Actualizando esta parte de la vista…</div>;
+  }
+
+  if (!resolution || resolution.status === "missing") {
+    return <div className="ui-civic-state" data-state="empty" role="status">Todavía no hay información para mostrar aquí.</div>;
+  }
+
+  if (resolution.status !== "resolved") {
+    return <div className="ui-civic-state" data-state="error" role="alert">No pude mostrar estos datos. El resto de la respuesta sigue disponible.</div>;
+  }
+
+  return children;
 }
 
 function expectedTypeForFormat(format: "currency" | "number" | "percent" | "date" | "text" | undefined) {
@@ -136,13 +183,13 @@ const ResolvedNode = memo(function ResolvedNode(props: ResolvedNodeProps) {
         resetKey={props.node}
         title={props.node.type === "visualization" ? "No pudimos mostrar esta visualización" : undefined}
       >
-        <ResolvedNodeContent {...props} />
+        <ResolvedNodeContent {...props} isPending={isRecovering} />
       </NodeErrorBoundary>
     </RuntimeMotionNode>
   );
 });
 
-const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, bindingOptions, instanceSuffix }: ResolvedNodeProps) {
+const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, bindingOptions, instanceSuffix, isPending }: ResolvedNodeProps) {
   switch (node.type) {
     case "container":
       return <Container padding={node.padding} size={node.size}>{renderChildren(node.children, resolver, bindingOptions, instanceSuffix)}</Container>;
@@ -228,47 +275,53 @@ const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, 
     case "electionDelta":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
-        return <ElectionDelta data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><ElectionDelta data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "territoryRanking":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
-        return <TerritoryRanking data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><TerritoryRanking data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "participationTimeline":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
-        return <ParticipationTimeline data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><ParticipationTimeline data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "dataQualityBadge":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
-        return <DataQualityBadge data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><DataQualityBadge data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "demographicBreakdown":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
-        return <DemographicBreakdown data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><DemographicBreakdown data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "comparisonMatrix":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
-        return <ComparisonMatrix data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><ComparisonMatrix data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "evidenceSummary":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
-        return <EvidenceSummary data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><EvidenceSummary data={resolution?.status === "resolved" ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} /></CivicBindingState>;
       }
     case "civicInsight":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "object" });
-        return <CivicInsight data={resolution?.status === "resolved" ? resolution.value : undefined} spec={node} />;
+        return <CivicBindingState isPending={isPending} resolution={resolution}><CivicInsight data={resolution?.status === "resolved" ? resolution.value : undefined} spec={node} /></CivicBindingState>;
       }
     case "mexicoChoropleth":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
-        return <MexicoChoropleth data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />;
+        return (
+          <CivicBindingState isPending={isPending} resolution={resolution}>
+            <Suspense fallback={<div aria-live="polite" className="ui-civic-state" data-state="loading" role="status">Preparando el mapa de México…</div>}>
+              <MexicoChoropleth data={resolution?.status === "resolved" && Array.isArray(resolution.value) ? resolution.value : undefined} locale={bindingOptions?.locale} spec={node} />
+            </Suspense>
+          </CivicBindingState>
+        );
       }
     case "visualization":
       {
@@ -299,27 +352,27 @@ const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, 
         );
       }
     case "button":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Button {...node} id={interactionId(node.id, instanceSuffix)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Button {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} /></PendingNode>;
     case "input":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Input {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Input {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "numberInput":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><NumberInput {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><NumberInput {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "select":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Select {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Select {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "multiSelect":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><MultiSelect {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><MultiSelect {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "slider":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Slider {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Slider {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "datePicker":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><DatePicker {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><DatePicker {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "dateRange":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><DateRange {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><DateRange {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "checkbox":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Checkbox {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Checkbox {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "switch":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Switch {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><Switch {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "radioGroup":
-      return <PendingNode id={interactionId(node.id, instanceSuffix)}><RadioGroup {...node} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
+      return <PendingNode id={interactionId(node.id, instanceSuffix)}><RadioGroup {...citizenControlCopy(node)} id={interactionId(node.id, instanceSuffix)} key={controlCompatibilityKey(node)} /></PendingNode>;
     case "repeat":
       {
         const resolution = resolver?.resolve({ path: node.dataBinding, expectedType: "array" });
