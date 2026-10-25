@@ -45,6 +45,9 @@ interface Extraction {
   scores: Record<CivicAnalysis, number>;
   previousElection: boolean;
   hasCivicSignal: boolean;
+  includeEvidence: boolean;
+  unsupportedGranularity?: "municipio" | "distrito" | "casilla";
+  focus?: "maximum-change" | "coverage";
 }
 
 interface EntityPhrase {
@@ -109,7 +112,7 @@ const ANALYSIS_SIGNALS: Record<CivicAnalysis, RegExp[]> = {
     /\b(?:contra|vs|versus|frente a|respecto a|respecto de|diferencia|cambio|cambio de|subio|bajo|aumento|disminuyo|crecio|cayo|mejoro|empeoro)\b/u,
   ],
   trend: [
-    /\b(?:evolucion|tendencia|a lo largo|historic\w*|con el tiempo|ha cambiado|ha evolucionado|serie|todas las elecciones|cada eleccion|ano con ano|trayectoria)\b/u,
+    /\b(?:evoluci\w*|tendencia|a lo largo|historic\w*|con el tiempo|ha cambiado|ha evolucionado|serie|todas las elecciones|cada eleccion|ano con ano|trayectoria)\b/u,
   ],
   breakdown: [
     /\bpor (?:estado|estados|entidad|entidades|sexo|genero|edad|edades|grupo de edad|grupos de edad|rango de edad|tipo de seccion|seccion|zona|zonas)\b/u,
@@ -133,9 +136,12 @@ const GUIDANCE = "Puedo mostrarte la participación ciudadana de las elecciones 
 
 const COMPARISON_WORDS = /\b(?:compar\w*|contra|vs|versus|frente a|respecto a|respecto de|diferencia|cambi\w*|subio|bajo|aumento|disminuyo|crecio|cayo)\b/u;
 
-const TREND_WORDS = /\b(?:evolucion|tendencia|a lo largo|historic\w*|con el tiempo|trayectoria|cada eleccion|todas las elecciones)\b/u;
+const TREND_WORDS = /\b(?:evoluci\w*|tendencia|a lo largo|historic\w*|con el tiempo|trayectoria|cada eleccion|todas las elecciones)\b/u;
 
 const FOLLOW_UP_PATTERN = /^(?:y|e|ahora|tambien|lo mismo|igual|pero|y si|ok y|y que tal|que tal|ahora con|ahora para|ahora en|solo)\b/u;
+const UNSUPPORTED_GRANULARITY = /\b(municipios?|distritos?|casillas?)\b/u;
+const COVERAGE_WORDS = /\b(?:cobertura|sin datos|sin observaciones|faltan datos|faltan registros|datos faltantes|observaciones disponibles)\b/u;
+const MAXIMUM_CHANGE_WORDS = /\b(?:mayor|maxim[oa]|mas grande|mas fuerte)\b.{0,35}\b(?:cambio|variacion|aumento|caida|incremento|disminucion)\b|\b(?:cambio|variacion)\b.{0,35}\b(?:mayor|maxim[oa]|mas grande|mas fuerte)\b/u;
 
 export function interpretCivicQuery(query: string): CivicPlan {
   const context = readRequestContext(query);
@@ -163,10 +169,19 @@ function readRequestContext(query: string): RequestContext {
   if (intent) {
     const originalRequest = typeof data?.originalRequest === "string" ? data.originalRequest : "";
     const value = typeof data?.value === "string" || typeof data?.value === "number" ? String(data.value) : undefined;
+    const selection = data?.selection && typeof data.selection === "object" && !Array.isArray(data.selection)
+      ? data.selection as Record<string, unknown>
+      : undefined;
+    const semanticSelection = intent === "map.entity_selected" && typeof selection?.entityName === "string"
+      ? selection.entityName
+      : intent === "timeline.period_selected" && typeof selection?.period === "string"
+        ? selection.period
+        : undefined;
+    const selectedValue = semanticSelection ?? (intent === "filters.value.changed" ? value : undefined);
     return {
       latest: originalRequest,
       previous: [],
-      ...(intent === "filters.value.changed" && value ? { selectedValue: value } : {}),
+      ...(selectedValue ? { selectedValue } : {}),
     };
   }
   const marker = "Nueva solicitud del usuario:";
@@ -214,6 +229,11 @@ function extract(text: string): Extraction {
   const sexes: CcpcSex[] = pyramid ? ["hombre", "mujer"] : extractSexes(text);
   const ageGroups = extractAgeGroups(text);
   const sectionTypes = extractSectionTypes(text);
+  const unsupported = UNSUPPORTED_GRANULARITY.exec(text)?.[1];
+  const scores = scoreAnalyses(text);
+  const includeEvidence = scores.evidence > 0 && (
+    scores.comparison > 0 || scores.trend > 0 || scores.breakdown > 0 || years.length >= 2 || Boolean(extractDimension(text, sexes, sectionTypes))
+  );
   return {
     years,
     invalidYears,
@@ -226,8 +246,11 @@ function extract(text: string): Extraction {
     ...optionalDimension(pyramid ? "grupo_edad" : extractDimension(text, sexes, sectionTypes)),
     indicator: extractIndicator(text),
     presentation: extractPresentation(text),
-    scores: scoreAnalyses(text),
+    scores,
     previousElection: PREVIOUS_ELECTION.test(text),
+    includeEvidence,
+    ...(unsupported ? { unsupportedGranularity: unsupported.startsWith("municip") ? "municipio" as const : unsupported.startsWith("distr") ? "distrito" as const : "casilla" as const } : {}),
+    ...(COVERAGE_WORDS.test(text) ? { focus: "coverage" as const } : MAXIMUM_CHANGE_WORDS.test(text) ? { focus: "maximum-change" as const } : {}),
     hasCivicSignal: CIVIC_SIGNAL.test(text) || years.length > 0 || invalidYears.length > 0 || codes.length > 0
       || sexes.length > 0 || ageGroups.length > 0 || sectionTypes.length > 0,
   };
@@ -235,10 +258,12 @@ function extract(text: string): Extraction {
 
 function extractYears(text: string): Pick<Extraction, "years" | "invalidYears" | "wantsAllYears"> {
   const mentioned = [...text.matchAll(/\b(19\d{2}|20\d{2})\b/gu)].map((match) => Number(match[1]));
-  const expandsRange = TREND_WORDS.test(text) || !COMPARISON_WORDS.test(text);
+  const expandsRange = TREND_WORDS.test(text) || MAXIMUM_CHANGE_WORDS.test(text) || !COMPARISON_WORDS.test(text);
   const range = !expandsRange ? null
     : /\b(?:de|desde)\s+(?:el\s+)?(20\d{2})\s+(?:a|al|hasta)\s+(?:el\s+)?(20\d{2})\b/u.exec(text)
-      ?? (TREND_WORDS.test(text) ? /\bentre\s+(20\d{2})\s+y\s+(20\d{2})\b/u.exec(text) : null);
+      ?? (TREND_WORDS.test(text) || MAXIMUM_CHANGE_WORDS.test(text)
+        ? /\bentre\s+(20\d{2})\s+y\s+(20\d{2})\b/u.exec(text)
+        : null);
   const since = /\bdesde\s+(?:el\s+)?(20\d{2})\b/u.exec(text);
   const valid = (year: number): year is CcpcYear => (CCPC_YEARS as readonly number[]).includes(year);
   let years: CcpcYear[] = mentioned.filter(valid);
@@ -338,7 +363,9 @@ function extractDimension(
 }
 
 function extractIndicator(text: string): CivicIndicator {
-  if (/\b(?:abstencion|abstencionismo|no votaron|no voto|no fueron a votar|ausentismo|dejaron de votar)\b/u.test(text)) return "abstention";
+  if (/\b(?:abstencion|abstencionismo|ausentismo|dejaron de votar)\b/u.test(text)) return "abstention";
+  if (/\bparticipacion(?: ciudadana| oficial| ccpc)?\b/u.test(text)) return "participation";
+  if (/\b(?:no votaron|no voto|no fueron a votar)\b/u.test(text)) return "abstention";
   if (/\b(?:participacion nominal|sobre la lista nominal|respecto a la lista nominal)\b/u.test(text)) return "nominal-participation";
   if (/\b(?:lista nominal|padron|inscritos|personas registradas|podian votar|pueden votar)\b/u.test(text)) return "nominal-list";
   return "participation";
@@ -349,6 +376,7 @@ function extractPresentation(text: string): CivicPresentation[] {
   if (/\b(?:mapa|mapas|geografic\w*)\b/u.test(text)) presentation.push("map");
   if (/\b(?:grafica|graficas|grafico|graficos|barras|lineas|visual\w*|piramide)\b/u.test(text)) presentation.push("chart");
   if (/\b(?:tabla|tablas)\b/u.test(text)) presentation.push("table");
+  if (/\b(?:matriz|cruce|cuadro comparativo)\b/u.test(text)) presentation.push("matrix");
   if (/\b(?:ranking|top|ordena\w*|clasificacion|de mayor a menor|de menor a mayor)\b|\b(?:que|cual|cuales) (?:estado|estados|entidad|entidades)\b|\b(?:estado|estados|entidad|entidades) con (?:mas|mayor|menos|menor)\b/u.test(text)) {
     presentation.push("ranking");
   }
@@ -385,6 +413,9 @@ function mergeWithPrevious(current: Extraction, previous: Extraction): Extractio
     presentation: current.presentation.length > 0 ? current.presentation : previous.presentation,
     scores: hasOwnAnalysis ? current.scores : previous.scores,
     hasCivicSignal: current.hasCivicSignal || previous.hasCivicSignal,
+    includeEvidence: current.includeEvidence,
+    ...(current.unsupportedGranularity ? { unsupportedGranularity: current.unsupportedGranularity } : {}),
+    ...(current.focus ? { focus: current.focus } : previous.focus ? { focus: previous.focus } : {}),
   };
 }
 
@@ -416,8 +447,18 @@ function buildPlan(extraction: Extraction): CivicPlan {
     ageGroups: extraction.ageGroups,
     sectionTypes: extraction.sectionTypes,
     presentation: extraction.presentation,
+    ...(extraction.includeEvidence ? { includeEvidence: true } : {}),
+    ...(extraction.focus ? { focus: extraction.focus } : {}),
   };
   if (!extraction.hasCivicSignal) return { ...base, analysis: "summary", clarification: GUIDANCE };
+  if (extraction.unsupportedGranularity) {
+    return {
+      ...base,
+      analysis: "summary",
+      clarification: `Los datos conectados todavía no permiten consultar por ${extraction.unsupportedGranularity}. `
+        + "Puedo responder con el nivel estatal o nacional para las elecciones federales de 2009 a 2024.",
+    };
+  }
   if (extraction.invalidYears.length > 0) {
     return {
       ...base,
@@ -428,6 +469,30 @@ function buildPlan(extraction: Extraction): CivicPlan {
     };
   }
   const analysis = chooseAnalysis(extraction);
+  if ((analysis === "comparison" || analysis === "trend") && extraction.dimension && extraction.years.length >= 2) {
+    return {
+      ...base,
+      analysis,
+      clarification: "Esa consulta cruza varios años con un desglose adicional y no debo agregarlos como si fueran una sola serie. "
+        + "Elige un año para comparar grupos, o conserva los años para ver la evolución agregada.",
+    };
+  }
+  if ((analysis === "comparison" || analysis === "trend") && extraction.entityCodes.length >= 2 && extraction.years.length >= 2) {
+    return {
+      ...base,
+      analysis,
+      clarification: "Esa consulta cruza varias entidades y varios años. Para no mezclar territorios, elige una entidad para ver su evolución "
+        + "o un año para comparar las entidades.",
+    };
+  }
+  if (extraction.national && extraction.entityCodes.length > 0 && extraction.years.length <= 1) {
+    return {
+      ...base,
+      analysis: "breakdown",
+      clarification: "No debo mezclar el promedio nacional con un subconjunto de entidades en una sola cifra. "
+        + "Puedo mostrar el ranking estatal completo o consultar por separado el total nacional.",
+    };
+  }
   if (analysis === "comparison" && extraction.previousElection && base.years.length <= 1) {
     const latest = base.years[0] ?? CCPC_YEARS.at(-1)!;
     const previous = CCPC_YEARS[CCPC_YEARS.indexOf(latest) - 1];
@@ -453,6 +518,10 @@ function buildPlan(extraction: Extraction): CivicPlan {
 
 function chooseAnalysis(extraction: Extraction): CivicAnalysis {
   const { scores } = extraction;
+  if (extraction.focus === "coverage") return "breakdown";
+  if (extraction.years.length >= 3 || extraction.wantsAllYears) return "trend";
+  if (extraction.years.length === 2) return "comparison";
+  if (extraction.dimension || extraction.entityCodes.length >= 2) return "breakdown";
   const hasFilters = extraction.years.length > 0 || extraction.entityCodes.length > 0;
   const weights: Record<CivicAnalysis, number> = {
     summary: 1 + scores.summary,
@@ -464,10 +533,10 @@ function chooseAnalysis(extraction: Extraction): CivicAnalysis {
     breakdown: 2 * scores.breakdown
       + (extraction.dimension ? 3 : 0)
       + (extraction.entityCodes.length >= 2 && extraction.years.length <= 1 ? 3 : 0),
-    evidence: 4 * scores.evidence,
+    evidence: 2 * scores.evidence,
     methodology: hasFilters ? 0 : 4 * scores.methodology,
   };
-  const priority: CivicAnalysis[] = ["evidence", "methodology", "trend", "comparison", "breakdown", "summary"];
+  const priority: CivicAnalysis[] = ["methodology", "trend", "comparison", "breakdown", "evidence", "summary"];
   return priority.reduce((best, candidate) => (weights[candidate] > weights[best] ? candidate : best));
 }
 

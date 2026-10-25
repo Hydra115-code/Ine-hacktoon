@@ -1,8 +1,15 @@
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import { createSystemApi } from "./system-api.js";
+import { readRuntimeCapabilities } from "./system-status.js";
+import { initializeCivicDataRuntime } from "../server.js";
 
-const server = createSystemApi();
+const dataRuntime = await initializeCivicDataRuntime();
+const server = createSystemApi({
+  dataReady: dataRuntime.ready,
+  readCapabilities: () => readRuntimeCapabilities(undefined, dataRuntime.ready),
+  ...(dataRuntime.ready ? { datasetDocuments: dataRuntime.documents } : {}),
+});
 
 server.on("error", (error) => {
   logger.error("Agent API no pudo iniciarse", {

@@ -86,9 +86,30 @@ const privateFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner|
 function normalizeSourceData(source: UiDataSource): unknown {
   const normalized = normalizeValues(source.data);
   if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
-    return { ...(normalized as Record<string, unknown>), dataType: "OBSERVED" };
+    const record = normalized as Record<string, unknown>;
+    const metadata = isRecord(record.metadata) ? record.metadata : {};
+    return {
+      ...record,
+      dataType: "OBSERVED",
+      quality: isRecord(record.quality) ? record.quality : {
+        status: record.isSampleData === true ? "sample" : "full",
+        label: record.isSampleData === true ? "Datos de muestra" : "Fuente oficial disponible",
+        ...(firstFiniteNumber(metadata.matchedRecords, metadata.sourceRows, record.matchedRecords) !== undefined
+          ? { recordCount: firstFiniteNumber(metadata.matchedRecords, metadata.sourceRows, record.matchedRecords) }
+          : {}),
+        ...(typeof metadata.queriedAt === "string" ? { updatedAt: metadata.queriedAt } : {}),
+      },
+    };
   }
   return { dataType: "OBSERVED", value: normalized };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function firstFiniteNumber(...values: unknown[]): number | undefined {
+  return values.find((value): value is number => typeof value === "number" && Number.isFinite(value));
 }
 
 function isPrivateField(key: string, container?: string): boolean {
@@ -131,18 +152,31 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
     case "dashboard":
       return { type: "section", id, ariaLabel: node.title, surface: "primary", children: node.children.map((child) => adaptNode(child, context)) };
     case "stack":
-      return { type: "flex", id, direction: node.direction === "horizontal" ? "row" : "column", gap: "md", children: node.children.map((child) => adaptNode(child, context)) };
+      return {
+        type: "flex",
+        id,
+        direction: node.direction === "horizontal" ? "row" : "column",
+        gap: "md",
+        children: addDataQualityBadge(node.id, node.children.map((child) => adaptNode(child, context)), context),
+      };
     case "grid":
       return { type: "grid", id, columns: normalizeColumnCount(node.columnCount), gap: "md", children: node.children.map((child) => adaptNode(child, context)) };
     case "card":
       return { type: "section", id, ariaLabel: node.title ?? "Contenido electoral", surface: "elevated", padding: "md", children: node.children.map((child) => adaptNode(child, context)) };
     case "text":
+      if (node.id === "relato") return adaptCivicInsight(node, id, context);
       return node.variant === "title" || node.variant === "subtitle"
         ? { type: "heading", id, content: node.text, level: node.variant === "title" ? 2 : 3 }
         : { type: "text", id, content: node.text, variant: node.variant === "caption" ? "caption" : "body" };
     case "metric":
+      if (node.id === "delta") return adaptElectionDelta(node, id, context);
+      if (node.id === "participacion") return adaptEvidenceSummary(node, id, context);
       return { type: "metric", id, label: node.label, valueBinding: adaptReference(node.value, context), format: node.format === "percentage" ? "percent" : node.format };
     case "chart":
+      if (node.id === "mapa") return adaptMexicoMap(node, id, context);
+      if (node.id === "grafica-ranking") return adaptTerritoryRanking(node, id, context);
+      if (node.id === "grafica-linea-tiempo") return adaptParticipationTimeline(node, id, context);
+      if (node.id === "grafica-grupos") return adaptDemographicBreakdown(node, id, context);
       return adaptChart(node, id, context);
     case "heatmap":
       return {
@@ -159,6 +193,7 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
         legend: { show: true, position: "top" },
       };
     case "table":
+      if (node.id === "matriz-comparativa") return adaptComparisonMatrix(node, id, context);
       return adaptTable(node, id, context);
     case "form":
       return {
@@ -203,6 +238,255 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
         showValue: node.showValue,
       };
   }
+}
+
+function adaptComparisonMatrix(
+  node: Extract<UiNode, { type: "table" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const rawSource = context.sourceData.get(node.data.sourceId);
+  const source = isRecord(rawSource) ? rawSource : {};
+  const rows = rowsAtPath(source, node.data.path);
+  const matrixRows = buildComparisonMatrixRows(rows, source);
+  if (matrixRows.length === 0) {
+    throw new SharedContractAdapterError("La matriz comparativa no contiene dimensiones compatibles");
+  }
+  const dataBinding = `derived_${id.replaceAll("-", "_")}`;
+  context.data[dataBinding] = matrixRows;
+  return {
+    type: "comparisonMatrix",
+    id,
+    ariaLabel: `Matriz comparativa. ${node.title}`,
+    title: node.title,
+    dataBinding,
+    rowField: "row",
+    columnField: "column",
+    valueField: "value",
+    valueLabel: "Participación oficial (%)",
+    maximumColumns: 8,
+    format: "percent",
+  };
+}
+
+function rowsAtPath(source: Record<string, unknown>, path: string | undefined): Array<Record<string, unknown>> {
+  const value = path ? path.split(".").reduce<unknown>((current, key) => isRecord(current) ? current[key] : undefined, source) : source;
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function buildComparisonMatrixRows(
+  rows: Array<Record<string, unknown>>,
+  source: Record<string, unknown>,
+): Array<{ row: string; column: string; value: number }> {
+  if (rows.some((row) => typeof row.ageGroup === "string")) {
+    return rows.flatMap((row) => [
+      ...(typeof row.menParticipationPct === "number" ? [{ row: String(row.ageGroup), column: "Hombres", value: percentageFraction(row.menParticipationPct) }] : []),
+      ...(typeof row.womenParticipationPct === "number" ? [{ row: String(row.ageGroup), column: "Mujeres", value: percentageFraction(row.womenParticipationPct) }] : []),
+    ]);
+  }
+  if (rows.some((row) => typeof row.year === "number" && typeof row.participationPct === "number")) {
+    const scope = typeof source.scope === "string" ? source.scope : "Selección";
+    return rows.flatMap((row) => typeof row.participationPct === "number"
+      ? [{ row: scope, column: String(row.year), value: percentageFraction(row.participationPct) }]
+      : []);
+  }
+  if (rows.some((row) => typeof row.group === "string" && typeof row.participationPct === "number")) {
+    const period = typeof source.year === "number" ? String(source.year) : "Participación";
+    return rows.flatMap((row) => typeof row.participationPct === "number"
+      ? [{ row: String(row.group), column: period, value: percentageFraction(row.participationPct) }]
+      : []);
+  }
+  return [];
+}
+
+function percentageFraction(value: number): number {
+  return Number((value / 100).toFixed(6));
+}
+
+function addDataQualityBadge(rootId: string, children: UINode[], context: AdapterContext): UINode[] {
+  if (!rootId.startsWith("composicion-") || context.sourceIds.size === 0) return children;
+  const firstSourceId = context.sourceIds.values().next().value as string | undefined;
+  if (!firstSourceId) return children;
+  return [{
+    type: "dataQualityBadge",
+    id: getNodeId(`${rootId}-calidad`, context),
+    ariaLabel: "Calidad y cobertura de los datos consultados",
+    dataBinding: `${firstSourceId}.quality`,
+    title: "Cobertura de la consulta",
+    statusField: "status",
+    labelField: "label",
+    recordCountField: "recordCount",
+    updatedAtField: "updatedAt",
+  }, ...children];
+}
+
+function adaptMexicoMap(
+  node: Extract<UiNode, { type: "chart" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const dataBinding = adaptReference(node.data, context);
+  const valueField = node.series[0]?.key;
+  if (!valueField) throw new SharedContractAdapterError("El mapa no contiene una medida");
+  return {
+    type: "mexicoChoropleth",
+    id,
+    ariaLabel: `Mapa de México. ${node.title}`,
+    title: node.title,
+    dataBinding,
+    entityCodeField: "value",
+    entityNameField: node.categoryKey,
+    valueField,
+    ...(node.series[0]?.label ? { valueLabel: node.series[0].label } : {}),
+    numeratorField: "voted",
+    denominatorField: "classified",
+    format: "percent",
+    selectionEvent: "map.entity_selected",
+  };
+}
+
+function adaptTerritoryRanking(
+  node: Extract<UiNode, { type: "chart" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const valueField = node.series[0]?.key;
+  if (!valueField) throw new SharedContractAdapterError("El ranking no contiene una medida");
+  return {
+    type: "territoryRanking",
+    id,
+    ariaLabel: `Ranking territorial. ${node.title}`,
+    title: node.title,
+    dataBinding: adaptReference(node.data, context),
+    territoryField: node.categoryKey,
+    valueField,
+    ...(node.series[0]?.label ? { valueLabel: node.series[0].label } : {}),
+    limit: 32,
+    order: node.sort === "ascending" ? "ascending" : "descending",
+    format: "percent",
+  };
+}
+
+function adaptParticipationTimeline(
+  node: Extract<UiNode, { type: "chart" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const valueField = node.series[0]?.key;
+  if (!valueField) throw new SharedContractAdapterError("La serie temporal no contiene una medida");
+  return {
+    type: "participationTimeline",
+    id,
+    ariaLabel: node.title,
+    title: node.title,
+    dataBinding: adaptReference(node.data, context),
+    periodField: node.categoryKey,
+    valueField,
+    ...(node.series[0]?.label ? { valueLabel: node.series[0].label } : {}),
+    format: "percent",
+    selectionEvent: "timeline.period_selected",
+  };
+}
+
+function adaptDemographicBreakdown(
+  node: Extract<UiNode, { type: "chart" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const valueField = node.series[0]?.key;
+  if (!valueField) throw new SharedContractAdapterError("El desglose demográfico no contiene una medida");
+  return {
+    type: "demographicBreakdown",
+    id,
+    ariaLabel: node.title,
+    title: node.title,
+    dataBinding: adaptReference(node.data, context),
+    segmentField: node.categoryKey,
+    valueField,
+    ...(node.series[0]?.label ? { valueLabel: node.series[0].label } : {}),
+    order: node.sort === "ascending" ? "ascending" : node.sort === "descending" ? "descending" : "source",
+    format: "percent",
+  };
+}
+
+function adaptElectionDelta(
+  node: Extract<UiNode, { type: "metric" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const raw = context.sourceData.get(node.value.sourceId);
+  const sourceId = requireSourceId(node.value.sourceId, context);
+  const elections = isRecord(raw) && Array.isArray(raw.elections) ? raw.elections.filter(isRecord) : [];
+  const changes = isRecord(raw) && Array.isArray(raw.changes) ? raw.changes.filter(isRecord) : [];
+  const first = elections.at(0);
+  const last = elections.at(-1);
+  if (!first || !last) throw new SharedContractAdapterError("El delta electoral requiere dos elecciones");
+  const dataBinding = `${sourceId}_${id.replaceAll("-", "_")}`;
+  context.data[dataBinding] = normalizeValues({
+    previousLabel: String(first.year ?? "Anterior"),
+    currentLabel: String(last.year ?? "Actual"),
+    previousValue: typeof first.participationPct === "number" ? percentageFraction(first.participationPct) : first.participationPct,
+    currentValue: typeof last.participationPct === "number" ? percentageFraction(last.participationPct) : last.participationPct,
+    difference: changes.at(-1)?.participationPoints,
+  });
+  return {
+    type: "electionDelta",
+    id,
+    ariaLabel: "Cambio de participación entre elecciones",
+    title: node.label,
+    dataBinding,
+    previousLabelField: "previousLabel",
+    currentLabelField: "currentLabel",
+    previousValueField: "previousValue",
+    currentValueField: "currentValue",
+    differenceField: "difference",
+    differenceUnit: "pp",
+    format: "percent",
+  };
+}
+
+function adaptEvidenceSummary(
+  node: Extract<UiNode, { type: "metric" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  return {
+    type: "evidenceSummary",
+    id,
+    ariaLabel: "Evidencia de la participación calculada",
+    title: node.label,
+    dataBinding: `${requireSourceId(node.value.sourceId, context)}.totals`,
+    numeratorField: "voted",
+    denominatorField: "classified",
+    resultField: "participationPct",
+    numeratorLabel: "Votaron",
+    denominatorLabel: "Votaron + no votaron",
+    resultLabel: "Participación oficial",
+    format: "percent",
+  };
+}
+
+function adaptCivicInsight(
+  node: Extract<UiNode, { type: "text" }>,
+  id: string,
+  context: AdapterContext,
+): UINode {
+  const dataBinding = `derived_${id.replaceAll("-", "_")}`;
+  context.data[dataBinding] = {
+    title: "Lectura ciudadana",
+    explanation: node.text,
+    source: "CCPC · Instituto Nacional Electoral",
+  };
+  return {
+    type: "civicInsight",
+    id,
+    ariaLabel: "Explicación ciudadana de los datos",
+    dataBinding,
+    titleField: "title",
+    explanationField: "explanation",
+    sourceField: "source",
+    tone: "highlight",
+  };
 }
 
 function adaptTable(

@@ -40,6 +40,8 @@ export function transformPersistedUi(options: {
   const sortDirection = requestedSortDirection(request);
   const showSource = /\b(?:fuente|origen|procedencia)\b/u.test(request)
     && /\b(?:muestr|ensen|dame|ver|cual|donde|agreg|pon|incluy|anad)[a-z]*\b/u.test(request);
+  const showMethodology = /\bmetodolog[a-z]*\b/u.test(request)
+    && /\b(?:muestr|ensen|dame|ver|cual|como|agreg|pon|incluy|anad)[a-z]*\b/u.test(request);
   const removeCharts = requestsRemoval(request, /\bgrafic[a-z]*\b|\bvisualiz[a-z]*\b/u);
   const removeTables = requestsRemoval(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
   const onlyTables = requestsOnly(request, /\btabl[a-z]*\b|\btabal[a-z]*\b/u);
@@ -61,12 +63,10 @@ export function transformPersistedUi(options: {
     answer = "Dejé únicamente la evidencia del cambio más grande, sin volver a consultar ni modificar los datos.";
     operation = "preserve";
   } else if (chartMark) {
-    if (!findFirst(options.specification.root, isCartesianChart)) {
+    if (!findFirst(options.specification.root, isConvertibleChart)) {
       return unchanged("Esta vista no tiene una gráfica que se pueda cambiar; pide primero una gráfica.");
     }
-    nextRoot = mapTree(options.specification.root, (node) => (
-      isCartesianChart(node) ? { ...node, mark: chartMark } : node
-    ));
+    nextRoot = mapTree(options.specification.root, (node) => convertChartMark(node, chartMark));
     answer = `Cambié la gráfica a ${CHART_MARK_NAMES[chartMark]} con los mismos datos.`;
     operation = "configure";
   } else if (removeMap) {
@@ -76,7 +76,7 @@ export function transformPersistedUi(options: {
     operation = "remove";
   } else if (convertToTable) {
     nextRoot = mapTree(options.specification.root, (node) => (
-      node.type === "visualization" ? visualizationToTable(node) : node
+      node.type === "visualization" ? visualizationToTable(node) : civicVisualizationToTable(node) ?? node
     ));
     answer = "Convertí la evidencia visual en una tabla ordenable usando exactamente los mismos datos.";
     operation = "replace";
@@ -88,8 +88,8 @@ export function transformPersistedUi(options: {
           || (preserveSource && isSourceNotice(node))
           || (preserveSampleNotice && isSampleNotice(node));
       }
-      if (onlyCharts) return node.type === "visualization" || isStructuralNode(node);
-      if ((removeCharts || onlyTables) && node.type === "visualization") return false;
+      if (onlyCharts) return isVisualEvidence(node) || isStructuralNode(node);
+      if ((removeCharts || onlyTables) && isVisualEvidence(node)) return false;
       if ((removeTables || onlyCharts) && node.type === "table") return false;
       return true;
     }, onlyTables || onlyCharts);
@@ -107,6 +107,8 @@ export function transformPersistedUi(options: {
     const hasSortableEvidence = findFirst(options.specification.root, (node) => (
       (node.type === "table" && valueColumn(node.columns) !== undefined)
       || (node.type === "visualization" && node.encoding.y !== undefined)
+      || node.type === "territoryRanking"
+      || node.type === "demographicBreakdown"
     ));
     if (!hasSortableEvidence) return unchanged("Esta vista no tiene una tabla o gráfica con valores para ordenar.");
     nextRoot = mapTree(options.specification.root, (node) => sortNode(node, sortDirection));
@@ -122,16 +124,35 @@ export function transformPersistedUi(options: {
       : node);
     answer = "Habilité el ordenamiento de la tabla sin cambiar los datos mostrados.";
     operation = "configure";
-  } else if (showSource) {
-    const existing = findFirst(options.specification.root, isSourceNotice);
-    if (existing) return unchanged(`${describeSource(existing)} Está al final de la vista.`);
+  } else if (showSource || showMethodology) {
+    const existingSource = findFirst(options.specification.root, isSourceNotice);
+    const existingMethodology = findFirst(options.specification.root, isMethodologyNotice);
+    if ((!showSource || existingSource) && (!showMethodology || existingMethodology)) {
+      const sourceDescription = existingSource ? `${describeSource(existingSource)} ` : "";
+      return unchanged(`${sourceDescription}La fuente y la metodología solicitadas ya están visibles al final de la vista.`.trim());
+    }
     const names = sourceNames(options.dataRegistry);
-    if (names.length === 0) return unchanged("No encontré la fuente en los datos de esta vista.");
-    const sourceNode: UINode = { type: "text", id: "fuente", variant: "caption", content: `Fuente: ${names.join("; ")}.`.slice(0, 600) };
+    if (showSource && !existingSource && names.length === 0) return unchanged("No encontré la fuente en los datos de esta vista.");
+    const additions: UINode[] = [];
+    if (showSource && !existingSource) {
+      additions.push({ type: "text", id: "fuente", variant: "caption", content: `Fuente: ${names.join("; ")}.`.slice(0, 600) });
+    }
+    if (showMethodology && !existingMethodology) {
+      additions.push({
+        type: "text",
+        id: "metodologia",
+        variant: "caption",
+        content: "Metodología: la participación oficial CCPC se calcula como votaron ÷ (votaron + no votaron); los cambios entre elecciones se expresan en puntos porcentuales.",
+      });
+    }
     nextRoot = "children" in options.specification.root
-      ? { ...options.specification.root, children: [...options.specification.root.children, sourceNode] } as UINode
-      : { type: "section", id: "vista-con-fuente", ariaLabel: "Vista con fuente", children: [options.specification.root, sourceNode] };
-    answer = `Agregué la fuente de los datos: ${names.join("; ")}.`;
+      ? { ...options.specification.root, children: [...options.specification.root.children, ...additions] } as UINode
+      : { type: "section", id: "vista-con-procedencia", ariaLabel: "Vista con fuente y metodología", children: [options.specification.root, ...additions] };
+    answer = showSource && showMethodology
+      ? `Agregué la fuente de los datos y la metodología de la comparación: ${names.join("; ")}.`
+      : showSource
+        ? `Agregué la fuente de los datos: ${names.join("; ")}.`
+        : "Agregué la metodología utilizada para interpretar esta comparación.";
     operation = "configure";
   } else {
     return null;
@@ -183,6 +204,61 @@ function isCartesianChart(node: UINode): node is VisualizationNode {
   return node.type === "visualization" && ["line", "bar", "area"].includes(node.mark);
 }
 
+function isConvertibleChart(node: UINode): boolean {
+  return isCartesianChart(node)
+    || node.type === "territoryRanking"
+    || node.type === "participationTimeline"
+    || node.type === "demographicBreakdown";
+}
+
+function isVisualEvidence(node: UINode): boolean {
+  return node.type === "visualization"
+    || node.type === "mexicoChoropleth"
+    || node.type === "territoryRanking"
+    || node.type === "participationTimeline"
+    || node.type === "demographicBreakdown"
+    || node.type === "electionDelta"
+    || node.type === "comparisonMatrix";
+}
+
+function convertChartMark(node: UINode, mark: ChartMark): UINode {
+  if (isCartesianChart(node)) return { ...node, mark };
+  const common = "dataBinding" in node && "ariaLabel" in node
+    ? { id: node.id, ariaLabel: node.ariaLabel, dataBinding: node.dataBinding }
+    : undefined;
+  if (!common) return node;
+  if (node.type === "territoryRanking") {
+    return {
+      type: "visualization", ...common, mark,
+      encoding: {
+        x: { field: node.territoryField, type: "nominal" },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+      },
+      sort: { by: "y", direction: node.order ?? "descending" },
+    };
+  }
+  if (node.type === "participationTimeline") {
+    return {
+      type: "visualization", ...common, mark,
+      encoding: {
+        x: { field: node.periodField, type: "ordinal" },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+      },
+    };
+  }
+  if (node.type === "demographicBreakdown") {
+    return {
+      type: "visualization", ...common, mark,
+      encoding: {
+        x: { field: node.segmentField, type: "nominal" },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+      },
+      ...(node.order !== "source" ? { sort: { by: "y" as const, direction: node.order ?? "descending" } } : {}),
+    };
+  }
+  return node;
+}
+
 function isMapNode(node: UINode): boolean {
   if (node.id && /(?:^|-)map(?:a|as)?(?:-|$)/u.test(node.id)) return true;
   return (node.type === "alert" || node.type === "text") && /\bmapa(?:s)?\b/u.test(normalize(JSON.stringify(node)));
@@ -194,6 +270,7 @@ function valueColumn(columns: readonly TableColumn[]): TableColumn | undefined {
 
 function sortNode(node: UINode, direction: SortDirection): UINode {
   if (node.type === "visualization" && node.encoding.y) return { ...node, sort: { by: "y", direction } };
+  if (node.type === "territoryRanking" || node.type === "demographicBreakdown") return { ...node, order: direction };
   if (node.type !== "table") return node;
   const column = valueColumn(node.columns);
   if (!column) return node;
@@ -201,6 +278,42 @@ function sortNode(node: UINode, direction: SortDirection): UINode {
     ...node,
     columns: node.columns.map((candidate) => candidate.field === column.field ? { ...candidate, sortable: true } : candidate),
     sorting: { ...node.sorting, enabled: true, default: { field: column.field, direction } },
+  };
+}
+
+function civicVisualizationToTable(node: UINode): UINode | undefined {
+  if (node.type === "territoryRanking") {
+    return civicTable(node, [
+      { field: node.territoryField, label: "Entidad", sortable: true },
+      { field: node.valueField, label: node.valueLabel ?? "Valor", format: node.format === "percent" ? "percentage" : "number", sortable: true },
+    ]);
+  }
+  if (node.type === "participationTimeline") {
+    return civicTable(node, [
+      { field: node.periodField, label: "Periodo", sortable: true },
+      { field: node.valueField, label: node.valueLabel ?? "Participación", format: node.format === "percent" ? "percentage" : "number", sortable: true },
+    ]);
+  }
+  if (node.type === "demographicBreakdown") {
+    return civicTable(node, [
+      { field: node.segmentField, label: "Grupo", sortable: true },
+      { field: node.valueField, label: node.valueLabel ?? "Participación", format: node.format === "percent" ? "percentage" : "number", sortable: true },
+    ]);
+  }
+  return undefined;
+}
+
+function civicTable(node: Extract<UINode, { dataBinding: string }>, columns: TableColumn[]): UINode {
+  return {
+    type: "table",
+    ...(node.id ? { id: node.id } : {}),
+    ariaLabel: `Tabla: ${"ariaLabel" in node ? node.ariaLabel : "evidencia"}`.slice(0, 160),
+    dataBinding: node.dataBinding,
+    columns,
+    sorting: { enabled: true },
+    filtering: { enabled: true, fields: columns.map((column) => column.field) },
+    pagination: { pageSize: 10 },
+    stickyHeader: true,
   };
 }
 
@@ -235,6 +348,11 @@ function bindingsResolve(root: UINode, registry: DataRegistryValue): boolean {
 function isSourceNotice(node: UINode): boolean {
   if (node.type !== "text" && node.type !== "alert") return false;
   return /\b(?:fuente|source|procedencia)\b/u.test(normalize(JSON.stringify(node)));
+}
+
+function isMethodologyNotice(node: UINode): boolean {
+  if (node.type !== "text" && node.type !== "alert") return false;
+  return /\bmetodolog[a-z]*\b/u.test(normalize(JSON.stringify(node)));
 }
 
 function isSampleNotice(node: UINode): boolean {

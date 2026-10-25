@@ -12,7 +12,7 @@ export const sessionUiSnapshotSchema = sessionReferenceSchema.extend({
   const keys = Object.keys(snapshot.data).sort();
   if (JSON.stringify(keys) !== JSON.stringify([...snapshot.dataKeys].sort())
     || snapshot.invalidatedKeys.some((key) => !Object.hasOwn(snapshot.data, key))) {
-    context.addIssue({ code: "custom", message: "Snapshot de datos incompleto" });
+    context.addIssue({ code: "custom", message: "La vista guardada está incompleta" });
   }
 });
 

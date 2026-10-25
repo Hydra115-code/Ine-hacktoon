@@ -11,7 +11,8 @@ import { type AgentToolCall } from "../schemas/agent.schema.js";
 
 export const CIVIC_ANALYSES = ["summary", "comparison", "trend", "breakdown", "evidence", "methodology"] as const;
 export const CIVIC_INDICATORS = ["participation", "nominal-participation", "abstention", "nominal-list"] as const;
-export const CIVIC_PRESENTATIONS = ["map", "chart", "table", "ranking", "story"] as const;
+export const CIVIC_PRESENTATIONS = ["map", "chart", "table", "ranking", "matrix", "story"] as const;
+export const CIVIC_FOCUSES = ["maximum-change", "coverage"] as const;
 
 export type CivicAnalysis = typeof CIVIC_ANALYSES[number];
 export type CivicIndicator = typeof CIVIC_INDICATORS[number];
@@ -32,6 +33,8 @@ export const CivicPlanSchema = z.object({
   sectionTypes: z.array(z.enum(CCPC_SECTION_TYPES)).max(3),
   breakdown: z.enum(BREAKDOWN_DIMENSIONS).optional(),
   presentation: z.array(z.enum(CIVIC_PRESENTATIONS)).max(CIVIC_PRESENTATIONS.length),
+  includeEvidence: z.boolean().optional(),
+  focus: z.enum(CIVIC_FOCUSES).optional(),
   clarification: z.string().trim().min(1).max(400).optional(),
 }).strict();
 
@@ -53,25 +56,28 @@ export function planToolCalls(plan: CivicPlan): AgentToolCall[] {
   const year = plan.years[0];
   const singleYear = year === undefined ? {} : { year };
 
+  let calls: AgentToolCall[];
   if (plan.analysis === "comparison" || plan.analysis === "trend") {
     const years = plan.years.length >= 2 ? plan.years : [...CCPC_YEARS];
-    return [{ name: COMPARE_TOOL, arguments: { years, ...filters } }];
-  }
-  if (plan.analysis === "breakdown" && plan.breakdown === "grupo_edad"
+    calls = [{ name: COMPARE_TOOL, arguments: { years, ...filters } }];
+  } else if (plan.analysis === "breakdown" && plan.breakdown === "grupo_edad"
     && plan.sexes.includes("hombre") && plan.sexes.includes("mujer")) {
-    return (["hombre", "mujer"] as const).map((sex) => ({
+    calls = (["hombre", "mujer"] as const).map((sex) => ({
       name: BREAKDOWN_TOOL,
       arguments: { ...singleYear, dimension: "grupo_edad", ...filters, sexes: [sex] },
     }));
-  }
-  if (plan.analysis === "breakdown") {
-    return [{
+  } else if (plan.analysis === "breakdown") {
+    calls = [{
       name: BREAKDOWN_TOOL,
       arguments: { ...singleYear, dimension: plan.breakdown ?? "entidad", ...filters },
     }];
+  } else if (plan.analysis === "evidence") {
+    calls = [{ name: SUPPORTING_TOOL, arguments: { ...singleYear, ...filters } }];
+  } else {
+    calls = [{ name: SUMMARY_TOOL, arguments: { ...singleYear, ...filters } }];
   }
-  if (plan.analysis === "evidence") {
-    return [{ name: SUPPORTING_TOOL, arguments: { ...singleYear, ...filters } }];
+  if (plan.includeEvidence && plan.analysis !== "evidence" && year !== undefined) {
+    calls.push({ name: SUPPORTING_TOOL, arguments: { ...singleYear, ...filters } });
   }
-  return [{ name: SUMMARY_TOOL, arguments: { ...singleYear, ...filters } }];
+  return calls;
 }

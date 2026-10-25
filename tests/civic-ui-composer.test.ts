@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dataRegistryContractSchema, uiSpecificationSchema } from "@banorte/contracts";
+import { dataRegistryContractSchema, uiSpecificationSchema, type UINode as SharedUINode } from "@banorte/contracts";
 import { CIVIC_TOOL_NAMES } from "../src/agent/civic-tool-policy.js";
 import { CivicMcpClient } from "../src/agent/mcp-client/civic-mcp-client.js";
 import { AgentOrchestrator } from "../src/agent/orchestrator.js";
@@ -10,6 +10,7 @@ import { adaptUiPayload } from "../src/integration/shared-contract-adapter.js";
 import { crearServidor } from "../src/server.js";
 import { UiDocumentSchema, type UiNode } from "../src/ui/dsl/ui.schema.js";
 import { CIVIC_COMPOSITIONS, composeCivicUi, compositionOf } from "../src/ui/generation/civic-ui-composer.js";
+import { CIVIC_COMPONENT_TYPES } from "../src/ui/generation/civic-component-catalog.js";
 
 const planner = createUiPlanner({ mode: "rules" });
 
@@ -48,6 +49,13 @@ function assertContractValid(response: AgentResponse): void {
   dataRegistryContractSchema.parse(payload.dataRegistry);
 }
 
+function sharedTypes(node: SharedUINode): string[] {
+  const children = "children" in node ? node.children
+    : node.type === "tabs" || node.type === "accordion" ? node.items.flatMap((item) => item.children)
+    : [];
+  return [node.type, ...children.flatMap(sharedTypes)];
+}
+
 const SCENARIOS: Array<{ query: string; composition: keyof typeof CIVIC_COMPOSITIONS; includes: string[]; excludes?: string[] }> = [
   { query: "¿Qué estado tuvo más participación en 2024?", composition: "ranking", includes: ["chart:bar", "table"] },
   { query: "¿Cómo ha evolucionado la participación en Aguascalientes?", composition: "timeline", includes: ["chart:line", "table"] },
@@ -81,7 +89,8 @@ test("el ranking por entidad se ordena de mayor a menor y trae tabla alternativa
   assert.equal(chart.sort, "descending");
   const payload = adaptUiPayload(response.ui, response.dataSources, 1);
   const visualization = JSON.stringify(payload.specification);
-  assert.match(visualization, /"sort":\{"by":"y","direction":"descending"\}/u);
+  assert.match(visualization, /"type":"territoryRanking"/u);
+  assert.match(visualization, /"order":"descending"/u);
 });
 
 test("respeta las preferencias del usuario", async () => {
@@ -95,8 +104,9 @@ test("respeta las preferencias del usuario", async () => {
 
   const map = await ask("Muéstrame un mapa de participación por estado en 2024");
   assert.equal(compositionOf(map.ui), "ranking");
-  assert.ok(nodesOf(map.ui.root).some((node) => node.id === "mapa-no-disponible"));
+  assert.ok(nodesOf(map.ui.root).some((node) => node.id === "mapa"));
   assertContractValid(map);
+  assert.match(JSON.stringify(adaptUiPayload(map.ui, map.dataSources, 1).specification), /"type":"mexicoChoropleth"/u);
 });
 
 test("no pide un componente si los datos no traen los campos que necesita", () => {
@@ -123,4 +133,47 @@ test("no pide un componente si los datos no traen los campos que necesita", () =
   assert.ok(document);
   assert.equal(compositionOf(document), "insufficient-data");
   assert.ok(!nodesOf(document.root).some((node) => node.type === "chart" || node.type === "table"));
+});
+
+test("la matriz comparativa se genera con datos enlazados y no como tabla genérica", async () => {
+  const response = await ask("Muéstrame una matriz comparativa de la participación de Aguascalientes entre 2018 y 2024");
+  const payload = adaptUiPayload(response.ui, response.dataSources, 1);
+  const matrix = sharedTypes(payload.specification.root);
+  assert.ok(matrix.includes("comparisonMatrix"));
+  assert.equal(matrix.includes("table"), false);
+  const derived = Object.entries(payload.dataRegistry.data).find(([key]) => key.startsWith("derived_matriz_comparativa"));
+  assert.ok(derived && Array.isArray(derived[1]));
+  const matrixRows = derived[1] as Array<Record<string, unknown>>;
+  assert.deepEqual(matrixRows.map((row) => row.column), ["2018", "2024"]);
+  const raw = response.dataSources[0]?.data as { elections?: Array<{ participationPct?: number }> };
+  const expectedFractions = (raw.elections ?? []).flatMap((election) => typeof election.participationPct === "number"
+    ? [Number((election.participationPct / 100).toFixed(6))]
+    : []);
+  assert.deepEqual(matrixRows.map((row) => row.value), expectedFractions);
+  assert.equal(matrixRows.every((row) => typeof row.value === "number" && row.value > 0 && row.value < 1), true);
+  const deltaKey = Object.keys(payload.dataRegistry.data).find((key) => key.includes("delta"));
+  assert.ok(deltaKey);
+  assert.deepEqual(
+    Object.values(payload.dataRegistry.data[deltaKey] as Record<string, unknown>).filter((value) => typeof value === "number").slice(0, 2),
+    expectedFractions,
+  );
+});
+
+test("los nueve componentes cívicos del frontend son alcanzables desde escenarios reales", async () => {
+  const queries = [
+    "Muéstrame un mapa de participación por estado en 2024",
+    "¿Cómo ha evolucionado la participación en Aguascalientes?",
+    "Participación por edad y sexo en Aguascalientes 2024",
+    "Participación por sexo en Aguascalientes 2024",
+    "Compara la participación de Aguascalientes entre 2018 y 2024",
+    "Muéstrame una matriz comparativa de la participación de Aguascalientes entre 2018 y 2024",
+    "Explícame como historia cuál fue la participación en Aguascalientes en 2024",
+  ];
+  const reached = new Set<string>();
+  for (const query of queries) {
+    const response = await ask(query);
+    const payload = adaptUiPayload(response.ui, response.dataSources, 1);
+    sharedTypes(payload.specification.root).forEach((type) => reached.add(type));
+  }
+  assert.deepEqual(CIVIC_COMPONENT_TYPES.filter((type) => !reached.has(type)), []);
 });

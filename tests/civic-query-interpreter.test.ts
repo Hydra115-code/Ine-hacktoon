@@ -201,3 +201,42 @@ test("un filtro elegido en la interfaz reemplaza la entidad de la pregunta origi
   const plan = interpretCivicQuery(query);
   assert.deepEqual([plan.analysis, plan.years, plan.entityCodes], ["summary", [2024], ["27"]]);
 });
+
+test("prioriza la pregunta analítica y conserva la evidencia como soporte", () => {
+  const plan = interpretCivicQuery("¿Cómo evolucionó la participación de Aguascalientes entre 2009 y 2024? Deja visible la evidencia.");
+  assert.equal(plan.analysis, "trend");
+  assert.equal(plan.includeEvidence, true);
+  assert.deepEqual(planToolCalls(plan).map((call) => call.name), ["compare_elections", "get_supporting_records"]);
+});
+
+test("no deja que campos de respaldo cambien el indicador explícito", () => {
+  const plan = interpretCivicQuery("Cambio de participación de Tabasco entre 2018 y 2024; muestra votaron, no votaron y lista nominal");
+  assert.equal(plan.indicator, "participation");
+  assert.equal(plan.analysis, "comparison");
+});
+
+test("rechaza cruces no soportados en vez de agregar dimensiones", () => {
+  const demographic = interpretCivicQuery("Compara mujeres y hombres a nivel nacional entre 2018 y 2024");
+  assert.match(demographic.clarification ?? "", /cruza varios años/u);
+  assert.deepEqual(planToolCalls(demographic), []);
+
+  const territorial = interpretCivicQuery("Mapa por entidad del cambio entre 2018 y 2024");
+  assert.match(territorial.clarification ?? "", /cruza varios años/u);
+  assert.deepEqual(planToolCalls(territorial), []);
+});
+
+test("explica con precisión las granularidades aún no conectadas", () => {
+  for (const scope of ["municipio de Mérida", "distrito 3", "casilla 810"]) {
+    const plan = interpretCivicQuery(`Participación en ${scope} en 2024`);
+    assert.match(plan.clarification ?? "", /nivel estatal o nacional/u);
+    assert.deepEqual(planToolCalls(plan), []);
+  }
+});
+
+test("modela cobertura y cambio extremo como operaciones generales", () => {
+  const coverage = interpretCivicQuery("¿Qué entidades no tienen observaciones disponibles en 2024?");
+  assert.deepEqual([coverage.analysis, coverage.breakdown, coverage.focus], ["breakdown", "entidad", "coverage"]);
+
+  const extreme = interpretCivicQuery("¿Cuál fue el mayor cambio de abstención en Veracruz entre 2009 y 2024?");
+  assert.deepEqual([extreme.analysis, extreme.focus], ["trend", "maximum-change"]);
+});

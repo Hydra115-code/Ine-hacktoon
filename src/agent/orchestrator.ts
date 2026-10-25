@@ -140,7 +140,7 @@ export class AgentOrchestrator {
       yield publish({
         type: "status",
         stage: "planning",
-        message: "Analizando la consulta",
+        message: "Entendiendo tu pregunta",
       });
       const scopeDecision = classifyCivicQuery(query);
       if (!scopeDecision.allowed) {
@@ -148,10 +148,10 @@ export class AgentOrchestrator {
           reason: scopeDecision.reason,
         });
         const response = createScopeAgentResponse(scopeDecision.reason);
-        yield publish({
-          type: "status",
-          stage: "rendering-ui",
-          message: "Aplicando la política de seguridad",
+          yield publish({
+            type: "status",
+            stage: "rendering-ui",
+            message: "Comprobando que la respuesta sea segura",
         });
         yield publish({ type: "ui-snapshot", ui: response.ui, dataSources: [] });
         requestSpan.complete({ toolCallCount: 0 });
@@ -191,7 +191,7 @@ export class AgentOrchestrator {
             yield publish({
               type: "status",
               stage: "rendering-ui",
-              message: "Aplicando la política de seguridad",
+              message: "Comprobando que la respuesta sea segura",
             });
             yield publish({ type: "ui-snapshot", ui: response.ui, dataSources: [] });
             requestSpan.complete({ toolCallCount: attemptedToolCalls });
@@ -217,7 +217,7 @@ export class AgentOrchestrator {
             yield publish({
               type: "status",
               stage: "planning",
-              message: "Verificando que las cifras estén respaldadas por los datos",
+              message: "Comprobando las cifras con las fuentes oficiales",
             });
             continue;
           }
@@ -225,7 +225,7 @@ export class AgentOrchestrator {
           yield publish({
             type: "status",
             stage: "generating-ui",
-            message: "Generando la interfaz",
+            message: "Organizando la información",
           });
           const ui = await runWithTraceContext(traceContext, () => telemetry.observe(
             { component: "ui", operation: "generate" },
@@ -240,7 +240,7 @@ export class AgentOrchestrator {
           yield publish({
             type: "status",
             stage: "rendering-ui",
-            message: "Preparando componentes de la interfaz",
+            message: "Preparando una vista clara",
           });
           for (const update of createUiUpdates(ui, uiDataSources)) {
             yield publish(update);
@@ -263,7 +263,7 @@ export class AgentOrchestrator {
         yield publish({
           type: "status",
           stage: "consulting-tools",
-          message: "Consultando datos mediante MCP",
+          message: "Consultando las fuentes oficiales",
         });
         validateToolCalls(turn.toolCalls, knownTools, executedCalls);
         attemptedToolCalls += turn.toolCalls.length;
@@ -531,7 +531,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "invalid-request",
-      message: "La solicitud no cumple el formato esperado",
+      message: "No pude entender todos los datos de la solicitud",
       recoverable: false,
       hasPartialData,
     };
@@ -540,7 +540,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "semantic-ui-error",
-      message: "No encontramos una interfaz que respetara todas tus indicaciones",
+      message: "No pude acomodar los datos como lo pediste",
       recoverable: true,
       hasPartialData,
     };
@@ -549,7 +549,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "evidence-validation-error",
-      message: "No pudimos respaldar la respuesta con evidencia suficiente",
+      message: "Me falta información para responder con confianza",
       recoverable: true,
       hasPartialData,
     };
@@ -558,7 +558,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "ui-error",
-      message: "No fue posible generar una interfaz válida",
+      message: "No pude preparar una vista clara con esta información",
       recoverable: true,
       hasPartialData,
     };
@@ -567,7 +567,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "provider-error",
-      message: "El planificador configurado no está disponible",
+      message: "Paper no está disponible en este momento",
       recoverable: false,
       hasPartialData,
     };
@@ -576,7 +576,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "provider-error",
-      message: "El planificador no pudo completar la solicitud",
+      message: "Paper no pudo terminar esta consulta",
       recoverable: true,
       hasPartialData,
     };
@@ -585,7 +585,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "tool-error",
-      message: "Una herramienta de datos no pudo completar la solicitud",
+      message: "No pude consultar una de las fuentes necesarias",
       recoverable: error instanceof ToolTransportError,
       hasPartialData,
     };
@@ -594,7 +594,7 @@ function createErrorEvent(
     return {
       type: "error",
       code: "agent-error",
-      message: error.message,
+      message: "Paper no pudo terminar esta consulta",
       recoverable: false,
       hasPartialData,
     };

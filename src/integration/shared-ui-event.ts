@@ -1,4 +1,4 @@
-import { type UIEvent, type UINode, type UISpecification } from "@banorte/contracts";
+import { type DataRegistryValue, type UIEvent, type UINode, type UISpecification } from "@banorte/contracts";
 
 export class SharedUiEventValidationError extends Error {
   constructor(message: string) {
@@ -11,6 +11,7 @@ export function createUiEventQuery(
   uiEvent: UIEvent,
   specification: NonNullable<UIEvent["currentSpecification"]>,
   originalRequest?: string,
+  dataRegistry?: DataRegistryValue,
 ): string {
   const source = findNode(specification.root, uiEvent.event.sourceId);
   if (!source) throw new SharedUiEventValidationError("El control de origen no existe");
@@ -18,7 +19,7 @@ export function createUiEventQuery(
     throw new SharedUiEventValidationError("El evento no pertenece al control de origen");
   }
 
-  validateEventValue(source, uiEvent.event.value);
+  validateEventValue(source, uiEvent.event.value, dataRegistry);
   const formFields = uiEvent.event.name === "form.submit"
     ? validateSubmittedForm(uiEvent, specification) : undefined;
   const context = {
@@ -26,6 +27,7 @@ export function createUiEventQuery(
     label: "label" in source ? source.label : undefined,
     intent: uiEvent.event.name,
     value: uiEvent.event.value ?? null,
+    ...civicSelectionContext(source, uiEvent.event.value, dataRegistry),
     ...(formFields ? { formFields } : {}),
     ...(originalRequest ? { originalRequest } : {}),
     presentationIdentity: {
@@ -168,10 +170,17 @@ function childNodes(node: UINode): UINode[] {
 function eventName(node: UINode): string | undefined {
   if ("event" in node) return node.event;
   if (node.type === "table") return node.selection?.event;
+  if (node.type === "mexicoChoropleth" || node.type === "participationTimeline") {
+    return node.selectionEvent;
+  }
   return undefined;
 }
 
-function validateEventValue(node: UINode, value: UIEvent["event"]["value"]): void {
+function validateEventValue(
+  node: UINode,
+  value: UIEvent["event"]["value"],
+  dataRegistry?: DataRegistryValue,
+): void {
   switch (node.type) {
     case "button":
       if (value !== undefined) rejectValue();
@@ -209,9 +218,71 @@ function validateEventValue(node: UINode, value: UIEvent["event"]["value"]): voi
     case "table":
       if (!node.selection || (typeof value !== "string" && !Array.isArray(value) && value !== null)) rejectValue();
       return;
+    case "mexicoChoropleth":
+      validateBoundSelection(node.dataBinding, node.entityCodeField, value, dataRegistry);
+      return;
+    case "participationTimeline":
+      validateBoundSelection(node.dataBinding, node.periodField, value, dataRegistry);
+      return;
     default:
       throw new SharedUiEventValidationError("El nodo no admite interacciones remotas");
   }
+}
+
+function civicSelectionContext(
+  node: UINode,
+  value: UIEvent["event"]["value"],
+  dataRegistry?: DataRegistryValue,
+): Record<string, unknown> {
+  if (node.type === "mexicoChoropleth" && typeof value === "string") {
+    const row = findBoundRow(node.dataBinding, node.entityCodeField, value, dataRegistry);
+    const entityName = row ? resolvePath(row, node.entityNameField) : undefined;
+    return {
+      selection: {
+        dimension: "entity",
+        entityCode: value,
+        ...(typeof entityName === "string" ? { entityName } : {}),
+      },
+    };
+  }
+  if (node.type === "participationTimeline" && typeof value === "string") {
+    return { selection: { dimension: "period", period: value } };
+  }
+  return {};
+}
+
+function validateBoundSelection(
+  dataBinding: string,
+  field: string,
+  value: UIEvent["event"]["value"],
+  dataRegistry?: DataRegistryValue,
+): void {
+  if (typeof value !== "string" || !dataRegistry) rejectValue();
+  if (!findBoundRow(dataBinding, field, value, dataRegistry)) rejectValue();
+}
+
+function findBoundRow(
+  dataBinding: string,
+  field: string,
+  value: string,
+  dataRegistry?: DataRegistryValue,
+): Record<string, unknown> | undefined {
+  if (!dataRegistry) return undefined;
+  const bound = resolvePath(dataRegistry, dataBinding);
+  if (!Array.isArray(bound)) return undefined;
+  return bound.find((row): row is Record<string, unknown> => {
+    if (!row || Array.isArray(row) || typeof row !== "object") return false;
+    const candidate = resolvePath(row, field);
+    return (typeof candidate === "string" || typeof candidate === "number")
+      && String(candidate) === value;
+  });
+}
+
+function resolvePath(root: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((current, segment) => {
+    if (!current || Array.isArray(current) || typeof current !== "object") return undefined;
+    return (current as Record<string, unknown>)[segment];
+  }, root);
 }
 
 function validateDateRange(

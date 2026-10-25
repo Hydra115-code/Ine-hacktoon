@@ -10,6 +10,7 @@ import {
 import { validateCivicUi } from "./civic-semantic-ui-validator.js";
 import { latestUiRequest, readUiPreferences, validateUiSemantics } from "./semantic-ui-validator.js";
 import { type UiGenerationInput } from "./ui-generator.js";
+import { planCivicComponents } from "./civic-component-catalog.js";
 
 export const CIVIC_COMPOSITIONS = {
   ranking: { trigger: "territorio + porcentaje", components: ["mapa (si el runtime lo soporta)", "ranking", "tabla"] },
@@ -25,7 +26,7 @@ export const CIVIC_COMPOSITIONS = {
 
 export type CivicCompositionId = keyof typeof CIVIC_COMPOSITIONS;
 
-export const CIVIC_RUNTIME_CAPABILITIES = { map: false } as const;
+export const CIVIC_RUNTIME_CAPABILITIES = { map: true } as const;
 
 interface Draft {
   composition: CivicCompositionId;
@@ -238,10 +239,25 @@ function assemble(draft: Draft, input: UiGenerationInput, sources: readonly UiDa
   const forbidTables = preferences.forbidTables || ONLY_CHART.test(request);
   const forbidCharts = preferences.forbidCharts || ONLY_TABLE.test(request);
   const tableFirst = presentation.includes("table") && !presentation.includes("chart");
+  const componentPlan = planCivicComponents({
+    composition: draft.composition,
+    presentation,
+    forbidCharts,
+  });
 
   const charts = forbidCharts ? [] : draft.charts;
-  const tables = forbidTables ? [] : draft.tables;
-  const evidence = tableFirst ? [...tables, ...charts] : [...charts, ...tables];
+  const requestedMatrix: UiNode[] = componentPlan.includes("comparisonMatrix") && draft.tables[0]
+    ? [{ ...draft.tables[0], id: "matriz-comparativa" }]
+    : [];
+  const tables = forbidTables || requestedMatrix.length > 0 ? [] : draft.tables;
+  const requestedMap: UiNode[] = componentPlan.includes("mexicoChoropleth")
+    && draft.composition === "ranking"
+    && charts[0]?.type === "chart"
+    ? [{ ...charts[0], id: "mapa" }]
+    : [];
+  const evidence = tableFirst
+    ? [...tables, ...requestedMatrix, ...requestedMap, ...charts]
+    : [...requestedMap, ...requestedMatrix, ...charts, ...tables];
   const children: UiNode[] = [];
   if (presentation.includes("map") && !CIVIC_RUNTIME_CAPABILITIES.map) {
     children.push({
@@ -253,7 +269,7 @@ function assemble(draft: Draft, input: UiGenerationInput, sources: readonly UiDa
         : "El mapa por entidad todavía no está disponible para esta consulta.",
     });
   }
-  if (presentation.includes("story")) {
+  if (componentPlan.includes("civicInsight")) {
     children.push({ id: "relato", type: "text", variant: "body", text: input.answer.slice(0, 2_000) });
   }
   if (sources.some((source) => data(source).isSampleData === true)) {

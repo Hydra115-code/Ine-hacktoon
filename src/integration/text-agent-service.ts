@@ -39,6 +39,8 @@ interface TextAgentServiceDependencies {
   now?: () => number;
 }
 
+const LOCAL_ONLY_UI_EVENT = /^(?:methodology\.opened|period\.changed|timeline\.period_selected|map\.entity_selected|territory\.selected|ui\.(?:accordion|tab)\.|view\.|table\.(?:filter|page|sort)\.)/u;
+
 export function createTextAgentService(dependencies: TextAgentServiceDependencies = {}) {
   const defaultSessionFactory = dependencies.sessionFactory ?? createAuthenticatedSupabaseSession;
   const createRuntime = dependencies.createRuntime ?? createRuntimeForMode;
@@ -70,7 +72,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         error: errorPayloadSchema.parse({
           version: "1",
           code: "provider_not_supported",
-          message: "El proveedor solicitado no está disponible",
+          message: "Paper no está disponible por el momento",
           recoverable: false,
           hasPartialData: false,
           correlationId: request.correlationId,
@@ -97,7 +99,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         error: errorPayloadSchema.parse({
           version: "1",
           code: "authentication_required",
-          message: "La sesión autenticada no está disponible",
+          message: "Tu sesión ya no está disponible. Vuelve a entrar para continuar.",
           recoverable: true,
           hasPartialData: false,
           correlationId: request.correlationId,
@@ -119,6 +121,13 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
       ...(sessionReference ? { reference: sessionReference } : {}),
     });
     if (!session.success) {
+      logger.warn("Continuidad de sesión rechazada", {
+        correlationId: request.correlationId,
+        code: session.code,
+        requestedInterfaceRevision: sessionReference?.interfaceRevision,
+        requestedDataRevision: sessionReference?.dataRevision,
+        requestedDataKeyCount: sessionReference?.dataKeys.length,
+      });
       yield event({
         type: "error",
         error: errorPayloadSchema.parse({
@@ -126,7 +135,10 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
           code: session.code,
           message: sessionErrorMessage(session.code),
           recoverable: true,
-          hasPartialData: false,
+          // A referenced request originates from a UI the client already rendered.
+          // Mark it as retained evidence so a continuity failure never replaces
+          // that valid view with an empty technical error screen.
+          hasPartialData: sessionReference !== undefined,
           correlationId: request.correlationId,
         }),
       });
@@ -152,7 +164,30 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         }
         const specification = session.state.specification;
         if (!specification) throw new SharedUiEventValidationError("La sesión no contiene una interfaz activa");
-        agentQuery = createUiEventQuery(request.uiEvent, specification, session.state.turns.at(-1)?.user);
+        if (LOCAL_ONLY_UI_EVENT.test(request.uiEvent.event.name)) {
+          logger.info("Interacción visual resuelta localmente sin invocar al modelo", {
+            correlationId: request.correlationId,
+            eventName: request.uiEvent.event.name,
+            sourceId: request.uiEvent.event.sourceId,
+          });
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: "ready",
+              message: "Cambio visual aplicado",
+            }),
+          });
+          yield event({ type: "completed" });
+          await sessionStore.release(actorId, request.sessionId, request.correlationId);
+          return;
+        }
+        agentQuery = createUiEventQuery(
+          request.uiEvent,
+          specification,
+          session.state.turns.at(-1)?.user,
+          session.state.dataRegistry,
+        );
         logger.info("UIEvent validado para el Agent Runtime", {
           correlationId: request.correlationId,
           eventName: request.uiEvent.event.name,
@@ -171,9 +206,12 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         error: errorPayloadSchema.parse({
           version: "1",
           code: "ui_event_invalid",
-          message: "La interacción de interfaz no es válida",
+          message: "No pude aplicar ese cambio. Intenta pedirlo con otras palabras.",
           recoverable: true,
-          hasPartialData: false,
+          // The event was rejected before any mutation. The session snapshot is
+          // still authoritative and safe for the client to keep displaying.
+          hasPartialData: Boolean(session.state.specification)
+            || Object.keys(session.state.dataRegistry ?? {}).length > 0,
           correlationId: request.correlationId,
         }),
       });
@@ -309,7 +347,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
           error: errorPayloadSchema.parse({
             version: "1",
             code: "ui_transform_invalid",
-            message: "No pude aplicar ese cambio a la interfaz; conservé la última vista válida y sus datos.",
+            message: "No pude aplicar ese cambio. Conservé la última vista disponible.",
             recoverable: true,
             hasPartialData: false,
             correlationId: request.correlationId,
@@ -325,7 +363,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
             status: agentStatusSchema.parse({
               version: "1",
               stage: "generating_ui",
-              message: "Adaptando la interfaz existente",
+              message: "Estoy actualizando la vista",
             }),
           });
           yield event({
@@ -657,7 +695,7 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
           error: errorPayloadSchema.parse({
             version: "1",
             code: "agent_unavailable",
-            message: "El agente no está disponible temporalmente",
+            message: "Paper no está disponible por el momento",
             recoverable: true,
             hasPartialData,
             correlationId: request.correlationId,

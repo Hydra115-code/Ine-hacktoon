@@ -21,6 +21,15 @@ export interface CcpcEngine {
   compareElections(filters: unknown, years: unknown): unknown;
   getParticipationBreakdown(filters: unknown, dimension: unknown): unknown;
   getSupportingRecords(filters: unknown): unknown;
+  getCatalog?(): unknown;
+  getDatasetMetadata?(): unknown;
+  getRelease?(): unknown;
+}
+
+export interface CcpcDatasetDocuments {
+  capabilities: unknown;
+  dataset: unknown;
+  release: unknown;
 }
 
 export interface CcpcEngineOptions {
@@ -33,6 +42,35 @@ export const DEFAULT_CCPC_DATASET = "data/ccpc/sample/data02/participation.json"
 export async function loadCcpcEngine(options: CcpcEngineOptions): Promise<CcpcEngine> {
   const root = path.resolve(options.dataDir);
   const moduleUrl = (relative: string) => pathToFileURL(path.join(root, relative)).href;
+  if (options.datasetPath === "data/ccpc/full/participation.compact.json") {
+    const { createFrozenParticipationService } = await import(moduleUrl("src/data/dataset-v1.ts"));
+    const service = await createFrozenParticipationService({ root });
+    logger.info("Publicación CCPC congelada cargada y verificada", {
+      dataset: options.datasetPath,
+      version: service.getRelease().datasetVersion,
+    });
+    return {
+      getCatalog: service.getCatalog,
+      getDatasetMetadata: service.getDatasetMetadata,
+      getRelease: service.getRelease,
+      getParticipationSummary: (filters: unknown) => unwrapFrozenResult(
+        service.getParticipationSummary(filters),
+        { filters, totals: null },
+      ),
+      compareElections: (filters: unknown, years: unknown) => unwrapFrozenResult(
+        service.compareElections(filters, years),
+        { filters, elections: [], changes: [] },
+      ),
+      getParticipationBreakdown: (filters: unknown, dimension: unknown) => unwrapFrozenResult(
+        service.getParticipationBreakdown(filters, dimension),
+        { filters, dimension, groups: [] },
+      ),
+      getSupportingRecords: (filters: unknown) => unwrapFrozenResult(
+        service.getSupportingRecords(filters),
+        { filters, records: [] },
+      ),
+    };
+  }
   const [{ validateFile }, { createParticipationRepository }, { createParticipationService }] = await Promise.all([
     import(moduleUrl("scripts/ccpc/validate-data.ts")),
     import(moduleUrl("src/repositories/participation.repository.ts")),
@@ -44,6 +82,33 @@ export async function loadCcpcEngine(options: CcpcEngineOptions): Promise<CcpcEn
   return createParticipationService(createParticipationRepository(dataset)) as CcpcEngine;
 }
 
+function unwrapFrozenResult(envelope: unknown, emptyResult: Record<string, unknown>): unknown {
+  if (!isRecord(envelope)) throw new Error("La publicación CCPC devolvió una respuesta inválida");
+  if (isRecord(envelope.result)) return envelope.result;
+  if (envelope.status !== "no_data") throw new Error("La publicación CCPC no produjo un resultado válido");
+
+  const release = isRecord(envelope.release) ? envelope.release : {};
+  return {
+    status: "no_data",
+    ...emptyResult,
+    warnings: [{
+      code: "NO_DATA",
+      message: "No hay registros para la combinación de filtros solicitada.",
+    }],
+    evidence: {
+      dataset: { kind: "full" },
+      matchedRecords: 0,
+      recordsSha256: typeof release.sha256 === "string" ? release.sha256 : "0".repeat(64),
+      sources: [],
+      catalogSources: [],
+    },
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export class CcpcEngineDataSource implements CivicDataSource {
   private engine: Promise<CcpcEngine> | undefined;
 
@@ -51,6 +116,18 @@ export class CcpcEngineDataSource implements CivicDataSource {
 
   static fromOptions(options: CcpcEngineOptions): CcpcEngineDataSource {
     return new CcpcEngineDataSource(() => loadCcpcEngine(options));
+  }
+
+  async initialize(): Promise<CcpcDatasetDocuments> {
+    const engine = await this.getEngine();
+    if (!engine.getCatalog || !engine.getDatasetMetadata || !engine.getRelease) {
+      throw new Error("La fuente CCPC configurada no expone la publicación congelada completa");
+    }
+    return {
+      capabilities: engine.getCatalog(),
+      dataset: engine.getDatasetMetadata(),
+      release: engine.getRelease(),
+    };
   }
 
   async getParticipationSummary(filters: CcpcFilters): Promise<SummaryData> {

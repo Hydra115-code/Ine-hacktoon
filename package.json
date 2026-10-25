@@ -14,6 +14,7 @@
     "security:audit": "pnpm audit --prod --audit-level moderate",
     "test": "pnpm contracts:build && node --import tsx --test \"tests/*.test.ts\"",
     "int-08:verify": "pnpm build && pnpm test",
+    "acceptance:verify": "pnpm contracts:build && node --import tsx --test tests/civic-ui-edits.test.ts tests/i9-conversational-continuity.test.ts tests/i8-patch-synchronization.test.ts tests/i7-ui-interaction-loop.test.ts",
     "test:civic": "pnpm contracts:build && node --import tsx --test \"tests/civic-*.test.ts\" \"tests/get-*.test.ts\" tests/compare-elections.test.ts tests/ui-planner.test.ts tests/ccpc-engine-data-source.test.ts",
     "test:i4": "pnpm contracts:build && node --import tsx --test tests/civic-scope-policy.test.ts tests/i4-agent-text-integration.test.ts",
     "test:transcription": "pnpm contracts:build && node --import tsx --test tests/realtime-transcription.test.ts",

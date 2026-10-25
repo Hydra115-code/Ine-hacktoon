@@ -100,3 +100,28 @@ test("con CCPC_DATA_DIR usa el motor de datos real", { skip: !process.env.CCPC_D
   const breakdown = await service.getParticipationBreakdown({ year: 2024, dimension: "entidad" });
   assert.equal(breakdown.groups.length, 5);
 });
+
+test("la publicación congelada entrega el universo completo sin caer a la muestra", {
+  skip: (!process.env.CCPC_DATA_DIR || !process.env.CCPC_DATASET_PATH)
+    && "La publicación CCPC completa no está configurada",
+}, async () => {
+  const source = CcpcEngineDataSource.fromOptions({
+    dataDir: process.env.CCPC_DATA_DIR!,
+    datasetPath: process.env.CCPC_DATASET_PATH!,
+  });
+  const service = new CivicDataService({ dataSource: source });
+  const documents = await source.initialize();
+
+  assert.equal((documents.capabilities as { schemaVersion: string }).schemaVersion, "ccpc-capabilities/v1");
+  assert.equal((documents.dataset as { schemaVersion: string }).schemaVersion, "ccpc-frontend-metadata/v1");
+  assert.equal((documents.release as { datasetVersion: string }).datasetVersion, "1.0.0");
+
+  const summary = await service.getParticipationSummary({ year: 2024 });
+  assert.equal(summary.isSampleData, false);
+  assert.equal(summary.metadata.matchedRecords, 3_503);
+  assert.equal(summary.totals?.voted, 54_899_228);
+
+  const breakdown = await service.getParticipationBreakdown({ year: 2024, dimension: "entidad" });
+  assert.equal(breakdown.isSampleData, false);
+  assert.equal(breakdown.groups.length, 32);
+});

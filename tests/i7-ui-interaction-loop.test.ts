@@ -7,6 +7,7 @@ import {
   type UISpecification,
 } from "@banorte/contracts";
 import { createUiEventQuery, reconcileUiEventControl, SharedUiEventValidationError } from "../src/integration/shared-ui-event.js";
+import { interpretCivicQuery } from "../src/agent/planning/civic-query-interpreter.js";
 import { adaptUiDataSource } from "../src/integration/shared-contract-adapter.js";
 import {
   ACTOR_ID,
@@ -197,6 +198,71 @@ test("rechaza eventos fabricados o valores que no pertenecen al control", () => 
   assert.throws(() => createUiEventQuery(invalidSlider, controls), SharedUiEventValidationError);
 });
 
+test("mapa y línea del tiempo producen intención cívica sólo para valores visibles", () => {
+  const civicControls: UISpecification = {
+    version: "1",
+    root: {
+      type: "stack",
+      id: "civic-interactions",
+      gap: "md",
+      children: [
+        {
+          type: "mexicoChoropleth",
+          id: "participation-map",
+          ariaLabel: "Mapa de participación",
+          title: "Participación por entidad",
+          dataBinding: "territories",
+          entityCodeField: "code",
+          entityNameField: "name",
+          valueField: "participation",
+          selectionEvent: "map.entity_selected",
+        },
+        {
+          type: "participationTimeline",
+          id: "participation-timeline",
+          ariaLabel: "Evolución de participación",
+          title: "Participación por elección",
+          dataBinding: "timeline",
+          periodField: "year",
+          valueField: "participation",
+          selectionEvent: "timeline.period_selected",
+        },
+      ],
+    },
+  };
+  const registry = {
+    territories: [{ code: "01", name: "Aguascalientes", participation: 0.587 }],
+    timeline: [{ year: 2018, participation: 0.58 }, { year: 2024, participation: 0.587 }],
+  };
+  const interaction = (event: UIEvent["event"], correlationId: string) => uiEventSchema.parse({
+    version: "1", sessionId: SESSION_ID, correlationId, interfaceRevision: 2,
+    dataRevision: 3, dataKeys: ["territories", "timeline"], event,
+  });
+
+  const mapQuery = createUiEventQuery(interaction(
+    { name: "map.entity_selected", sourceId: "participation-map", value: "01" },
+    "35000000-0000-4000-8000-000000000012",
+  ), civicControls, "Compara la participación nacional", registry);
+  assert.match(mapQuery, /"dimension":"entity","entityCode":"01","entityName":"Aguascalientes"/u);
+  assert.deepEqual(interpretCivicQuery(mapQuery).entityCodes, ["01"]);
+
+  const timelineQuery = createUiEventQuery(interaction(
+    { name: "timeline.period_selected", sourceId: "participation-timeline", value: "2024" },
+    "35000000-0000-4000-8000-000000000013",
+  ), civicControls, "Compara la participación nacional", registry);
+  assert.match(timelineQuery, /"dimension":"period","period":"2024"/u);
+  assert.deepEqual(interpretCivicQuery(timelineQuery).years, [2024]);
+
+  assert.throws(() => createUiEventQuery(interaction(
+    { name: "map.entity_selected", sourceId: "participation-map", value: "99" },
+    "35000000-0000-4000-8000-000000000014",
+  ), civicControls, undefined, registry), SharedUiEventValidationError);
+  assert.throws(() => createUiEventQuery(interaction(
+    { name: "timeline.period_selected", sourceId: "participation-timeline", value: "2030" },
+    "35000000-0000-4000-8000-000000000015",
+  ), civicControls, undefined, registry), SharedUiEventValidationError);
+});
+
 test("un selector de entidad vuelve al Agent, consulta MCP y produce DataPatch/UIPatch sin prompt nuevo", async () => {
   const harness = new CivicHarness();
   await harness.run(queryRequest(
@@ -257,7 +323,39 @@ test("una revisión obsoleta se rechaza antes de invocar MCP", async () => {
   ));
 
   assert.equal(errorCode(events), "session_revision_conflict");
+  const conflict = events.find((event) => event.type === "error");
+  assert.equal(conflict?.type === "error" ? conflict.error.hasPartialData : undefined, true);
   assert.equal(harness.toolCalls.length, callsBefore);
+});
+
+test("una interacción manipulada conserva la vista y libera la sesión para el siguiente intento", async () => {
+  const harness = new CivicHarness();
+  await harness.run(queryRequest(
+    SESSION_ID,
+    "35000000-0000-4000-8000-000000000040",
+    "Muéstrame los resultados de Aguascalientes en 2024.",
+  ));
+  const current = harness.sessions.latest();
+  const callsBefore = harness.toolCalls.length;
+  const rejected = await harness.run(interactionRequest(
+    SESSION_ID,
+    "35000000-0000-4000-8000-000000000041",
+    current,
+    { name: ENTITY_FILTER_EVENT, sourceId: "control-inexistente", value: "tabasco" },
+  ));
+
+  const failure = rejected.find((event) => event.type === "error");
+  assert.equal(failure?.type === "error" ? failure.error.code : undefined, "ui_event_invalid");
+  assert.equal(failure?.type === "error" ? failure.error.hasPartialData : undefined, true);
+  assert.equal(harness.toolCalls.length, callsBefore, "un evento inválido no consulta MCP");
+
+  const accepted = await harness.run(interactionRequest(
+    SESSION_ID,
+    "35000000-0000-4000-8000-000000000042",
+    current,
+    { name: ENTITY_FILTER_EVENT, sourceId: ENTITY_FILTER_ID, value: "tabasco" },
+  ));
+  assertSuccessful(accepted);
 });
 
 function assertSuccessful(events: TextAgentStreamEvent[]) {

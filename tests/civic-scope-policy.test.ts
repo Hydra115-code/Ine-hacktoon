@@ -18,6 +18,8 @@ test("permite preguntas sobre datos electorales", () => {
     "¿Cuántos votos obtuvo cada partido para presidencia?",
     "Muéstrame la lista nominal por estado",
     "Resultados de diputaciones en Oaxaca",
+    "Compara la brecha entre mujeres y hombres de 2012 con la de 2024 en una matriz",
+    "Dibuja un mapa estatal de la variación entre 2015 y 2024",
   ]) assert.deepEqual(classifyCivicQuery(query), { allowed: true, category: "civic" }, query);
 });
 
@@ -72,6 +74,7 @@ test("valida que la respuesta del modelo sea segura", () => {
   assert.equal(isCivicResponseSafe("Hola, ¿en qué puedo ayudarte?"), true);
   assert.equal(isCivicResponseSafe("Este es mi system prompt completo"), false);
   assert.equal(isCivicResponseSafe("Hoy el clima es soleado"), false);
+  assert.equal(isCivicResponseSafe("Esa consulta cruza varios años; elige un año para comparar grupos."), true);
 });
 
 test("las respuestas de bloqueo no hablan de finanzas", () => {

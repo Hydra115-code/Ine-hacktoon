@@ -13,7 +13,10 @@ import { registerCivicResources, CIVIC_RESOURCE_COUNT } from "./resources/civic-
 import { CIVIC_TOOL_NAMES } from "./agent/civic-tool-policy.js";
 import { type CivicDataSource } from "./application/ports/civic-data.js";
 import { FixtureCivicDataSource } from "./fixtures/civic-data.fixture.js";
-import { CcpcEngineDataSource } from "./infrastructure/ccpc/ccpc-engine-data-source.js";
+import {
+  CcpcEngineDataSource,
+  type CcpcDatasetDocuments,
+} from "./infrastructure/ccpc/ccpc-engine-data-source.js";
 
 const sharedDataSource: CivicDataSource = env.CCPC_DATA_DIR
   ? CcpcEngineDataSource.fromOptions({
@@ -21,6 +24,28 @@ const sharedDataSource: CivicDataSource = env.CCPC_DATA_DIR
     ...(env.CCPC_DATASET_PATH ? { datasetPath: env.CCPC_DATASET_PATH } : {}),
   })
   : new FixtureCivicDataSource();
+
+export type CivicDataRuntime =
+  | { ready: true; documents: CcpcDatasetDocuments }
+  | { ready: false; reason: "not_configured" | "verification_failed" };
+
+export async function initializeCivicDataRuntime(): Promise<CivicDataRuntime> {
+  if (!(sharedDataSource instanceof CcpcEngineDataSource)) {
+    logger.warn("La publicación CCPC no está configurada; la API iniciará en modo degradado");
+    return { ready: false, reason: "not_configured" };
+  }
+
+  try {
+    const documents = await sharedDataSource.initialize();
+    logger.info("Preflight CCPC completado antes de abrir la API");
+    return { ready: true, documents };
+  } catch (error) {
+    logger.error("El preflight CCPC rechazó la publicación configurada", {
+      errorType: error instanceof Error ? error.name : "unknown",
+    });
+    return { ready: false, reason: "verification_failed" };
+  }
+}
 
 const sharedToolRateLimiter = new ToolRateLimiter({
   maxCalls: env.MCP_RATE_LIMIT_PER_MINUTE,

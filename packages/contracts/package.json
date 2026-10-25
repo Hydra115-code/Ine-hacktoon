@@ -30,6 +30,10 @@
       "types": "./dist/generative-ui/schemas/content-node.d.ts",
       "import": "./dist/generative-ui/schemas/content-node.js"
     },
+    "./civic-node": {
+      "types": "./dist/generative-ui/schemas/civic-node.d.ts",
+      "import": "./dist/generative-ui/schemas/civic-node.js"
+    },
     "./interaction-node": {
       "types": "./dist/generative-ui/schemas/interaction-node.d.ts",
       "import": "./dist/generative-ui/schemas/interaction-node.js"

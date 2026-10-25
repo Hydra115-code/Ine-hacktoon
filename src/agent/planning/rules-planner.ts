@@ -1,4 +1,5 @@
 import { CCPC_YEARS } from "../../application/ports/civic-data.js";
+import { ENTITIES } from "../../domain/civic-entities.js";
 import {
   type CompareElectionsOutput,
   type GetParticipationBreakdownOutput,
@@ -127,6 +128,17 @@ function describeComparison(output: CompareElectionsOutput, plan: CivicPlan, con
     ? ""
     : ` En ${last.year} votaron ${count(last.voted ?? 0)} de ${count(last.classified ?? 0)} registros clasificados.`;
   const gaps = missing.length > 0 ? ` No hay datos para ${missing.join(", ")}.` : "";
+  if (plan.focus === "maximum-change" && output.changes.length > 0) {
+    const changeField = plan.indicator === "abstention" ? "abstentionPoints" : "participationPoints";
+    const extreme = [...output.changes]
+      .filter((candidate) => candidate[changeField] !== null)
+      .sort((left, right) => Math.abs(right[changeField] ?? 0) - Math.abs(left[changeField] ?? 0))[0];
+    const value = extreme?.[changeField];
+    if (extreme && value !== null && value !== undefined) {
+      return `${capitalize(where(output.scope))}, el mayor cambio de ${label} ocurrió entre ${extreme.baselineYear} y ${extreme.year}: `
+        + `${value >= 0 ? "subió" : "bajó"} ${num(Math.abs(value))} puntos porcentuales. Serie completa: ${series}.${base}${gaps}`;
+    }
+  }
   return `${capitalize(where(output.scope))}, ${label} por elección fue: ${series}.${movement}${base}${gaps}`;
 }
 
@@ -136,6 +148,13 @@ function describeBreakdown(output: GetParticipationBreakdownOutput, plan: CivicP
   const field = plan.indicator === "abstention" ? "abstentionPct" : "participationPct";
   const label = plan.indicator === "abstention" ? "La abstención" : "La participación oficial";
   const sorted = [...groups].sort((left, right) => (right[field] ?? 0) - (left[field] ?? 0));
+  if (plan.focus === "coverage" && output.dimension === "entidad") {
+    const observed = new Set(groups.map((group) => group.group));
+    const missing = ENTITIES.filter((entity) => !observed.has(entity.name)).map((entity) => entity.name);
+    return missing.length === 0
+      ? `Las 32 entidades tienen observaciones disponibles para ${output.year} con estos filtros.`
+      : `En ${output.year} faltan observaciones para ${missing.join(", ")}. La tabla conserva las entidades con datos disponibles.`;
+  }
   const listed = sorted.slice(0, 6)
     .map((group) => `${group.group}: ${pct(group[field])} (${count(group.voted)} de ${count(group.classified)})`)
     .join("; ");

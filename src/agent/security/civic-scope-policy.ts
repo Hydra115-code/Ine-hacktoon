@@ -7,7 +7,8 @@ export type CivicScopeDecision =
   | { allowed: false; reason: CivicScopeBlockReason };
 
 const STATES = "aguascalientes|baja\\s+california(?:\\s+sur)?|campeche|chiapas|chihuahua|ciudad\\s+de\\s+mexico|cdmx|coahuila|colima|durango|guanajuato|guerrero|hidalgo|jalisco|estado\\s+de\\s+mexico|edomex|michoacan|morelos|nayarit|nuevo\\s+leon|oaxaca|puebla|queretaro|quintana\\s+roo|san\\s+luis\\s+potosi|sinaloa|sonora|tabasco|tamaulipas|tlaxcala|veracruz|yucatan|zacatecas";
-const CIVIC_INTENT = new RegExp(`\\b(?:elecci(?:on|ones)|electoral(?:es)?|vot(?:o|os|ar|aron|antes?|acion(?:es)?)|sufragio(?:s)?|casilla(?:s)?|participacion|abstencion|lista\\s+nominal|padron(?:\\s+electoral)?|ine|partido(?:s)?|candidat[a-z]*|coalici(?:on|ones)|distrito(?:s)?|seccion(?:es)?\\s+electoral(?:es)?|municipio(?:s)?|entidad(?:es)?|estado(?:s)?|nacional|presiden(?:cia|te|ta)|diputad[a-z]*|senad[a-z]*|gubernatura(?:s)?|goberna(?:dor|dora)|alcald[a-z]*|ayuntamiento(?:s)?|proceso(?:s)?\\s+electoral(?:es)?|computo(?:s)?|prep|conteo\\s+rapido|resultado(?:s)?|ciudadan[a-z]*|democracia|cargo(?:s)?\\s+de\\s+eleccion|${STATES})\\b`, "u");
+const CIVIC_INTENT = new RegExp(`\\b(?:elecci(?:on|ones)|electoral(?:es)?|vot(?:o|os|ar|aron|antes?|acion(?:es)?)|sufragio(?:s)?|casilla(?:s)?|participacion|abstencion|lista\\s+nominal|padron(?:\\s+electoral)?|ine|partido(?:s)?|candidat[a-z]*|coalici(?:on|ones)|distrito(?:s)?|seccion(?:es)?\\s+electoral(?:es)?|municipio(?:s)?|entidad(?:es)?|estado(?:s)?|estatal(?:es)?|nacional|presiden(?:cia|te|ta)|diputad[a-z]*|senad[a-z]*|gubernatura(?:s)?|goberna(?:dor|dora)|alcald[a-z]*|ayuntamiento(?:s)?|proceso(?:s)?\\s+electoral(?:es)?|computo(?:s)?|prep|conteo\\s+rapido|resultado(?:s)?|ciudadan[a-z]*|democracia|cargo(?:s)?\\s+de\\s+eleccion|${STATES})\\b`, "u");
+const DEMOGRAPHIC_COMPARISON = /(?=.*\b(?:(?:19|20)\d{2}|matriz)\b)(?:\b(?:compar\w*|brecha|diferencia|matriz|desglose)\b.{0,80}\b(?:mujeres?|hombres?|sexo|genero|edad(?:es)?)\b|\b(?:mujeres?|hombres?|sexo|genero|edad(?:es)?)\b.{0,80}\b(?:compar\w*|brecha|diferencia|matriz|desglose)\b)/u;
 const PARTISAN_REQUEST = [
   /\b(?:por|a)\s+quien\s+(?:le\s+)?(?:debo|deberia|tengo\s+que|me\s+conviene|recomiendas)\s+votar\b/u,
   /\b(?:recomiend(?:a|as|ame)|sugier(?:e|es|eme)|aconsej(?:a|ame))\b.{0,60}\b(?:partido|candidat[a-z]*|votar|voto)\b/u,
@@ -22,7 +23,7 @@ const UI_REPLAY_FOLLOW_UP = /\b(?:muestr(?:a|ame)|ensen(?:a|ame))\b.{0,45}\b(?:l
 const CIVIC_FOLLOW_UP = /\b(?:mujer(?:es)?|hombre(?:s)?|sexo|genero|edad(?:es)?|joven(?:es)?|adult[oa]s\s+mayores|urban[ao]s?|rural(?:es)?|mixt[ao]s?|(?:19|20)\d{2}|compar[a-z]*|desglos[a-z]*|tendencia|evolucion|abstencion)\b/u;
 const GREETING = /^(?:hola|buen(?:os|as)?\s+(?:dias|tardes|noches)|hey|hello|hi|gracias|muchas\s+gracias|adios|hasta\s+luego)[!,.?\s]*$/u;
 const CAPABILITIES = /\b(?:que\s+(?:puedes|sabes)\s+hacer|como\s+(?:puedes\s+)?ayudarme|en\s+que\s+(?:puedes\s+)?ayudarme|tus\s+capacidades|quien\s+eres|what\s+can\s+you\s+do|how\s+can\s+you\s+help)\b/u;
-const SAFE_CONVERSATION = /\b(?:hola|gracias|con\s+gusto|puedo\s+ayudarte|como\s+puedo\s+ayudarte|hasta\s+luego)\b/u;
+const SAFE_CONVERSATION = /\b(?:hola|gracias|con\s+gusto|puedo\s+ayudarte|como\s+puedo\s+ayudarte|hasta\s+luego|cruza\s+varios\s+anos|elige\s+un\s+ano|nivel\s+estatal\s+o\s+nacional|no\s+debo\s+mezclar)\b/u;
 const CIVIC_VALUE = /\b\d[\d,.]*\s*(?:%|por\s+ciento|votos?|casillas?|electores?|ciudadan[a-z]*)\b/u;
 const PROMPT_INJECTION = [
   /\b(?:ignora|omite|olvida|desobedece|anula)\b.{0,80}\b(?:instrucciones|reglas|prompt|mensaje\s+de\s+sistema|politicas)\b/u,
@@ -50,7 +51,7 @@ export function classifyCivicQuery(query: string): CivicScopeDecision {
   if (hasPriorCivicSessionContext(normalized) && isUiTransformRequest(request)) {
     return { allowed: true, category: "ui-transform" };
   }
-  if (CIVIC_INTENT.test(request)) return { allowed: true, category: "civic" };
+  if (CIVIC_INTENT.test(request) || DEMOGRAPHIC_COMPARISON.test(request)) return { allowed: true, category: "civic" };
   if (hasPriorCivicSessionContext(normalized) && CIVIC_FOLLOW_UP.test(request)) return { allowed: true, category: "civic" };
   if (GREETING.test(request)) return { allowed: true, category: "greeting" };
   if (CAPABILITIES.test(request)) return { allowed: true, category: "capabilities" };

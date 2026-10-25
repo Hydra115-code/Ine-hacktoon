@@ -103,10 +103,10 @@ test("«ordénalo de menor a mayor» ordena gráfica y tabla sin consultar de nu
   assert.match(answer, /menor a mayor/u);
   assert.equal(events.some((event) => event.type === "data-patch"), false);
   const view = await conversation.view();
-  const chart = find(view, (node) => node.type === "visualization");
+  const chart = find(view, (node) => node.type === "territoryRanking");
   const table = find(view, (node) => node.type === "table");
-  assert.ok(chart?.type === "visualization" && table?.type === "table");
-  assert.deepEqual(chart.sort, { by: "y", direction: "ascending" });
+  assert.ok(chart?.type === "territoryRanking" && table?.type === "table");
+  assert.equal(chart.order, "ascending");
   assert.equal(table.sorting?.default?.direction, "ascending");
   assert.equal(table.columns.find((column) => column.field === table.sorting?.default?.field)?.sortable, true);
 });
@@ -121,20 +121,20 @@ test("«cambia a gráfica de líneas» cambia el tipo de gráfica y conserva los
   const chart = find(view, (node) => node.type === "visualization");
   assert.ok(chart?.type === "visualization");
   assert.equal(chart.mark, "line");
-  const beforeChart = find(before, (node) => node.type === "visualization");
-  assert.ok(beforeChart?.type === "visualization");
+  const beforeChart = find(before, (node) => node.type === "territoryRanking");
+  assert.ok(beforeChart?.type === "territoryRanking");
   assert.equal(chart.dataBinding, beforeChart.dataBinding);
 });
 
 test("«quita el mapa» retira el aviso del mapa y conserva ranking y tabla", async () => {
   const conversation = new Conversation();
   await conversation.ask("Muéstrame un mapa de participación por estado en 2024");
-  assert.ok(find(await conversation.view(), (node) => node.id === "mapa-no-disponible"));
+  assert.ok(find(await conversation.view(), (node) => node.type === "mexicoChoropleth"));
   const { answer } = await conversation.ask("quita el mapa");
   assert.match(answer, /Quité el mapa/u);
   const view = await conversation.view();
-  assert.equal(find(view, (node) => node.id === "mapa-no-disponible"), undefined);
-  assert.ok(find(view, (node) => node.type === "visualization"));
+  assert.equal(find(view, (node) => node.type === "mexicoChoropleth"), undefined);
+  assert.ok(find(view, (node) => node.type === "territoryRanking"));
   assert.ok(find(view, (node) => node.type === "table"));
 
   const { answer: again } = await conversation.ask("quita el mapa");
@@ -196,4 +196,33 @@ test("sin vista anterior, «regresa» deja la vista igual y lo explica", () => {
   assert.equal(result.operation, "preserve");
   assert.deepEqual(result.specification, specification);
   assert.match(result.answer, /No hay una vista anterior/u);
+});
+
+test("aceptación final: compara, conserva sólo la tabla y recupera fuente y metodología en la misma sesión", async () => {
+  const conversation = new Conversation();
+  const initial = await conversation.ask(
+    "Compara la participación de Aguascalientes entre 2018 y 2024. Elige la forma más clara de mostrarlo y deja visible la evidencia que sustenta la comparación.",
+  );
+  assert.ok(initial.events.some((event) => event.type === "data-patch"));
+  let view = await conversation.view();
+  assert.ok(find(view, (node) => node.type === "table"));
+  assert.ok(find(view, (node) => node.type === "visualization" || node.type === "electionDelta"));
+
+  const tableOnly = await conversation.ask("Quita la gráfica y conserva únicamente la tabla.");
+  assert.equal(tableOnly.events.some((event) => event.type === "data-patch"), false);
+  view = await conversation.view();
+  assert.ok(find(view, (node) => node.type === "table"));
+  assert.equal(find(view, (node) => node.type === "visualization"), undefined);
+  assert.equal(find(view, (node) => node.type === "participationTimeline"), undefined);
+  assert.equal(find(view, (node) => node.type === "mexicoChoropleth"), undefined);
+
+  const provenance = await conversation.ask("Muéstrame la fuente y la metodología de esta comparación.");
+  assert.equal(provenance.events.some((event) => event.type === "data-patch"), false);
+  view = await conversation.view();
+  assert.ok(find(view, (node) => node.type === "table"));
+  const renderedCopy = nodes(view.root)
+    .flatMap((node) => node.type === "text" || node.type === "heading" ? [node.content] : [])
+    .join(" ");
+  assert.match(renderedCopy, /Conteos Censales/u);
+  assert.match(renderedCopy, /Metodolog/u);
 });

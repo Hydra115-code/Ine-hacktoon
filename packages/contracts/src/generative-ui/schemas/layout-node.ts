@@ -41,6 +41,7 @@ import {
   type LogicNode,
 } from "./logic-node.js";
 import { optionalNodeIdField, type IdentifiableNode } from "./node-id.js";
+import { civicNodeSchemas, type CivicNode } from "./civic-node.js";
 
 export const MAX_LAYOUT_DEPTH = 12;
 export const MAX_LAYOUT_CHILDREN = 24;
@@ -164,7 +165,7 @@ export interface ConditionalUINode {
   else?: UINode;
 }
 export type LogicUINode = RepeatUINode | ConditionalUINode;
-export type UINode = LayoutNode | ContentNode | VisualizationNode | TableNode | InteractionNode | LogicUINode;
+export type UINode = LayoutNode | ContentNode | CivicNode | VisualizationNode | TableNode | InteractionNode | LogicUINode;
 
 const nodeValueSchema = z.string().min(1).max(48).regex(/^[a-zA-Z0-9_-]+$/);
 const nodeLabelSchema = z.string().trim().min(1).max(120);
@@ -313,6 +314,7 @@ export const uiNodeSchema = z.lazy(() =>
     progressNodeSchema,
     iconNodeSchema,
     listNodeSchema,
+    ...civicNodeSchemas,
     visualizationNodeBaseSchema,
     tableNodeBaseSchema,
     buttonNodeSchema,
@@ -463,6 +465,11 @@ function validateScopedBindings(node: UINode, scopedDepth: number, context: z.Re
     bindings.push(node.valueBinding);
   } else if (node.type === "visualization" || node.type === "table" || node.type === "repeat") {
     bindings.push(node.dataBinding);
+  } else if ([
+    "electionDelta", "territoryRanking", "participationTimeline", "dataQualityBadge",
+    "demographicBreakdown", "comparisonMatrix", "evidenceSummary", "civicInsight", "mexicoChoropleth",
+  ].includes(node.type)) {
+    bindings.push((node as CivicNode).dataBinding);
   } else if (node.type === "conditional") {
     bindings.push(node.condition.binding);
   }

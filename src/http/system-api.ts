@@ -30,8 +30,12 @@ import {
 } from "../application/create-realtime-transcription-session.js";
 import { ElevenLabsRealtimeTranscriptionGateway } from "../infrastructure/elevenlabs/elevenlabs-realtime-transcription.js";
 import { SqliteSessionStore } from "../repositories/sqlite-session.repository.js";
+import { type CcpcDatasetDocuments } from "../infrastructure/ccpc/ccpc-engine-data-source.js";
 
 const STATUS_PATH = "/api/system/status";
+const CAPABILITIES_PATH = "/api/capabilities";
+const DATASET_PATH = "/api/dataset";
+const RELEASE_PATH = "/api/release";
 const AGENT_PATH = "/api/agent";
 const SNAPSHOT_PATH = "/api/agent/snapshot";
 const REALTIME_TRANSCRIPTION_SESSION_PATH = "/api/transcription/realtime-session";
@@ -47,6 +51,8 @@ export interface SystemApiOptions {
   authenticationRateLimiter?: ToolRateLimiter;
   requestRateLimiter?: ToolRateLimiter;
   allowedOrigins?: readonly string[];
+  dataReady?: boolean;
+  datasetDocuments?: CcpcDatasetDocuments;
 }
 
 export function createSystemApi(options: SystemApiOptions = {}) {
@@ -144,7 +150,8 @@ async function handleRequest(
   }
 
   if (request.method === "GET" && request.url === STATUS_PATH) {
-    const capabilities = options.readCapabilities?.() ?? readRuntimeCapabilities();
+    const capabilities = options.readCapabilities?.()
+      ?? readRuntimeCapabilities(undefined, options.dataReady ?? true);
     const planner = plannerHeaderValue(capabilities);
     if (planner) {
       response.setHeader("X-Ui-Planner", planner);
@@ -154,7 +161,26 @@ async function handleRequest(
     return;
   }
 
+  if (request.method === "GET" && request.url === CAPABILITIES_PATH) {
+    writeDatasetDocument(response, options.datasetDocuments?.capabilities);
+    return;
+  }
+
+  if (request.method === "GET" && request.url === DATASET_PATH) {
+    writeDatasetDocument(response, options.datasetDocuments?.dataset);
+    return;
+  }
+
+  if (request.method === "GET" && request.url === RELEASE_PATH) {
+    writeDatasetDocument(response, options.datasetDocuments?.release);
+    return;
+  }
+
   if (request.method === "POST" && request.url === AGENT_PATH) {
+    if (options.dataReady === false) {
+      writeError(response, 503, "dataset_unavailable", "Los datos oficiales no están disponibles temporalmente", true);
+      return;
+    }
     await handleTextAgent(request, response, textAgent, authenticatedSessionFactory!);
     return;
   }
@@ -198,6 +224,14 @@ async function handleRequest(
   }
 
   writeError(response, 404, "route_not_found", "Ruta no disponible", false);
+}
+
+function writeDatasetDocument(response: ServerResponse, document: unknown): void {
+  if (document === undefined) {
+    writeError(response, 503, "dataset_unavailable", "Los datos oficiales no están disponibles temporalmente", true);
+    return;
+  }
+  writeJson(response, 200, document);
 }
 
 async function handleTextAgent(
@@ -245,7 +279,7 @@ async function handleTextAgent(
         error: {
           version: "1",
           code: "agent_unavailable",
-          message: "El agente no está disponible temporalmente",
+          message: "Paper no está disponible temporalmente",
           recoverable: true,
           hasPartialData: false,
           correlationId: parsed.data.correlationId,

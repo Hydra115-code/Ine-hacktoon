@@ -10,16 +10,21 @@ import { readPlannerStatus, type PlannerStatus } from "../agent/planning/planner
 export interface RuntimeCapabilities {
   isAgentReady: boolean;
   isMcpReady: boolean;
+  isDataReady?: boolean;
   planner?: PlannerStatus;
 }
 
-export function readRuntimeCapabilities(planner: PlannerStatus = readPlannerStatus()): RuntimeCapabilities {
+export function readRuntimeCapabilities(
+  planner: PlannerStatus = readPlannerStatus(),
+  isDataReady = true,
+): RuntimeCapabilities {
   const hasSessionRuntime = env.AUTH_MODE === "local_sqlite"
     ? Boolean(env.AGENT_API_TOKEN && env.SQLITE_DATABASE_PATH)
     : Boolean(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY);
   return {
-    isAgentReady: hasSessionRuntime && planner.ready,
-    isMcpReady: hasSessionRuntime,
+    isAgentReady: hasSessionRuntime && planner.ready && isDataReady,
+    isMcpReady: hasSessionRuntime && isDataReady,
+    isDataReady,
     planner,
   };
 }
@@ -53,7 +58,9 @@ export function createSystemStatus(
   capabilities: RuntimeCapabilities = readRuntimeCapabilities(),
   now: () => Date = () => new Date(),
 ): SystemStatus {
-  const isReady = capabilities.isAgentReady && capabilities.isMcpReady;
+  const isReady = capabilities.isAgentReady
+    && capabilities.isMcpReady
+    && capabilities.isDataReady !== false;
   return systemStatusSchema.parse({
     version: CONTRACT_VERSION,
     contractFingerprint: CONTRACT_FINGERPRINT,
