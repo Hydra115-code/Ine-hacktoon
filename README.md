@@ -2,24 +2,122 @@
 
 Aplicación web para consultar datos públicos de participación electoral mediante conversación e interfaces generadas. El frontend recibe especificaciones declarativas del backend, valida el contrato y las convierte en tablas, gráficas, mapas, métricas, filtros y notas metodológicas.
 
-## Requisitos
+## Instalación local paso a paso
 
-- Node.js 22 LTS recomendado; mínimo 20.9.
-- Corepack.
-- Backend de INE Explora disponible en `http://127.0.0.1:3101`.
+Esta guía está pensada para Linux, macOS o WSL. El frontend necesita que el backend esté ejecutándose para responder consultas; la portada y el catálogo visual pueden abrirse sin él.
 
-## Instalación
+### 1. Instalar los requisitos
+
+- [Git](https://git-scm.com/downloads).
+- [Node.js 22 LTS](https://nodejs.org/) recomendado; la versión mínima admitida es 20.9.
+- Acceso al repositorio de GitHub.
+
+Comprueba la instalación en una terminal:
 
 ```bash
-git clone --branch front-end git@github.com:Hydra115-code/Ine-hacktoon.git ine-explora-front
-cd ine-explora-front
+git --version
+node --version
+corepack --version
+```
+
+Si `corepack` no existe, instálalo y vuelve a comprobarlo:
+
+```bash
+npm install --global corepack
+corepack --version
+```
+
+### 2. Descargar la rama del frontend
+
+Desde la carpeta donde quieras guardar el proyecto:
+
+```bash
+mkdir -p INE-Integracion
+cd INE-Integracion
+git clone --branch front-end --single-branch git@github.com:Hydra115-code/Ine-hacktoon.git front-end
+cd front-end
+```
+
+Si Git muestra `Permission denied (publickey)`, configura una llave SSH en GitHub o, si tu cuenta tiene acceso, usa la URL HTTPS:
+
+```bash
+git clone --branch front-end --single-branch https://github.com/Hydra115-code/Ine-hacktoon.git front-end
+cd front-end
+```
+
+Si ya descargaste esta rama, no vuelvas a clonarla: entra a su carpeta y continúa.
+
+### 3. Instalar la versión correcta de pnpm y las dependencias
+
+```bash
 corepack enable
 corepack prepare pnpm@11.25.0 --activate
+pnpm --version
 pnpm install --frozen-lockfile
+```
+
+El resultado de `pnpm --version` debe ser `11.25.0`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
+
+### 4. Crear la configuración local
+
+```bash
 cp .env.example .env.local
 ```
 
-## Configuración
+Abre `.env.local` en un editor y deja, como mínimo:
+
+```dotenv
+AGENT_API_URL=http://127.0.0.1:3101/api/agent
+AGENT_SESSION_MODE=local_service
+AGENT_API_TOKEN=pega-aqui-el-mismo-token-del-backend
+INE_DEMO_LOGIN_ENABLED=false
+```
+
+`AGENT_API_TOKEN` debe contener exactamente el mismo valor que `AGENT_API_TOKEN` en `back-end/.env`. No agregues espacios y no cambies el nombre por uno que empiece con `NEXT_PUBLIC_`, porque eso expondría el token al navegador.
+
+### 5. Iniciar el frontend
+
+Primero inicia el backend en otra terminal. Después, desde `front-end/`, ejecuta:
+
+```bash
+pnpm dev
+```
+
+Espera a que la terminal muestre `Ready` y abre:
+
+- Aplicación: `http://127.0.0.1:3000`
+- Conversación: `http://127.0.0.1:3000/conversar`
+- Catálogo visual: `http://127.0.0.1:3000/dev/genui-audit-harness`
+
+Mantén la terminal abierta. Para detener el frontend, presiona `Ctrl+C`.
+
+### 6. Comprobar que quedó conectado
+
+1. Abre `/conversar`.
+2. Envía una consulta, por ejemplo: `Compara la participación de Jalisco y Nuevo León en 2024`.
+3. Confirma que Paper responda y que aparezca una vista con datos.
+
+Si la página abre pero la consulta falla, revisa primero que `http://127.0.0.1:3101/api/system/status` responda y después compara el token de ambos archivos de entorno.
+
+### Arranque de todos los días
+
+Después de instalar una vez, normalmente sólo necesitas dos terminales:
+
+```bash
+# Terminal 1
+cd INE-Integracion/back-end
+pnpm api
+```
+
+```bash
+# Terminal 2
+cd INE-Integracion/front-end
+pnpm dev
+```
+
+No vuelvas a ejecutar `pnpm install` salvo que cambie `package.json` o `pnpm-lock.yaml`.
+
+## Configuración de entorno
 
 | Variable | Requerida | Descripción |
 |---|---:|---|
@@ -33,36 +131,18 @@ cp .env.example .env.local
 | `INE_DEMO_EMAIL` | No | Cuenta sintética de demostración. |
 | `INE_DEMO_PASSWORD` | No | Contraseña server-side de la cuenta sintética. |
 
-Configuración mínima en `.env.local`:
+`AI_PROVIDER` es informativa; el proveedor que interpreta las preguntas se configura realmente en el backend. Supabase y el acceso de demostración no son necesarios para la instalación local recomendada.
 
-```dotenv
-AI_PROVIDER=google
-AGENT_API_URL=http://127.0.0.1:3101/api/agent
-AGENT_SESSION_MODE=local_service
-AGENT_API_TOKEN=replace-with-the-same-token-as-the-backend
-INE_DEMO_LOGIN_ENABLED=false
-```
+## Compilación de producción
 
-## Ejecución
-
-Inicia primero el backend y después ejecuta:
-
-```bash
-pnpm dev
-```
-
-Rutas:
-
-- Aplicación: `http://127.0.0.1:3000`
-- Conversación: `http://127.0.0.1:3000/conversar`
-- Catálogo de componentes: `http://127.0.0.1:3000/dev/genui-audit-harness`
-
-Build de producción:
+Para comprobar que el frontend puede compilarse y ejecutarse como producción:
 
 ```bash
 pnpm build
 pnpm start
 ```
+
+`pnpm start` escucha en el puerto 3000 y requiere que `pnpm build` haya terminado correctamente.
 
 ## Arquitectura
 
@@ -165,7 +245,7 @@ AGENT_API_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 
 ### Respuesta `401`
 
-Verifica que `AGENT_API_TOKEN` coincida en frontend y backend.
+Verifica que `AGENT_API_TOKEN` coincida carácter por carácter en `front-end/.env.local` y `back-end/.env`. Reinicia ambos procesos después de modificar un archivo de entorno.
 
 ### Backend no disponible
 
@@ -173,11 +253,35 @@ Verifica que `AGENT_API_TOKEN` coincida en frontend y backend.
 curl http://127.0.0.1:3101/api/system/status
 ```
 
+Si aparece `Connection refused`, inicia el backend con `pnpm api`. Si el estado abre en el navegador pero el frontend sigue fallando, confirma que `AGENT_API_URL` termine en `/api/agent`.
+
 ### Puerto 3000 ocupado
 
 ```bash
 ss -ltnp '( sport = :3000 )'
 ```
+
+Detén la instancia anterior con `Ctrl+C` en la terminal donde se inició. Si necesitas usar otro puerto temporalmente:
+
+```bash
+PORT=3001 pnpm dev
+```
+
+En ese caso agrega `http://localhost:3001,http://127.0.0.1:3001` a `AGENT_API_ALLOWED_ORIGINS` del backend y reinícialo.
+
+### `pnpm` tiene otra versión
+
+Desde `front-end/`:
+
+```bash
+corepack prepare pnpm@11.25.0 --activate
+pnpm --version
+pnpm install --frozen-lockfile
+```
+
+### Cambié `.env.local` pero no ocurrió nada
+
+Detén `pnpm dev` con `Ctrl+C` y vuelve a iniciarlo. Next.js lee estas variables al arrancar.
 
 ### Contratos incompatibles
 
