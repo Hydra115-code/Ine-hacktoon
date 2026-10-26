@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { TableNode } from "../schemas/table-node";
@@ -26,6 +26,19 @@ const localizedColumnLabels: Readonly<Record<string, string>> = {
 function columnLabel(label: string) {
   const key = label.replace(/[\s_-]/gu, "").toLocaleLowerCase("es-MX");
   return cleanGeneratedCopy(localizedColumnLabels[key] ?? localizeDisplayValue(label));
+}
+
+const narrativeColumnPattern = /(?:descripcion|description|nota|note|metodologia|methodology|advertencia|warning|detalle|detail|explicacion|explanation|fuente|source|hallazgo|finding|resumen|summary|contexto|context|observacion|observation)/u;
+
+function tableCellClass(column: TableNode["columns"][number]) {
+  const semanticName = `${column.field} ${column.label}`
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("es-MX");
+  const isNarrative = (column.format === undefined || column.format === "text")
+    && narrativeColumnPattern.test(semanticName);
+
+  return `ui-table__cell--${column.align ?? "start"}${isNarrative ? " ui-table__cell--narrative" : ""}`;
 }
 
 interface TableProps {
@@ -57,6 +70,8 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
   const [sort, setSort] = useState<TableSortState | undefined>(spec.sorting?.default);
   const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => new Set());
+  const [tableAnnouncement, setTableAnnouncement] = useState("");
+  const hasFilteredRef = useRef(false);
   const periodColumn = useMemo(() => spec.columns.find((column) => /^(?:year|period|año|anio)$/iu.test(column.field)), [spec.columns]);
   const periodFilteredData = useMemo(() => {
     if (!data || !periodColumn || (typeof selectedTimelinePeriod !== "string" && typeof selectedTimelinePeriod !== "number")) return undefined;
@@ -74,13 +89,23 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
   const allVisibleSelected = visibleSelectionKeys.length > 0
     && visibleSelectionKeys.every((key) => selectedRows.has(key));
 
+  useEffect(() => {
+    if (!hasFilteredRef.current) return;
+    setTableAnnouncement(query.trim()
+      ? `${model.totalRows} ${model.totalRows === 1 ? "resultado" : "resultados"} para ${query.trim()}`
+      : `Filtro eliminado. ${model.totalRows} ${model.totalRows === 1 ? "registro" : "registros"} en la tabla`);
+  }, [model.totalRows, query]);
+
   function changeSort(field: string) {
-    setSort((current) => ({
+    const nextSort: TableSortState = {
       field,
-      direction: current?.field === field && current.direction === "ascending"
+      direction: sort?.field === field && sort.direction === "ascending"
         ? "descending"
         : "ascending",
-    }));
+    };
+    setSort(nextSort);
+    const sortedColumn = spec.columns.find((column) => column.field === field);
+    setTableAnnouncement(`Tabla ordenada por ${columnLabel(sortedColumn?.label ?? field)} en orden ${nextSort.direction === "ascending" ? "ascendente" : "descendente"}`);
     setPage(1);
     emitSort(field);
   }
@@ -113,6 +138,7 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
 
   return (
     <div className={`ui-table ui-table--${spec.density ?? "comfortable"}`} data-column-count={selection ? undefined : spec.columns.length}>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{tableAnnouncement}</p>
       {spec.filtering?.enabled || periodFilteredData ? (
         <div className="ui-table__toolbar">
           <div className="ui-table__active-filters">
@@ -142,6 +168,7 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
                 type="search"
                 value={query}
                 onChange={(event) => {
+                  hasFilteredRef.current = true;
                   setQuery(event.target.value);
                   setPage(1);
                   emitFilter(event.target.value);
@@ -222,7 +249,7 @@ export function Table({ spec, data, locale = "es-MX", currency = "MXN" }: TableP
                       ? tableStatus(readDataField(row.data, column.field))
                       : undefined;
                     return (
-                      <td className={`ui-table__cell--${column.align ?? "start"}`} key={column.field}>
+                      <td className={tableCellClass(column)} key={column.field}>
                         {status ? <span className={`ui-table__status ui-table__status--${status}`}>{displayValue}</span> : displayValue}
                       </td>
                     );

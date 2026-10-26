@@ -30,7 +30,7 @@ export default function HistoriasPage() {
       <PublicNav />
       <OnboardingModal />
 
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "var(--space-6) var(--space-4)", width: "100%", display: "flex", flexDirection: "column", gap: "var(--space-8)" }}>
+      <main id="main-content" tabIndex={-1} style={{ maxWidth: 960, margin: "0 auto", padding: "var(--space-6) var(--space-4)", width: "100%", display: "flex", flexDirection: "column", gap: "var(--space-8)" }}>
         {/* Encabezado Editorial */}
         <header style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-3)" }}>
           <span style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, color: "var(--color-brand-primary)" }}>

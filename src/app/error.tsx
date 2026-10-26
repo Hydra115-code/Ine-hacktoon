@@ -1,8 +1,16 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 export default function ApplicationError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const errorRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    errorRef.current?.focus();
+  }, []);
+
   return (
-    <main className="workspace-failure">
+    <main ref={errorRef} className="workspace-failure" role="alert" aria-atomic="true" tabIndex={-1}>
       <div className="workspace-failure__mark" aria-hidden="true">!</div>
       <p className="canvas__eyebrow">Paper conserva tu consulta</p>
       <h1>No pude abrir esta página</h1>

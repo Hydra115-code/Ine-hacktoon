@@ -263,7 +263,8 @@
 .paper-suggestions li:nth-child(2) button { border-top-color: var(--color-brand-primary); }
 .paper-suggestions li:nth-child(3) button { border-top-color: var(--color-evidence-caution, #9b5d00); }
 .paper-suggestions li button:hover,
-.paper-suggestions li button:focus-visible { border-color: var(--color-brand-primary); outline: none; box-shadow: 0.4rem 0.45rem 0 color-mix(in srgb, var(--color-brand-primary) 16%, transparent); transform: translate(-0.15rem, -0.15rem); }
+.paper-suggestions li button:focus-visible { border-color: var(--color-brand-primary); box-shadow: 0.4rem 0.45rem 0 color-mix(in srgb, var(--color-brand-primary) 16%, transparent); transform: translate(-0.15rem, -0.15rem); }
+.paper-suggestions li button:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 3px; }
 .paper-suggestions li button > span { color: var(--color-civic-accent); font-size: 0.68rem; font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-label); text-transform: uppercase; }
 .paper-suggestions li button strong { font-size: 0.98rem; }
 .paper-suggestions li button small { color: var(--color-text-secondary); font-size: 0.78rem; line-height: 1.4; }

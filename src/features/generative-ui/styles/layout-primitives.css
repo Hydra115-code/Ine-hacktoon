@@ -5,7 +5,7 @@
 
 .ui-container--size-sm { max-width: 40rem; }
 .ui-container--size-md { max-width: 56rem; }
-.ui-container--size-lg { max-width: 76rem; }
+.ui-container--size-lg { max-width: 86rem; }
 .ui-container--size-full { max-width: none; }
 .ui-container--padding-none { padding: 0; }
 .ui-container--padding-sm { padding: var(--space-3); }
@@ -338,6 +338,24 @@
     [data-node-type="alert"]
   ) {
     margin-block-start: var(--space-5);
+  }
+}
+
+@media (min-width: 90rem) {
+  .ui-container--size-lg { max-width: 100rem; }
+
+  .ui-flex--direction-row > .ui-runtime-motion-node:is(
+    [data-node-type="table"],
+    [data-node-type="visualization"],
+    [data-node-type="electionDelta"],
+    [data-node-type="territoryRanking"],
+    [data-node-type="participationTimeline"],
+    [data-node-type="demographicBreakdown"],
+    [data-node-type="comparisonMatrix"],
+    [data-node-type="evidenceSummary"],
+    [data-node-type="mexicoChoropleth"]
+  ) {
+    flex-basis: 36rem;
   }
 }
 

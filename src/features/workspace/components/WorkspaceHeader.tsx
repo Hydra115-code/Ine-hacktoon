@@ -2,6 +2,7 @@
 
 import { useWorkspaceStore } from "../state/workspace-store";
 import { ThemeToggle } from "@/shared/design-system/components/ThemeToggle";
+import { AccessibilityCenter } from "@/shared/design-system/components/AccessibilityCenter";
 import { useAgentSession } from "../../agent/components/AgentSessionProvider";
 import { CivicBrand } from "./CivicBrand";
 
@@ -26,6 +27,7 @@ export function WorkspaceHeader({ onSignOut }: { onSignOut?: () => Promise<void>
         <Link href="/" className="session-reset workspace-header__home">
           ← Inicio
         </Link>
+        <AccessibilityCenter />
         <ThemeToggle />
         {hasStarted ? (
           <button className="session-reset" type="button" onClick={() => {

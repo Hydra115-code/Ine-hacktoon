@@ -127,7 +127,7 @@
   box-shadow: 4px 4px 0 color-mix(in srgb, var(--color-border-strong) 32%, transparent);
 }
 
-.landing-question:focus-within { border-color: var(--color-brand-primary); }
+.landing-question:focus-within { border-color: var(--color-brand-primary); box-shadow: 0 0 0 3px var(--color-focus-ring); }
 .landing-question > label { padding-left: 0.35rem; color: var(--color-brand-primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .landing-question__control { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-left: 1px solid var(--color-border-subtle); }
 .landing-question__control input { width: 100%; min-width: 0; height: 50px; padding: 0 1rem; border: 0; background: transparent; color: var(--color-text-primary); font: inherit; font-size: 1rem; outline: none; }

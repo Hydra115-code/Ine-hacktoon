@@ -70,8 +70,7 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
   const maximum = values.length > 0 ? Math.max(...values) : 0;
   const activeRow = activeCode ? rowsByCode.get(activeCode) : undefined;
   const activeGeometry = mexicoMapAsset.states.find((state) => state.code === activeCode);
-  const renderedStates = useMemo(() => [...mexicoMapAsset.states].sort((left, right) =>
-    Number(left.code === activeCode) - Number(right.code === activeCode)), [activeCode]);
+  const renderedStates = mexicoMapAsset.states;
   const zoom = ZOOM_LEVELS[zoomIndex];
   const missingCount = mexicoMapAsset.states.length - rowsByCode.size;
   const visibleStateCodes = useMemo(() => new Set(mexicoMapAsset.states.flatMap((state) => {
@@ -80,6 +79,9 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
     if (activeFilter === "missing") return row ? [] : [state.code];
     return row && binForValue(row.value, minimum, maximum) === activeFilter ? [state.code] : [];
   })), [activeFilter, maximum, minimum, rowsByCode]);
+  const keyboardEntryCode = activeCode && visibleStateCodes.has(activeCode)
+    ? activeCode
+    : renderedStates.find((state) => visibleStateCodes.has(state.code))?.code;
   const legendRanges = Array.from({ length: BIN_COUNT }, (_, index) => {
     const step = maximum === minimum ? 0 : (maximum - minimum) / BIN_COUNT;
     return {
@@ -115,7 +117,8 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
   };
 
   const handlePathKeyDown = (event: KeyboardEvent<SVGPathElement>, code: string) => {
-    const currentIndex = mexicoMapAsset.states.findIndex((state) => state.code === code);
+    const keyboardStates = mexicoMapAsset.states.filter((state) => visibleStateCodes.has(state.code));
+    const currentIndex = keyboardStates.findIndex((state) => state.code === code);
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       selectEntity(code);
@@ -128,8 +131,9 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
         : 0;
     if (step !== 0) {
       event.preventDefault();
-      const nextIndex = (currentIndex + step + mexicoMapAsset.states.length) % mexicoMapAsset.states.length;
-      selectEntity(mexicoMapAsset.states[nextIndex].code, true);
+      if (keyboardStates.length === 0) return;
+      const nextIndex = (currentIndex + step + keyboardStates.length) % keyboardStates.length;
+      selectEntity(keyboardStates[nextIndex].code, true);
     }
   };
 
@@ -172,7 +176,7 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
             aria-describedby={spec.valueLabel ? descriptionId : undefined}
             aria-labelledby={titleId}
             className="ui-mexico-map__svg"
-            role="img"
+            role="group"
             viewBox={mexicoMapAsset.viewBox}
           >
             <g style={{ transform: `translate(480px, 300px) scale(${zoom}) translate(-480px, -300px)`, transformOrigin: "center" }}>
@@ -205,7 +209,7 @@ export function MexicoChoropleth({ data, locale = "es-MX", spec }: MexicoChoropl
                       else pathRefs.current.delete(state.code);
                     }}
                     role="button"
-                    tabIndex={0}
+                    tabIndex={state.code === keyboardEntryCode ? 0 : -1}
                   />
                 );
               })}

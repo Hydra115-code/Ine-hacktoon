@@ -68,7 +68,8 @@ export function Visualization({ spec, data }: VisualizationProps) {
     let runtimePromise: Promise<typeof import("./echarts-runtime")> | undefined;
 
     const update = () => {
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reducedMotion = document.documentElement.dataset.a11yMotion === "reduced"
+        || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       chart?.setOption(compileVisualizationOption(spec, rows, readTheme(), { reducedMotion }), true);
     };
 
@@ -92,7 +93,10 @@ export function Visualization({ spec, data }: VisualizationProps) {
       resizeObserver.observe(element);
     }
     const themeObserver = new MutationObserver(update);
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-a11y-contrast", "data-a11y-motion"],
+    });
     resize();
 
     return () => {

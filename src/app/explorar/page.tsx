@@ -50,7 +50,7 @@ export default function ExplorarMexicoPage() {
       <PublicNav />
       <OnboardingModal />
 
-      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "var(--space-6) var(--space-4)", width: "100%", display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+      <main id="main-content" tabIndex={-1} style={{ maxWidth: 1240, margin: "0 auto", padding: "var(--space-6) var(--space-4)", width: "100%", display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
         {/* Cabecera de Experiencia 2 */}
         <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--space-4)" }}>
           <div style={{ maxWidth: 720 }}>

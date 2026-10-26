@@ -35,11 +35,17 @@ test("las preguntas de aceptación son ciudadanas y no reintroducen el dominio f
   assert.match(prompts, /participación|comparación|fuente|metodología/u);
 });
 
-test("los datos inline de una UI se anuncian como claves autoritativas en cada ciclo", () => {
+test("la continuidad anuncia únicamente claves confirmadas por eventos de datos", () => {
   const source = readFileSync(new URL(
     "../src/features/agent/components/AgentSessionProvider.tsx",
     import.meta.url,
   ), "utf8");
-  const registrations = source.match(/Object\.keys\(part\.data\.data \?\? \{\}\)\) authoritativeDataKeysRef\.current\.add\(key\)/gu) ?? [];
-  assert.equal(registrations.length, 2, "ui y uiStarted deben registrar todas sus claves inline");
+  assert.doesNotMatch(
+    source,
+    /Object\.keys\(part\.data\.data \?\? \{\}\)\) authoritativeDataKeysRef\.current\.add\(key\)/u,
+    "los valores temporales de la UI progresiva no deben contaminar la referencia del backend",
+  );
+  assert.match(source, /part\.type === "data-dataAvailable"[\s\S]*?authoritativeDataKeysRef\.current\.add\(part\.data\.key\)/u);
+  assert.match(source, /part\.type === "data-dataPatch"[\s\S]*?authoritativeDataKeysRef\.current\.(?:add|delete)\(part\.data\.key\)/u);
+  assert.match(source, /dataKeys: \[\.\.\.authoritativeDataKeysRef\.current\]/u);
 });

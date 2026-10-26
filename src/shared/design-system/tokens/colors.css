@@ -26,7 +26,7 @@
   --color-trend-decrease: #a8302e;
   --color-evidence-neutral: #625f70;
   --color-evidence-caution: #8a5300;
-  --color-focus-ring: rgb(167 12 95 / 28%);
+  --color-focus-ring: #a70c5f;
   --color-canvas-dot: rgb(28 27 44 / 12%);
   --color-canvas-glow: rgb(255 255 255 / 40%);
   --color-success-ring: rgb(30 111 67 / 12%);
@@ -75,7 +75,7 @@
   --color-trend-decrease: #f17f7b;
   --color-evidence-neutral: #c9c3b6;
   --color-evidence-caution: #e5a74a;
-  --color-focus-ring: rgb(255 124 186 / 34%);
+  --color-focus-ring: #ff7cba;
   --color-canvas-dot: rgb(243 238 228 / 10%);
   --color-canvas-glow: rgb(42 41 57 / 34%);
   --color-success-ring: rgb(95 197 140 / 14%);

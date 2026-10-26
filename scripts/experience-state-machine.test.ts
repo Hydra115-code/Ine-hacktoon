@@ -133,6 +133,27 @@ test("un conflicto de revisión entra a recuperación de datos", () => {
   assert.equal(recovery.state.domains.ui, "stable");
 });
 
+test("una respuesta sólo conversacional conserva el lienzo vacío o la vista previa", () => {
+  const emptyReply = advance(createInitialExperienceState(), [
+    { type: "SUBMIT" },
+    { type: "CONVERSATION_COMPLETED" },
+  ]);
+  assert.equal(emptyReply.status, "empty");
+  assert.equal(emptyReply.hasValidSnapshot, false);
+  assert.equal(emptyReply.domains.conversation, "active");
+  assert.equal(emptyReply.domains.ui, "empty");
+
+  const restored = transitionExperience(createInitialExperienceState(), { type: "RESTORE_SESSION" });
+  assert.equal(restored.accepted, true);
+  const preservedReply = advance(restored.state, [
+    { type: "SUBMIT" },
+    { type: "CONVERSATION_COMPLETED" },
+  ]);
+  assert.equal(preservedReply.status, "ready");
+  assert.equal(preservedReply.hasValidSnapshot, true);
+  assert.equal(preservedReply.domains.ui, "stable");
+});
+
 test("rechaza transiciones que no pertenecen al estado actual", () => {
   const initial = createInitialExperienceState();
   const result = transitionExperience(initial, { type: "ACTION_CONFIRMED" });

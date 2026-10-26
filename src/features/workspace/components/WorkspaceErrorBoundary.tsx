@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
+import { Component, createRef, type ReactNode } from "react";
 
 interface WorkspaceErrorBoundaryProps {
   children: ReactNode;
@@ -12,9 +12,16 @@ interface WorkspaceErrorBoundaryState {
 
 export class WorkspaceErrorBoundary extends Component<WorkspaceErrorBoundaryProps, WorkspaceErrorBoundaryState> {
   state: WorkspaceErrorBoundaryState = { hasError: false };
+  private readonly errorRef = createRef<HTMLElement>();
 
   static getDerivedStateFromError(): WorkspaceErrorBoundaryState {
     return { hasError: true };
+  }
+
+  componentDidUpdate(_: WorkspaceErrorBoundaryProps, previousState: WorkspaceErrorBoundaryState) {
+    if (!previousState.hasError && this.state.hasError) {
+      window.requestAnimationFrame(() => this.errorRef.current?.focus());
+    }
   }
 
   retry = () => {
@@ -24,7 +31,7 @@ export class WorkspaceErrorBoundary extends Component<WorkspaceErrorBoundaryProp
   render() {
     if (this.state.hasError) {
       return (
-        <main className="workspace-failure">
+        <main ref={this.errorRef} className="workspace-failure" role="alert" aria-atomic="true" tabIndex={-1}>
           <div className="workspace-failure__mark" aria-hidden="true">!</div>
           <p className="canvas__eyebrow">Explorador ciudadano</p>
           <h1>Paper tuvo un problema al mostrar la página</h1>

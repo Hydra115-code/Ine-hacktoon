@@ -352,6 +352,7 @@
 .ui-comparison-matrix__scroller { max-width: 100%; overflow-x: auto; border: 1px solid var(--color-border-strong); }
 .ui-comparison-matrix__scroller:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 3px; }
 .ui-comparison-matrix table { width: 100%; min-width: 36rem; border-collapse: collapse; }
+.ui-comparison-matrix table { font-size: 1rem; line-height: 1.5; }
 .ui-comparison-matrix th,
 .ui-comparison-matrix td { padding: var(--space-3) var(--space-4); text-align: end; border-bottom: 1px solid var(--color-border-subtle); }
 .ui-comparison-matrix thead th { color: var(--color-text-secondary); font-size: var(--font-size-caption); letter-spacing: 0.045em; text-transform: uppercase; background: var(--color-surface-secondary); }
@@ -494,6 +495,11 @@
   transform: scale(1.14);
   animation: ui-map-state-selected 320ms var(--ease-standard);
 }
+.ui-mexico-map__state[data-selected="true"]:focus-visible {
+  filter: drop-shadow(0 0 5px var(--color-focus-ring));
+  stroke: var(--color-focus-ring);
+  stroke-width: 3;
+}
 .ui-mexico-map__state[data-filtered-out="true"] { opacity: 0.12; }
 
 @keyframes ui-map-state-selected {
@@ -553,6 +559,7 @@
 .ui-mexico-map__table-alternative summary { padding: var(--space-3) var(--space-4); color: var(--color-text-primary); font-weight: var(--font-weight-bold); cursor: pointer; background: var(--color-surface-secondary); }
 .ui-mexico-map__table-alternative > div { max-height: 24rem; overflow: auto; }
 .ui-mexico-map__table-alternative table { width: 100%; min-width: 32rem; border-collapse: collapse; }
+.ui-mexico-map__table-alternative table { font-size: 1rem; line-height: 1.5; }
 .ui-mexico-map__table-alternative caption { padding: var(--space-3); color: var(--color-text-secondary); text-align: start; }
 .ui-mexico-map__table-alternative th,
 .ui-mexico-map__table-alternative td { padding: var(--space-3) var(--space-4); text-align: start; border-bottom: 1px solid var(--color-border-subtle); }
@@ -566,6 +573,22 @@
   .ui-mexico-map__detail { min-height: 8rem; }
   .ui-comparison-matrix table,
   .ui-mexico-map__table-alternative table { min-width: 30rem; }
+}
+
+@media (min-width: 90rem) {
+  .ui-participation-timeline__layout {
+    grid-template-columns: minmax(15rem, 0.68fr) minmax(24rem, 1.32fr);
+  }
+
+  .ui-mexico-map__body {
+    grid-template-columns: minmax(0, 3.35fr) minmax(17rem, 1fr);
+  }
+
+  .ui-mexico-map__detail p,
+  .ui-mexico-map__table-alternative table,
+  .ui-comparison-matrix table {
+    font-size: 1.0625rem;
+  }
 }
 
 @media (max-width: 40rem) {

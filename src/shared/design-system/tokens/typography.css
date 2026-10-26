@@ -2,8 +2,8 @@
   /* --font-ui y --font-display los inyecta next/font en app/layout.tsx */
   --font-family-sans: var(--font-ui), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-family-display: var(--font-display), Georgia, "Times New Roman", serif;
-  --font-size-caption: 0.8125rem;
-  --font-size-label: 0.875rem;
+  --font-size-caption: 0.875rem;
+  --font-size-label: 0.9375rem;
   --font-size-body: 1.0625rem;
   --font-size-title: clamp(1.4rem, 2.2vw, 1.875rem);
   --font-size-display: clamp(2.1rem, 5.4vw, 4.25rem);

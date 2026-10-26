@@ -443,6 +443,12 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         else if (part.data.stage === "generating_ui") dispatchExperience({ type: "UI_GENERATION_STARTED" });
         else if (part.data.stage === "updating") dispatchExperience({ type: "UI_UPDATE_STARTED" });
         else if (part.data.stage === "ready") {
+          if (part.data.message === "Paper está listo para ayudarte") {
+            isFollowUpRequestRef.current = false;
+            setActivityMessage(part.data.message);
+            dispatchExperience({ type: "CONVERSATION_COMPLETED" });
+            return;
+          }
           if (isFollowUpRequestRef.current) {
             commitPendingChanges(patchStateRef.current?.revision ?? dataStateRef.current.revision);
           }
@@ -459,7 +465,9 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         }
         renderStartedAtRef.current ??= globalThis.performance.now();
         patchStateRef.current = initial.state;
-        for (const key of Object.keys(part.data.data ?? {})) authoritativeDataKeysRef.current.add(key);
+        // Inline UI data can include temporary values produced by the progressive
+        // frontend fallback. Only data events advance the backend session registry,
+        // so these visual values must not be echoed as session reference keys.
         dataStateRef.current = createDataRegistryPatchState(
           { ...dataStateRef.current.data, ...(part.data.data ?? {}) },
           dataStateRef.current.revision,
@@ -487,10 +495,8 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         }
         renderStartedAtRef.current ??= globalThis.performance.now();
         patchStateRef.current = initial.state;
-        // Inline data included with the initial UI is authoritative too. If its
-        // keys are omitted from the next SessionReference, the backend correctly
-        // rejects an otherwise current follow-up as a revision conflict.
-        for (const key of Object.keys(part.data.data ?? {})) authoritativeDataKeysRef.current.add(key);
+        // Keep inline values available to the renderer without treating temporary
+        // progressive-fallback fields as persisted backend session keys.
         dataStateRef.current = createDataRegistryPatchState(
           { ...dataStateRef.current.data, ...(part.data.data ?? {}) },
           dataStateRef.current.revision,

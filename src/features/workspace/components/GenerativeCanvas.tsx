@@ -250,8 +250,9 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
     const distanceFromBottom = runtime.scrollHeight - runtime.scrollTop - runtime.clientHeight;
     if (distanceFromBottom > 120) return;
 
-    const reducedMotion = typeof window.matchMedia === "function"
-      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = document.documentElement.dataset.a11yMotion === "reduced"
+      || (typeof window.matchMedia === "function"
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     requestAnimationFrame(() => runtime.scrollTo({
       behavior: reducedMotion ? "auto" : "smooth",
       top: runtime.scrollHeight,
@@ -278,7 +279,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
   }, [failure, isRecoveringSnapshot, showReaction]);
 
   return (
-    <section className="canvas" aria-labelledby="canvas-title" data-has-result={Boolean(generatedInterface && !guidanceOnly && !hasBlockingFailure)} data-guidance-only={guidanceOnly || undefined}>
+    <section className="canvas" aria-busy={isProcessing} aria-labelledby="canvas-title" data-has-result={Boolean(generatedInterface && !guidanceOnly && !hasBlockingFailure)} data-guidance-only={guidanceOnly || undefined}>
       <header className="canvas__header">
         <div>
           <p className="canvas__eyebrow">Laboratorio de datos públicos</p>
@@ -304,7 +305,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
         data-status={status}
         aria-busy={!isSettled}
       >
-        {!isProcessing ? <p className="sr-only" role="status">{isHistoricalView ? "Revisión anterior de solo lectura" : guidanceOnly ? "Paper necesita más contexto" : content.title}</p> : null}
+        {!isProcessing ? <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{isHistoricalView ? "Revisión anterior de solo lectura" : guidanceOnly ? "Paper necesita más contexto" : content.title}</p> : null}
         {hasBlockingFailure ? (
           <div ref={failureRef} className="canvas-paper-error" role="alert" tabIndex={-1}>
             <div className="canvas-paper-error__character" aria-hidden="true">
@@ -390,7 +391,12 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
             {status === "ready" && hasBoundData && paperResultIntro ? (
               <PaperResultIntro intro={paperResultIntro} announce={!isHistoricalView} />
             ) : null}
-            <div className="canvas-result__surface" inert={isHistoricalView} aria-label={isHistoricalView ? "Interfaz anterior de solo lectura" : undefined}>
+            <div
+              className="canvas-result__surface"
+              inert={isHistoricalView}
+              role="region"
+              aria-label={isHistoricalView ? "Interfaz anterior de solo lectura" : "Resultado visual de la consulta"}
+            >
               <UIEventProvider key={activeAnalysisId}>
               <UIRenderer
                 data={generatedInterface.data}
@@ -490,6 +496,7 @@ export function GenerativeCanvas({ showRuntimeDiagnostics = false, onShowChat }:
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={processProgress[activeProcessStep]}
+                aria-valuetext={`${content.label}. ${content.detail}`}
               >
                 <span />
               </div>

@@ -59,7 +59,7 @@ export default function HomePage() {
       <PublicNav />
       <OnboardingModal />
 
-      <main className="landing-main">
+      <main className="landing-main" id="main-content" tabIndex={-1}>
         <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-copy">
             <span className="landing-sticker landing-sticker--primary">Datos que sí puedes seguir</span>

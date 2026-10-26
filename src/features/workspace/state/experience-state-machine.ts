@@ -20,6 +20,7 @@ export type ExperienceEvent =
   | { type: "UI_GENERATION_STARTED" }
   | { type: "UI_UPDATE_STARTED" }
   | { type: "UI_COMMITTED" }
+  | { type: "CONVERSATION_COMPLETED" }
   | { type: "ACTION_CONFIRMATION_REQUIRED" }
   | { type: "ACTION_CONFIRMED" }
   | { type: "ACTION_COMPLETED" }
@@ -70,11 +71,11 @@ export function createInitialExperienceState(): ExperienceState {
 
 const allowedEvents: Record<ExperienceStatus, ReadonlySet<ExperienceEvent["type"]>> = {
   empty: new Set(["SUBMIT", "RESTORE_SESSION", "RESET"]),
-  submitting: new Set(["DATA_REQUESTED", "UI_GENERATION_STARTED", "UI_COMMITTED", "PARTIAL_AVAILABLE", "FAIL", "CANCEL", "RESET"]),
-  retrieving_data: new Set(["UI_GENERATION_STARTED", "UI_UPDATE_STARTED", "UI_COMMITTED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
-  generating_ui: new Set(["UI_UPDATE_STARTED", "UI_COMMITTED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
+  submitting: new Set(["DATA_REQUESTED", "UI_GENERATION_STARTED", "UI_COMMITTED", "CONVERSATION_COMPLETED", "PARTIAL_AVAILABLE", "FAIL", "CANCEL", "RESET"]),
+  retrieving_data: new Set(["UI_GENERATION_STARTED", "UI_UPDATE_STARTED", "UI_COMMITTED", "CONVERSATION_COMPLETED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
+  generating_ui: new Set(["UI_UPDATE_STARTED", "UI_COMMITTED", "CONVERSATION_COMPLETED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
   ready: new Set(["SUBMIT", "UI_UPDATE_STARTED", "ACTION_CONFIRMATION_REQUIRED", "FAIL", "CANCEL", "RESTORE_SESSION", "RESET"]),
-  updating: new Set(["DATA_REQUESTED", "UI_COMMITTED", "ACTION_CONFIRMATION_REQUIRED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
+  updating: new Set(["DATA_REQUESTED", "UI_COMMITTED", "CONVERSATION_COMPLETED", "ACTION_CONFIRMATION_REQUIRED", "PARTIAL_AVAILABLE", "REVISION_CONFLICT", "FAIL", "CANCEL", "RESET"]),
   awaiting_confirmation: new Set(["ACTION_CONFIRMED", "CANCEL", "FAIL", "RESET"]),
   executing_action: new Set(["ACTION_COMPLETED", "PARTIAL_AVAILABLE", "FAIL", "RESET"]),
   partial: new Set(["SUBMIT", "UI_UPDATE_STARTED", "UI_COMMITTED", "RESTORE_SESSION", "RESET"]),
@@ -97,6 +98,8 @@ function nextStatus(current: ExperienceState, event: ExperienceEvent): Experienc
     case "ACTION_COMPLETED":
     case "RESTORE_SESSION":
       return "ready";
+    case "CONVERSATION_COMPLETED":
+      return current.hasValidSnapshot ? "ready" : "empty";
     case "ACTION_CONFIRMATION_REQUIRED":
       return "awaiting_confirmation";
     case "ACTION_CONFIRMED":
@@ -140,6 +143,8 @@ function domainsFor(
       return { ...domains, conversation: "active", ui: "updating", dataRegistry: currentData };
     case "UI_COMMITTED":
       return { ...domains, conversation: "active", ui: "stable", dataRegistry: "current" };
+    case "CONVERSATION_COMPLETED":
+      return { ...domains, conversation: "active", ui: hasValidSnapshot ? "stable" : "empty", dataRegistry: hasValidSnapshot ? "current" : "empty" };
     case "ACTION_CONFIRMATION_REQUIRED":
       return { ...domains, conversation: "active", ui: "stable", dataRegistry: "current", action: "awaiting_confirmation" };
     case "ACTION_CONFIRMED":

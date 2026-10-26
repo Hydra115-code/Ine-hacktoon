@@ -53,7 +53,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
   }, [conversationTurns.length, isBusy]);
 
   return (
-    <section className="conversation" aria-labelledby="conversation-title">
+    <section className="conversation" aria-busy={isBusy} aria-labelledby="conversation-title">
       <header className="conversation__header">
         <div>
           <p>Consulta ciudadana con Paper</p>
@@ -70,7 +70,14 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
             />
           </div>
         ) : (
-          <ol ref={listRef} className="conversation__turns" aria-label="Mensajes de esta consulta">
+          <ol
+            ref={listRef}
+            className="conversation__turns"
+            aria-label="Mensajes de esta consulta"
+            aria-live="polite"
+            aria-relevant="additions text"
+            role="log"
+          >
             {conversationTurns.map((turn) => {
               const summary = turn.role === "assistant" ? summarizeAnswer(turn.text) : "";
               const fullAnswer = turn.role === "assistant" ? cleanAnswerText(turn.text) : "";
@@ -118,13 +125,13 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
           </ol>
         )}
         {isBusy ? (
-          <div className="conversation__activity">
+          <div className="conversation__activity" role="status" aria-live="polite" aria-atomic="true">
             <span aria-hidden="true" />
             {activityMessage}
           </div>
         ) : null}
         {isHistoricalView ? (
-          <p className="conversation__historical-note">Estás viendo una versión anterior. Para hacer cambios, vuelve al resultado más reciente o escribe una nueva petición.</p>
+          <p className="conversation__historical-note" role="status">Estás viendo una versión anterior. Para hacer cambios, vuelve al resultado más reciente o escribe una nueva petición.</p>
         ) : displayedInterface && conversationTurns.length > 0 && !guidanceOnly ? (
           <p className="conversation__hint">Puedes pedir cambios como “compáralo por estado” o usar las opciones visibles.</p>
         ) : null}
