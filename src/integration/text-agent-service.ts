@@ -406,6 +406,60 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
         return;
       }
     }
+    if (!isUiInteraction) {
+      const conversationalScope = classifyCivicQuery(agentQuery);
+      if (conversationalScope.allowed && (
+        conversationalScope.category === "greeting"
+        || conversationalScope.category === "capabilities"
+      )) {
+        const answer = createConversationalAnswer(conversationalScope.category, request.query);
+        try {
+          await sessionStore.complete({
+            actorId,
+            sessionId: request.sessionId,
+            correlationId: request.correlationId,
+            interfaceRevision,
+            dataRevision,
+            dataKeys: [...knownDataKeys],
+            dataRegistry: snapshotData,
+            invalidatedKeys: [...invalidatedKeys],
+            ...(currentSpecification ? { specification: currentSpecification } : {}),
+            prompt: request.query,
+            answer,
+          });
+          isSessionCompleted = true;
+          for (const delta of splitText(answer)) yield event({ type: "text-delta", delta });
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: "ready",
+              message: "Paper está listo para ayudarte",
+            }),
+          });
+          yield event({ type: "completed" });
+        } catch (error) {
+          logger.error("No fue posible responder la conversación breve", {
+            correlationId: request.correlationId,
+            errorType: error instanceof Error ? error.name : "unknown",
+          });
+          yield event({
+            type: "error",
+            error: errorPayloadSchema.parse({
+              version: "1",
+              code: "agent_unavailable",
+              message: "Paper no está disponible por el momento",
+              recoverable: true,
+              hasPartialData: Boolean(currentSpecification),
+              correlationId: request.correlationId,
+            }),
+          });
+        } finally {
+          await sessionStore.release(actorId, request.sessionId, request.correlationId);
+        }
+        return;
+      }
+    }
     try {
       runtime = await createRuntime(requestSessionFactory, request.responseMode);
       for await (const source of runtime.orchestrator.stream(agentQuery, {
@@ -764,6 +818,23 @@ function splitText(text: string): string[] {
     chunks.push(text.slice(offset, offset + 2_000));
   }
   return chunks;
+}
+
+function createConversationalAnswer(
+  category: "greeting" | "capabilities",
+  rawQuery: string,
+): string {
+  if (category === "capabilities") {
+    return "Puedo ayudarte a explorar participación, abstención y comparaciones electorales con datos públicos del INE. Dime qué territorio, periodo o grupo quieres revisar.";
+  }
+  const normalized = rawQuery.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase("es-MX");
+  if (/\b(?:gracias|muchas gracias)\b/u.test(normalized)) {
+    return "¡Con gusto! Si quieres, podemos seguir explorando participación, territorio o elecciones.";
+  }
+  if (/\b(?:adios|hasta luego)\b/u.test(normalized)) {
+    return "¡Hasta luego! Cuando quieras volver, aquí estaré para ayudarte a explorar los datos públicos del INE.";
+  }
+  return "¡Hola! Soy Paper. Puedo ayudarte a explorar participación, abstención y comparaciones electorales con datos públicos del INE. ¿Qué te gustaría consultar?";
 }
 
 function roundedDuration(durationMs: number): number {

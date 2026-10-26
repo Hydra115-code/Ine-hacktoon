@@ -86,9 +86,38 @@ function patchCount(events: TextAgentStreamEvent[]): number {
   return events.filter((event) => event.type === "ui-patch").length;
 }
 
+test("un saludo se responde en el chat sin llamar al modelo ni fabricar una vista", async () => {
+  let runtimeCreated = false;
+  const service = createTextAgentService({
+    sessionStore: new AgentSessionStore(),
+    sessionFactory: async () => ({ client: {} as never, user: { id: ACTOR_ID } }),
+    createRuntime: async () => {
+      runtimeCreated = true;
+      throw new Error("El saludo no debe crear el runtime del modelo");
+    },
+  });
+  const request = textAgentRequestSchema.parse({
+    version: "1",
+    sessionId: uuid("95"),
+    correlationId: uuid("96"),
+    provider: "google",
+    responseMode: "complete-ui",
+    query: "hola",
+  });
+  const events: TextAgentStreamEvent[] = [];
+  for await (const event of service(request)) events.push(event);
+  const answer = events.flatMap((event) => event.type === "text-delta" ? [event.delta] : []).join("");
+
+  assert.equal(runtimeCreated, false);
+  assert.match(answer, /Hola.*Paper/u);
+  assert.equal(events.some((event) => event.type === "ui-started" || event.type === "ui-patch" || event.type === "ui-completed"), false);
+  assert.equal(events.some((event) => event.type === "error"), false);
+  assert.equal(events.at(-1)?.type, "completed");
+});
+
 test("las ediciones de vista dentro de una conversación electoral no se bloquean", () => {
   const context = `${RANKING_QUERY}\nNueva solicitud del usuario: `;
-  for (const request of ["ordénalo de menor a mayor", "muéstrame la fuente", "regresa a la vista anterior", "cambia a gráfica de líneas", "quita el mapa"]) {
+  for (const request of ["ordénalo de menor a mayor", "muéstrame la fuente", "regresa a la vista anterior", "recupera la vista anterior", "cambia a gráfica de líneas", "quita el mapa"]) {
     assert.deepEqual(classifyCivicQuery(`${context}${request}`), { allowed: true, category: "ui-transform" }, request);
   }
   assert.deepEqual(classifyCivicQuery(`${context}compara sólo mujeres y hombres`), { allowed: true, category: "civic" });
@@ -168,7 +197,7 @@ test("«muéstrame la fuente» la describe o la vuelve a agregar si se había qu
   assert.match(source.content, /Conteos Censales/u);
 });
 
-test("«regresa a la vista anterior» deshace la última edición, también con SQLite", async () => {
+test("«recupera la vista anterior» deshace la última edición, también con SQLite", async () => {
   const directory = mkdtempSync(path.join(tmpdir(), "ine-ui-edits-"));
   const store = new SqliteSessionStore(path.join(directory, "sessions.sqlite"));
   try {
@@ -177,7 +206,7 @@ test("«regresa a la vista anterior» deshace la última edición, también con 
     const original = await conversation.view();
     await conversation.ask("deja sólo la tabla");
     assert.equal(find(await conversation.view(), (node) => node.type === "visualization"), undefined);
-    const { answer } = await conversation.ask("regresa a la vista anterior");
+    const { answer } = await conversation.ask("recupera la vista anterior");
     assert.match(answer, /Regresé a la vista anterior/u);
     assert.deepEqual(await conversation.view(), original);
   } finally {

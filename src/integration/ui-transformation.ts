@@ -182,7 +182,7 @@ export function transformPersistedUi(options: {
 const CHART_MARK_NAMES: Partial<Record<ChartMark, string>> = { line: "líneas", bar: "barras", area: "área" };
 
 function requestsUndo(request: string): boolean {
-  return /\b(?:regres|vuelv|volv|deshaz|deshac)[a-z]*\b/u.test(request)
+  return /\b(?:regres|vuelv|volv|deshaz|deshac|recuper|restaur)[a-z]*\b/u.test(request)
     && /\b(?:anterior|antes|previa|cambio)\b/u.test(request);
 }
 
