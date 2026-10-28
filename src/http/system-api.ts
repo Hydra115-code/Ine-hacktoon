@@ -59,6 +59,7 @@ export function createSystemApi(options: SystemApiOptions = {}) {
   const localSessionStore = env.AUTH_MODE === "local_sqlite"
     ? new SqliteSessionStore(env.SQLITE_DATABASE_PATH)
     : undefined;
+  if (localSessionStore && env.SESSION_RESET_ON_START) localSessionStore.clear();
   const textAgent = options.textAgent ?? createTextAgentService(
     localSessionStore ? { sessionStore: localSessionStore } : {},
   );

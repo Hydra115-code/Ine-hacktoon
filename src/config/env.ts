@@ -30,6 +30,12 @@ const EnvSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9.-]{1,100}$/, "GEMINI_MODEL contiene caracteres inválidos")
     .default("gemini-3.7-flash"),
   GEMINI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(60_000),
+  GEMINI_PLANNER_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(30_000).default(8_000),
+  GEMINI_ANSWER_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(30_000).default(3_000),
+  GEMINI_EDIT_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(30_000).default(4_000),
+  SESSION_RESET_ON_START: z.enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
   UI_PLANNER_MODE: z.preprocess(
     (value) => value === "" ? undefined : value,
     z.enum(["rules", "local-model", "gemini"]).default("rules"),

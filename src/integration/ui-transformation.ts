@@ -36,6 +36,7 @@ export function transformPersistedUi(options: {
     return { specification: previous, answer: "Regresé a la vista anterior con los mismos datos.", operation: "restore" };
   }
   const chartMark = requestedChartMark(request);
+  const chartFormat = !chartMark && requestsChartFormat(request);
   const removeMap = requestsRemoval(request, /\bmapa(?:s)?\b/u);
   const sortDirection = requestedSortDirection(request);
   const showSource = /\b(?:fuente|origen|procedencia)\b/u.test(request)
@@ -69,6 +70,23 @@ export function transformPersistedUi(options: {
     nextRoot = mapTree(options.specification.root, (node) => convertChartMark(node, chartMark));
     answer = `Cambié la gráfica a ${CHART_MARK_NAMES[chartMark]} con los mismos datos.`;
     operation = "configure";
+  } else if (chartFormat) {
+    if (findFirst(options.specification.root, isVisualEvidence)) {
+      nextRoot = filterTree(options.specification.root, (node) => (
+        isVisualEvidence(node) || isStructuralNode(node) || isSourceNotice(node)
+      ), true);
+      answer = "Dejé la información en formato de gráfica con los mismos datos.";
+      operation = "preserve";
+    } else {
+      if (!findFirst(options.specification.root, (node) => node.type === "table" && tableToVisualization(node) !== undefined)) {
+        return unchanged("Esta vista no tiene datos que se puedan mostrar como gráfica.");
+      }
+      nextRoot = mapTree(options.specification.root, (node) => (
+        node.type === "table" ? tableToVisualization(node) ?? node : node
+      ));
+      answer = "Convertí la tabla en una gráfica de barras con los mismos datos.";
+      operation = "replace";
+    }
   } else if (removeMap) {
     if (!findFirst(options.specification.root, isMapNode)) return unchanged("Esta vista no incluye un mapa; la dejé igual.");
     nextRoot = filterTree(options.specification.root, (node) => !isMapNode(node));
@@ -192,6 +210,28 @@ function requestedChartMark(request: string): ChartMark | undefined {
   const kind = match?.[1] ?? match?.[2];
   if (!kind) return undefined;
   return kind.startsWith("linea") ? "line" : kind.startsWith("barra") ? "bar" : "area";
+}
+
+function requestsChartFormat(request: string): boolean {
+  if (requestsRemoval(request, /\bgrafic[a-z]*\b/u)) return false;
+  return /\b(?:formato|forma|modo|version|vista)\s+(?:de\s+)?grafic[a-z]*\b|\b(?:como|en)\s+(?:una\s+)?grafic[a-z]*\b|\b(?:graficamente|visualmente)\b/u.test(request);
+}
+
+function tableToVisualization(node: Extract<UINode, { type: "table" }>): UINode | undefined {
+  const value = valueColumn(node.columns);
+  const label = node.columns.find((column) => column !== value && (column.format === undefined || column.format === "text"));
+  if (!value || !label) return undefined;
+  return {
+    type: "visualization",
+    ...(node.id ? { id: node.id } : {}),
+    ariaLabel: `Gráfica: ${node.ariaLabel}`.slice(0, 160),
+    mark: "bar",
+    dataBinding: node.dataBinding,
+    encoding: {
+      x: { field: label.field, type: "nominal", label: label.label.slice(0, 80) },
+      y: { field: value.field, type: "quantitative", label: value.label.slice(0, 80) },
+    },
+  };
 }
 
 function requestedSortDirection(request: string): SortDirection | undefined {

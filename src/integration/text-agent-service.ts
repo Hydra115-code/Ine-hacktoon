@@ -28,6 +28,7 @@ import { type SessionStore } from "../application/ports/session-store.js";
 import { SupabaseSessionStore } from "../repositories/supabase-session.repository.js";
 import { classifyCivicQuery } from "../agent/security/civic-scope-policy.js";
 import { transformPersistedUi } from "./ui-transformation.js";
+import { createViewEditInterpreter, type ViewEditInterpreter } from "./view-edit-interpreter.js";
 
 interface TextAgentServiceDependencies {
   createRuntime?: (
@@ -37,6 +38,7 @@ interface TextAgentServiceDependencies {
   sessionFactory?: SessionFactory;
   sessionStore?: SessionStore;
   now?: () => number;
+  viewEditInterpreter?: ViewEditInterpreter | null;
 }
 
 const LOCAL_ONLY_UI_EVENT = /^(?:methodology\.opened|period\.changed|timeline\.period_selected|map\.entity_selected|territory\.selected|ui\.(?:accordion|tab)\.|view\.|table\.(?:filter|page|sort)\.)/u;
@@ -45,6 +47,9 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
   const defaultSessionFactory = dependencies.sessionFactory ?? createAuthenticatedSupabaseSession;
   const createRuntime = dependencies.createRuntime ?? createRuntimeForMode;
   const now = dependencies.now ?? (() => performance.now());
+  const viewEditInterpreter = dependencies.viewEditInterpreter === undefined
+    ? createViewEditInterpreter()
+    : dependencies.viewEditInterpreter ?? undefined;
 
   return async function* streamTextAgent(
     request: TextAgentRequest,
@@ -309,14 +314,19 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
       const previousSpecification = currentSpecification;
       const previousRevision = interfaceRevision;
       try {
-        transformation = scope.allowed && scope.category === "ui-transform"
-          ? transformPersistedUi({
-              specification: previousSpecification,
-              dataRegistry: snapshotData,
-              prompt: request.query,
-              ...(session.state.previousSpecification ? { previousSpecification: session.state.previousSpecification } : {}),
-            })
-          : null;
+        const transformWith = (prompt: string) => transformPersistedUi({
+          specification: previousSpecification,
+          dataRegistry: snapshotData,
+          prompt,
+          ...(session.state.previousSpecification ? { previousSpecification: session.state.previousSpecification } : {}),
+        });
+        const isEdit = scope.allowed && scope.category === "ui-transform";
+        transformation = isEdit ? transformWith(request.query) : null;
+        const mayBeEdit = isEdit || (!scope.allowed && scope.reason === "out-of-scope");
+        if (!transformation && mayBeEdit && viewEditInterpreter) {
+          const canonicalEdit = await viewEditInterpreter.interpret(request.query);
+          if (canonicalEdit) transformation = transformWith(canonicalEdit);
+        }
         if (transformation) {
           patches = createSharedUiPatches(previousSpecification, transformation.specification, previousRevision);
           // Persist only a completely validated transformation. On failure the

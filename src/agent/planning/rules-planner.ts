@@ -1,4 +1,4 @@
-import { CCPC_YEARS } from "../../application/ports/civic-data.js";
+import { CCPC_AGE_GROUPS, CCPC_YEARS } from "../../application/ports/civic-data.js";
 import { ENTITIES } from "../../domain/civic-entities.js";
 import {
   type CompareElectionsOutput,
@@ -19,7 +19,8 @@ import {
   SUPPORTING_TOOL,
   type CivicPlan,
 } from "./civic-plan.js";
-import { type CivicQueryInterpreter } from "./civic-query-interpreter.js";
+import { readLatestRequest, type CivicQueryInterpreter } from "./civic-query-interpreter.js";
+import { type CivicAnswerWriter } from "./gemini-answer-writer.js";
 import {
   PlannerProviderError,
   UiCompositionError,
@@ -40,10 +41,11 @@ const METHODOLOGY_ANSWER = [
 export function createRulesUiPlanner(
   interpreter: CivicQueryInterpreter,
   mode: UiPlannerMode = "rules",
+  answerWriter?: CivicAnswerWriter,
 ): UiPlanner {
   return {
     mode,
-    createSession: (input) => new RulesPlannerSession(interpreter, input),
+    createSession: (input) => new RulesPlannerSession(interpreter, input, answerWriter),
     composeUi: async (input) => composeUi(input),
   };
 }
@@ -55,6 +57,7 @@ class RulesPlannerSession implements PlannerSession {
   constructor(
     private readonly interpreter: CivicQueryInterpreter,
     private readonly input: PlannerSessionInput,
+    private readonly answerWriter?: CivicAnswerWriter,
   ) {}
 
   async next(
@@ -72,7 +75,10 @@ class RulesPlannerSession implements PlannerSession {
       return { kind: "tools", toolCalls };
     }
     if (toolResults.length > 0) this.results = toolResults;
-    return { kind: "answer", text: writeAnswer(this.plan, this.results, Boolean(feedback)) };
+    const verified = writeAnswer(this.plan, this.results, Boolean(feedback));
+    if (!this.answerWriter || feedback) return { kind: "answer", text: verified };
+    const question = readLatestRequest(this.input.query).text;
+    return { kind: "answer", text: await this.answerWriter.rewrite(question, verified, signal) };
   }
 }
 
@@ -92,7 +98,7 @@ function writeAnswer(plan: CivicPlan, results: readonly AgentToolResult[], conse
 function describeSummary(output: GetParticipationSummaryOutput, plan: CivicPlan, conservative: boolean): string {
   if (output.status === "no_data" || !output.totals) return noDataAnswer(output.scope, output.year);
   const totals = output.totals;
-  const place = `${capitalize(where(output.scope))}, en ${output.year}`;
+  const place = `${capitalize(whereFor(output))}, en ${output.year}`;
   if (plan.indicator === "abstention" && !conservative) {
     return `${place}, la abstención fue de ${pct(totals.abstentionPct)}: ${count(totals.didNotVote)} de ${count(totals.classified)} `
       + `registros clasificados no votaron. La participación oficial fue de ${pct(totals.participationPct)}.`;
@@ -111,7 +117,7 @@ function describeSummary(output: GetParticipationSummaryOutput, plan: CivicPlan,
 function describeComparison(output: CompareElectionsOutput, plan: CivicPlan, conservative: boolean): string {
   const withData = output.elections.filter((election) => election.hasData && election.participationPct !== null);
   if (output.status === "no_data" || withData.length === 0) {
-    return `No hay datos de participación ${where(output.scope)} en los años ${output.years.join(", ")} con esos filtros.`;
+    return `No hay datos de participación ${whereFor(output)} en los años ${output.years.join(", ")} con esos filtros.`;
   }
   const missing = output.elections.filter((election) => !election.hasData).map((election) => election.year);
   const first = withData[0]!;
@@ -135,11 +141,11 @@ function describeComparison(output: CompareElectionsOutput, plan: CivicPlan, con
       .sort((left, right) => Math.abs(right[changeField] ?? 0) - Math.abs(left[changeField] ?? 0))[0];
     const value = extreme?.[changeField];
     if (extreme && value !== null && value !== undefined) {
-      return `${capitalize(where(output.scope))}, el mayor cambio de ${label} ocurrió entre ${extreme.baselineYear} y ${extreme.year}: `
+      return `${capitalize(whereFor(output))}, el mayor cambio de ${label} ocurrió entre ${extreme.baselineYear} y ${extreme.year}: `
         + `${value >= 0 ? "subió" : "bajó"} ${num(Math.abs(value))} puntos porcentuales. Serie completa: ${series}.${base}${gaps}`;
     }
   }
-  return `${capitalize(where(output.scope))}, ${label} por elección fue: ${series}.${movement}${base}${gaps}`;
+  return `${capitalize(whereFor(output))}, ${label} por elección fue: ${series}.${movement}${base}${gaps}`;
 }
 
 function describeBreakdown(output: GetParticipationBreakdownOutput, plan: CivicPlan): string {
@@ -159,7 +165,7 @@ function describeBreakdown(output: GetParticipationBreakdownOutput, plan: CivicP
     .map((group) => `${group.group}: ${pct(group[field])} (${count(group.voted)} de ${count(group.classified)})`)
     .join("; ");
   const more = sorted.length > 6 ? ` y ${sorted.length - 6} grupos más en la tabla` : "";
-  return `${label} ${where(output.scope)} en ${output.year}, por ${dimensionLabel(output.dimension)}: ${listed}${more}.`;
+  return `${label} ${whereFor(output, output.dimension)} en ${output.year}, por ${dimensionLabel(output.dimension)}: ${listed}${more}.`;
 }
 
 function describeRecords(output: GetSupportingRecordsOutput): string {
@@ -167,7 +173,7 @@ function describeRecords(output: GetSupportingRecordsOutput): string {
   const shown = output.truncated
     ? `Se muestran ${count(output.records.length)} de ${count(output.totalRecords)} registros`
     : `Hay ${count(output.totalRecords)} registros`;
-  return `${shown} de los conteos censales de participación ${where(output.scope)} en ${output.year}, `
+  return `${shown} de los conteos censales de participación ${whereFor(output)} en ${output.year}, `
     + "cada uno con su lista nominal, votaron, no votaron y su archivo de origen.";
 }
 
@@ -182,7 +188,7 @@ function describeAgeBySex(outputs: readonly GetParticipationBreakdownOutput[]): 
   const topMen = peak(men);
   const topWomen = peak(women);
   if (!topMen || !topWomen) return noDataAnswer(men.scope, men.year);
-  return `Participación oficial por edad y sexo ${where(men.scope)} en ${men.year}: entre los hombres, el grupo con mayor `
+  return `Participación oficial por edad y sexo ${whereFor(men, "grupo_edad", "sexo")} en ${men.year}: entre los hombres, el grupo con mayor `
     + `participación fue ${topMen.group} con ${pct(topMen.participationPct)} (${count(topMen.voted)} de ${count(topMen.classified)}); `
     + `entre las mujeres, ${topWomen.group} con ${pct(topWomen.participationPct)} (${count(topWomen.voted)} de ${count(topWomen.classified)}). `
     + "La tabla muestra todos los grupos de edad.";
@@ -192,6 +198,43 @@ function noDataAnswer(scope: string, year: number): string {
   return `No hay datos de participación ${where(scope)} en ${year} con esos filtros. `
     + "La falta de registros no indica la participación real; prueba con otro año o entidad "
     + `(hay conteos para ${CCPC_YEARS.join(", ")}).`;
+}
+
+type AppliedFilters = GetParticipationSummaryOutput["filters"];
+type Dimension = GetParticipationBreakdownOutput["dimension"];
+
+const SEX_LABELS: Record<string, string> = { hombre: "hombres", mujer: "mujeres", no_binario: "personas no binarias" };
+const SECTION_LABELS: Record<string, string> = { urbana: "urbanas", mixta: "mixtas", rural: "rurales" };
+
+function whereFor(output: { scope: string; filters: AppliedFilters }, ...excluded: Dimension[]): string {
+  const group = audience(output.filters, excluded);
+  return group ? `entre ${group} ${where(output.scope)}` : where(output.scope);
+}
+
+function audience(filters: AppliedFilters, excluded: readonly Dimension[]): string {
+  const sexes = excluded.includes("sexo") ? [] : filters.sexes ?? [];
+  const ages = excluded.includes("grupo_edad") ? [] : filters.ageGroups ?? [];
+  const sections = excluded.includes("tipo_seccion") ? [] : filters.sectionTypes ?? [];
+  if (sexes.length === 0 && ages.length === 0 && sections.length === 0) return "";
+  const who = sexes.length > 0 ? joinWords(sexes.map((sex) => SEX_LABELS[sex] ?? sex)) : "personas";
+  const age = ages.length > 0 ? ` ${ageLabel(ages)}` : "";
+  const section = sections.length > 0 ? ` de secciones ${joinWords(sections.map((type) => SECTION_LABELS[type] ?? type))}` : "";
+  return `${who}${age}${section}`;
+}
+
+function ageLabel(groups: readonly string[]): string {
+  const ordered = CCPC_AGE_GROUPS.filter((group) => groups.includes(group));
+  const first = ordered[0]!;
+  const last = ordered.at(-1)!;
+  const contiguous = CCPC_AGE_GROUPS.indexOf(last) - CCPC_AGE_GROUPS.indexOf(first) === ordered.length - 1;
+  if (!contiguous) return `de los grupos de edad ${joinWords(ordered)}`;
+  const from = first.split("-")[0]!.replace("+", "");
+  if (last === "100+") return `de ${from} años o más`;
+  return `de ${from} a ${last.split("-")[1]} años`;
+}
+
+function joinWords(words: readonly string[]): string {
+  return words.length <= 1 ? words.join("") : `${words.slice(0, -1).join(", ")} y ${words.at(-1)}`;
 }
 
 function where(scope: string): string {

@@ -15,6 +15,7 @@ import { classifyCivicQuery } from "../src/agent/security/civic-scope-policy.js"
 import { AgentSessionStore } from "../src/integration/agent-session-store.js";
 import { createTextAgentService } from "../src/integration/text-agent-service.js";
 import { transformPersistedUi } from "../src/integration/ui-transformation.js";
+import { type ViewEditInterpreter } from "../src/integration/view-edit-interpreter.js";
 import { SqliteSessionStore } from "../src/repositories/sqlite-session.repository.js";
 
 const ACTOR_ID = "10000000-0000-4000-8000-000000000001";
@@ -26,10 +27,11 @@ class Conversation {
   private state: SessionReference | undefined;
   private readonly service;
 
-  constructor(readonly store: SessionStore = new AgentSessionStore()) {
+  constructor(readonly store: SessionStore = new AgentSessionStore(), viewEditInterpreter: ViewEditInterpreter | null = null) {
     this.service = createTextAgentService({
       sessionStore: store,
       sessionFactory: async () => ({ client: {} as never, user: { id: ACTOR_ID } }),
+      viewEditInterpreter,
     });
   }
 
@@ -254,4 +256,71 @@ test("aceptación final: compara, conserva sólo la tabla y recupera fuente y me
     .join(" ");
   assert.match(renderedCopy, /Conteos Censales/u);
   assert.match(renderedCopy, /Metodolog/u);
+});
+
+test("«dámelo en formato gráfica» deja la gráfica y, sin gráfica, convierte la tabla", async () => {
+  const conversation = new Conversation();
+  await conversation.ask("Participación por sexo en Aguascalientes 2024");
+  const { answer } = await conversation.ask("dámelo en formato gráfica");
+  assert.match(answer, /formato de gráfica/u);
+  const chartOnly = await conversation.view();
+  assert.ok(find(chartOnly, (node) => ["visualization", "demographicBreakdown"].includes(node.type)), JSON.stringify(nodes(chartOnly.root).map((node) => node.type)));
+  assert.equal(find(chartOnly, (node) => node.type === "table"), undefined);
+
+  const tableFirst = new Conversation();
+  await tableFirst.ask("Participación por sexo en Aguascalientes 2024");
+  await tableFirst.ask("deja sólo la tabla");
+  const converted = await tableFirst.ask("muéstralo como gráfica");
+  assert.match(converted.answer, /Convertí la tabla en una gráfica/u);
+  const chart = find(await tableFirst.view(), (node) => node.type === "visualization");
+  assert.ok(chart?.type === "visualization");
+  assert.equal(chart.mark, "bar");
+});
+
+test("una edición que las reglas no entienden se interpreta con la lista cerrada de operaciones", async () => {
+  const asked: string[] = [];
+  const interpreter: ViewEditInterpreter = {
+    interpret: async (request) => {
+      asked.push(request);
+      return request.includes("barritas") ? "cambia a gráfica de barras" : undefined;
+    },
+  };
+  const conversation = new Conversation(new AgentSessionStore(), interpreter);
+  await conversation.ask("¿Cómo ha evolucionado la participación en Aguascalientes?");
+  const { answer, events } = await conversation.ask("ponlo bonito en barritas");
+  assert.deepEqual(asked, ["ponlo bonito en barritas"]);
+  assert.match(answer, /barras/u);
+  assert.equal(events.some((event) => event.type === "data-patch"), false);
+  const chart = find(await conversation.view(), (node) => node.type === "visualization");
+  assert.ok(chart?.type === "visualization");
+  assert.equal(chart.mark, "bar");
+
+  await conversation.ask("ordénalo de menor a mayor");
+  assert.equal(asked.length, 1, "las ediciones que entienden las reglas no llaman al intérprete");
+});
+
+test("SESSION_RESET_ON_START: el almacén SQLite se puede vaciar al arrancar", async () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "ine-ui-reset-"));
+  const store = new SqliteSessionStore(path.join(directory, "sessions.sqlite"));
+  try {
+    const conversation = new Conversation(store);
+    await conversation.ask(RANKING_QUERY);
+    store.clear();
+    const correlationId = uuid("95");
+    const begun = await store.begin({ actorId: ACTOR_ID, sessionId: conversation.sessionId, correlationId });
+    assert.ok(begun.success);
+    assert.equal(begun.isContinuation, false);
+    await store.release(ACTOR_ID, conversation.sessionId, correlationId);
+  } finally {
+    store.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("la respuesta dice a qué grupo se refiere la cifra cuando hay filtros de sexo, edad o sección", async () => {
+  const conversation = new Conversation();
+  const { answer } = await conversation.ask("Participación de hombres de 20 a 24 años en Aguascalientes 2024");
+  assert.match(answer, /^Entre hombres de 20 a 24 años en Aguascalientes, en 2024/u);
+  const older = await new Conversation().ask("Participación de adultos mayores de 65 en Aguascalientes 2024");
+  assert.match(older.answer, /de 65 años o más/u);
 });

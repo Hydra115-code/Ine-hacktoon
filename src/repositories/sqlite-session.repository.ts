@@ -151,6 +151,10 @@ export class SqliteSessionStore implements SessionStore {
     return { code: "success" as const, snapshot };
   }
 
+  clear(): void {
+    this.database.exec("DELETE FROM agent_sessions");
+  }
+
   close(): void {
     this.database.close();
   }

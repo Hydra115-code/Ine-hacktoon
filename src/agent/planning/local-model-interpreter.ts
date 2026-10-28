@@ -5,6 +5,7 @@ import { logger } from "../../config/logger.js";
 import { BREAKDOWN_DIMENSIONS } from "../../schemas/civic.schema.js";
 import {
   CIVIC_ANALYSES,
+  CIVIC_FOCUSES,
   CIVIC_INDICATORS,
   CIVIC_PRESENTATIONS,
   CivicPlanSchema,
@@ -91,7 +92,7 @@ export class LocalModelQueryInterpreter implements CivicQueryInterpreter {
   }
 }
 
-function groundedPlan(raw: unknown, text: string): CivicPlan {
+export function groundedPlan(raw: unknown, text: string): CivicPlan {
   const source = typeof raw === "object" && raw !== null && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
   const list = (key: string) => (Array.isArray(source[key]) ? source[key] : []);
   const plan = CivicPlanSchema.parse({
@@ -104,6 +105,8 @@ function groundedPlan(raw: unknown, text: string): CivicPlan {
     sectionTypes: [...new Set(list("sectionTypes"))].sort(),
     ...(typeof source.breakdown === "string" ? { breakdown: source.breakdown } : {}),
     presentation: [...new Set(list("presentation"))],
+    ...(source.includeEvidence === true ? { includeEvidence: true } : {}),
+    ...(typeof source.focus === "string" && (CIVIC_FOCUSES as readonly string[]).includes(source.focus) ? { focus: source.focus } : {}),
     ...(typeof source.clarification === "string" && source.clarification.trim() ? { clarification: source.clarification } : {}),
   });
   const writtenYears = new Set([...text.matchAll(/\b(\d{4})\b/gu)].map((match) => Number(match[1])));

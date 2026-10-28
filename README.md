@@ -161,6 +161,8 @@ GEMINI_MODEL=gemini-3.7-flash
 
 No agregues comillas extra ni espacios alrededor de la clave. Gemini es opcional: si sólo necesitas comprobar instalación y datos, empieza con `rules`.
 
+En modo `gemini`, Gemini interpreta la pregunta, redacta la respuesta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar.
+
 ### 7. Iniciar la API
 
 Desde `back-end/`:
@@ -204,6 +206,10 @@ Después configura e inicia el frontend siguiendo su `README.md`.
 | `LOCAL_MODEL_NAME` | Identificador del modelo local. |
 | `GEMINI_API_KEY` | Clave requerida únicamente en modo `gemini`. |
 | `GEMINI_MODEL` | Modelo usado por Gemini. |
+| `GEMINI_PLANNER_TIMEOUT_MS` | Tiempo máximo para que Gemini planee; después responden las reglas (8000). |
+| `GEMINI_ANSWER_TIMEOUT_MS` | Tiempo máximo para que Gemini redacte; después se usa la respuesta verificada (3000). |
+| `GEMINI_EDIT_TIMEOUT_MS` | Tiempo máximo para que Gemini interprete una edición de la vista (4000). |
+| `SESSION_RESET_ON_START` | Con `local_sqlite`, borra las sesiones guardadas al iniciar la API (`true`). |
 | `AGENT_API_TOKEN` | Token compartido con el frontend. |
 | `AGENT_API_ALLOWED_ORIGINS` | Orígenes permitidos separados por comas. |
 | `ELEVENLABS_API_KEY` | Habilita transcripción en tiempo real. |

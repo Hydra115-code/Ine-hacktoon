@@ -24,7 +24,7 @@ export const rulesQueryInterpreter: CivicQueryInterpreter = {
   interpret: async (query) => interpretCivicQuery(query),
 };
 
-interface RequestContext {
+export interface RequestContext {
   latest: string;
   previous: string[];
   selectedValue?: string;
@@ -130,7 +130,7 @@ const CIVIC_SIGNAL = /\b(?:particip\w*|vot\w*|abstencion\w*|lista nominal|padron
 
 const PREVIOUS_ELECTION = /\b(?:eleccion|elecciones|proceso|conteo) (?:anterior|pasad[ao]|previ[ao])\b|\b(?:la|el) (?:anterior|pasad[ao])\b/u;
 
-const GUIDANCE = "Puedo mostrarte la participación ciudadana de las elecciones federales 2009 a 2024 por entidad, sexo, "
+export const CIVIC_GUIDANCE = "Puedo mostrarte la participación ciudadana de las elecciones federales 2009 a 2024 por entidad, sexo, "
   + "grupo de edad o tipo de sección. Por ejemplo: «¿Cuál fue la participación en Jalisco en 2024?» o "
   + "«Compara la participación de mujeres y hombres en 2018». ¿Qué te gustaría consultar?";
 
@@ -163,7 +163,7 @@ export function readLatestRequest(query: string): { text: string; hasContext: bo
   };
 }
 
-function readRequestContext(query: string): RequestContext {
+export function readRequestContext(query: string): RequestContext {
   const data = readEmbeddedJson(query);
   const intent = typeof data?.intent === "string" ? data.intent : undefined;
   if (intent) {
@@ -450,7 +450,7 @@ function buildPlan(extraction: Extraction): CivicPlan {
     ...(extraction.includeEvidence ? { includeEvidence: true } : {}),
     ...(extraction.focus ? { focus: extraction.focus } : {}),
   };
-  if (!extraction.hasCivicSignal) return { ...base, analysis: "summary", clarification: GUIDANCE };
+  if (!extraction.hasCivicSignal) return { ...base, analysis: "summary", clarification: CIVIC_GUIDANCE };
   if (extraction.unsupportedGranularity) {
     return {
       ...base,

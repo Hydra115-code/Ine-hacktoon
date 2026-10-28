@@ -1,19 +1,28 @@
 import { env } from "../../config/env.js";
 import { logger } from "../../config/logger.js";
-import { GeminiUiGenerator } from "../../ui/generation/gemini-ui-generator.js";
-import { type GeminiModelConfig } from "../model/gemini-api-client.js";
-import { GeminiModel } from "../model/gemini-model.js";
+import { GeminiApiClient, type GeminiModelConfig } from "../model/gemini-api-client.js";
 import { rulesQueryInterpreter } from "./civic-query-interpreter.js";
+import { GeminiAnswerWriter } from "./gemini-answer-writer.js";
+import { GeminiQueryInterpreter } from "./gemini-query-interpreter.js";
 import { LocalModelQueryInterpreter, type LocalModelConfig } from "./local-model-interpreter.js";
 import { PlannerConfigurationError, type UiPlannerMode } from "./planner-result.js";
 import { createRulesUiPlanner } from "./rules-planner.js";
-import { createModelUiPlanner, type UiPlanner } from "./ui-planner.js";
+import { type UiPlanner } from "./ui-planner.js";
+
+export interface GeminiBudget {
+  plannerMs: number;
+  answerMs: number;
+  editMs: number;
+}
 
 export interface PlannerSettings {
   mode: UiPlannerMode;
   gemini?: GeminiModelConfig;
+  geminiBudget?: GeminiBudget;
   localModel?: LocalModelConfig;
 }
+
+const DEFAULT_GEMINI_BUDGET: GeminiBudget = { plannerMs: 8_000, answerMs: 3_000, editMs: 4_000 };
 
 export interface PlannerStatus {
   mode: UiPlannerMode;
@@ -23,6 +32,11 @@ export interface PlannerStatus {
 export function readPlannerSettings(): PlannerSettings {
   return {
     mode: env.UI_PLANNER_MODE,
+    geminiBudget: {
+      plannerMs: env.GEMINI_PLANNER_TIMEOUT_MS,
+      answerMs: env.GEMINI_ANSWER_TIMEOUT_MS,
+      editMs: env.GEMINI_EDIT_TIMEOUT_MS,
+    },
     ...(env.GEMINI_API_URL && env.GEMINI_API_KEY
       ? {
         gemini: {
@@ -50,10 +64,11 @@ export function createUiPlanner(settings: PlannerSettings = readPlannerSettings(
     if (!settings.gemini) {
       throw new PlannerConfigurationError("UI_PLANNER_MODE=gemini requiere GEMINI_API_URL y GEMINI_API_KEY");
     }
-    return createModelUiPlanner(
+    const budget = settings.geminiBudget ?? DEFAULT_GEMINI_BUDGET;
+    return createRulesUiPlanner(
+      new GeminiQueryInterpreter(new GeminiApiClient({ ...settings.gemini, timeoutMs: budget.plannerMs }), budget.plannerMs),
       "gemini",
-      new GeminiModel(settings.gemini),
-      new GeminiUiGenerator(settings.gemini),
+      new GeminiAnswerWriter(new GeminiApiClient({ ...settings.gemini, timeoutMs: budget.answerMs }), budget.answerMs),
     );
   }
   if (settings.mode === "local-model") {
