@@ -161,7 +161,7 @@ GEMINI_MODEL=gemini-3.7-flash
 
 No agregues comillas extra ni espacios alrededor de la clave. Gemini es opcional: si sólo necesitas comprobar instalación y datos, empieza con `rules`.
 
-En modo `gemini`, Gemini interpreta la pregunta, redacta la respuesta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar.
+En modo `gemini`, Gemini interpreta la pregunta, redacta la respuesta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar. Para responder rápido se le pide a Gemini no pensar (`thinkingBudget: 0`); si el modelo no acepta esa opción, se usa la siguiente que sí acepte.
 
 ### 7. Iniciar la API
 

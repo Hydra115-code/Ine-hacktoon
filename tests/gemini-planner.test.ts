@@ -140,18 +140,28 @@ test("el texto del formulario de datos consulta esos datos aunque Gemini propong
   assert.deepEqual([completed.sexes, completed.ageGroups], [["hombre"], ["20-24"]]);
 });
 
-test("la redacción pide pensar lo mínimo y, si el modelo no lo acepta, lo intenta sin esa opción", async () => {
+test("Gemini se pide sin pensar y, si el modelo no lo acepta, se recuerda la opción que sí acepta", async () => {
   const verified = "En Jalisco, en 2024, la participación oficial fue de 61.2 %: 3,914 de 6,395 registros clasificados votaron.";
-  const bodies: Array<Record<string, unknown>> = [];
+  const thinking: unknown[] = [];
   const fetchImplementation = (async (_url: string | URL | Request, init?: RequestInit) => {
-    const body = JSON.parse(String(init?.body)) as { generationConfig?: { thinkingConfig?: unknown } };
-    bodies.push(body);
+    const body = JSON.parse(String(init?.body)) as { generationConfig?: { thinkingConfig?: { thinkingBudget?: number } } };
+    thinking.push(body.generationConfig?.thinkingConfig);
     return body.generationConfig?.thinkingConfig
       ? new Response("{}", { status: 400 })
       : reply("En Jalisco participó el 61.2 % en 2024: votaron 3,914 de 6,395 registros clasificados.");
   }) as typeof fetch;
-  const writer = new GeminiAnswerWriter(new GeminiApiClient(CONFIG, fetchImplementation), 3_000);
-  assert.match(await writer.rewrite("p", verified), /participó/u);
-  assert.match(await writer.rewrite("p", verified), /participó/u);
-  assert.equal(bodies.length, 3, "después del primer rechazo ya no pide la opción");
+  const config = { ...CONFIG, model: "gemini-sin-opciones" };
+  assert.match(await new GeminiAnswerWriter(new GeminiApiClient(config, fetchImplementation), 3_000).rewrite("p", verified), /participó/u);
+  assert.deepEqual(thinking, [{ thinkingBudget: 0 }, { thinkingLevel: "low" }, undefined]);
+
+  assert.match(await new GeminiAnswerWriter(new GeminiApiClient(config, fetchImplementation), 3_000).rewrite("p", verified), /participó/u);
+  assert.equal(thinking.length, 4, "otra solicitud usa directo la opción aceptada");
+
+  const accepted: unknown[] = [];
+  const fast = (async (_url: string | URL | Request, init?: RequestInit) => {
+    accepted.push((JSON.parse(String(init?.body)) as { generationConfig?: { thinkingConfig?: unknown } }).generationConfig?.thinkingConfig);
+    return reply(JSON.stringify(PLAN));
+  }) as typeof fetch;
+  await new GeminiQueryInterpreter(new GeminiApiClient({ ...CONFIG, model: "gemini-rapido" }, fast), 3_000).interpret("partisipacion en jalisko 2024");
+  assert.deepEqual(accepted, [{ thinkingBudget: 0 }]);
 });

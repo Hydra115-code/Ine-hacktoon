@@ -1,6 +1,6 @@
 import { logger } from "../../config/logger.js";
 import { isCivicResponseSafe } from "../security/civic-scope-policy.js";
-import { type GeminiApiClient, GeminiModelError } from "../model/gemini-api-client.js";
+import { type GeminiApiClient } from "../model/gemini-api-client.js";
 import { askGeminiText, geminiRequest } from "../model/gemini-quick-request.js";
 
 export interface CivicAnswerWriter {
@@ -10,8 +10,6 @@ export interface CivicAnswerWriter {
 const MAX_ANSWER_LENGTH = 1_200;
 
 export class GeminiAnswerWriter implements CivicAnswerWriter {
-  private minimalThinkingSupported = true;
-
   constructor(
     private readonly client: GeminiApiClient,
     private readonly timeoutMs: number,
@@ -19,8 +17,10 @@ export class GeminiAnswerWriter implements CivicAnswerWriter {
 
   async rewrite(question: string, verifiedAnswer: string, signal?: AbortSignal): Promise<string> {
     try {
-      const text = await this.ask(
+      const text = await askGeminiText(
+        this.client,
         geminiRequest(WRITER_INSTRUCTION, `Pregunta: ${question.slice(0, 600)}\nRespuesta verificada: ${verifiedAnswer}`, false),
+        this.timeoutMs,
         signal,
       );
       const rewritten = text.replace(/\s+/gu, " ").trim();
@@ -36,23 +36,6 @@ export class GeminiAnswerWriter implements CivicAnswerWriter {
       return verifiedAnswer;
     }
   }
-
-  private async ask(body: Record<string, unknown>, signal?: AbortSignal): Promise<string> {
-    if (this.minimalThinkingSupported) {
-      try {
-        return await askGeminiText(this.client, withMinimalThinking(body), this.timeoutMs, signal);
-      } catch (error) {
-        if (!(error instanceof GeminiModelError) || !/HTTP 400\b/u.test(error.message)) throw error;
-        this.minimalThinkingSupported = false;
-      }
-    }
-    return askGeminiText(this.client, body, this.timeoutMs, signal);
-  }
-}
-
-function withMinimalThinking(body: Record<string, unknown>): Record<string, unknown> {
-  const generationConfig = (body.generationConfig ?? {}) as Record<string, unknown>;
-  return { ...body, generationConfig: { ...generationConfig, thinkingConfig: { thinkingLevel: "minimal" } } };
 }
 
 function numbersIn(text: string): string[] {

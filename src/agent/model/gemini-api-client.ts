@@ -25,6 +25,10 @@ export class GeminiApiClient {
     private readonly instrumentation: Telemetry = telemetry,
   ) {}
 
+  get model(): string {
+    return this.config.model;
+  }
+
   async generateContent(
     body: Record<string, unknown>,
     signal?: AbortSignal,
