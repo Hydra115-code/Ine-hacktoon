@@ -161,7 +161,7 @@ GEMINI_MODEL=gemini-3.7-flash
 
 No agregues comillas extra ni espacios alrededor de la clave. Gemini es opcional: si sólo necesitas comprobar instalación y datos, empieza con `rules`.
 
-En modo `gemini`, Gemini interpreta la pregunta, redacta la respuesta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar. Para responder rápido se le pide a Gemini no pensar (`thinkingBudget: 0`); si el modelo no acepta esa opción, se usa la siguiente que sí acepte.
+En modo `gemini`, Gemini interpreta la pregunta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar. La respuesta escrita es la verificada; si se quiere que Gemini la redacte con otras palabras, se activa con `GEMINI_ANSWER_TIMEOUT_MS` (suma unos segundos por pregunta). Para responder rápido se le pide a Gemini no pensar (`thinkingBudget: 0`); si el modelo no acepta esa opción, se usa la siguiente que sí acepte.
 
 ### 7. Iniciar la API
 
@@ -207,7 +207,7 @@ Después configura e inicia el frontend siguiendo su `README.md`.
 | `GEMINI_API_KEY` | Clave requerida únicamente en modo `gemini`. |
 | `GEMINI_MODEL` | Modelo usado por Gemini. |
 | `GEMINI_PLANNER_TIMEOUT_MS` | Tiempo máximo para que Gemini planee; después responden las reglas (8000). |
-| `GEMINI_ANSWER_TIMEOUT_MS` | Tiempo máximo para que Gemini redacte; después se usa la respuesta verificada (3000). |
+| `GEMINI_ANSWER_TIMEOUT_MS` | `0` (por defecto) usa la respuesta verificada sin Gemini. Con un valor entre 1000 y 30000, Gemini la redacta y, si no termina en ese tiempo, se usa la verificada. |
 | `GEMINI_EDIT_TIMEOUT_MS` | Tiempo máximo para que Gemini interprete una edición de la vista (4000). |
 | `SESSION_RESET_ON_START` | Con `local_sqlite`, borra las sesiones guardadas al iniciar la API (`true`). |
 | `AGENT_API_TOKEN` | Token compartido con el frontend. |

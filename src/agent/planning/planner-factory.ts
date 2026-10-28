@@ -22,7 +22,7 @@ export interface PlannerSettings {
   localModel?: LocalModelConfig;
 }
 
-const DEFAULT_GEMINI_BUDGET: GeminiBudget = { plannerMs: 8_000, answerMs: 3_000, editMs: 4_000 };
+const DEFAULT_GEMINI_BUDGET: GeminiBudget = { plannerMs: 8_000, answerMs: 0, editMs: 4_000 };
 
 export interface PlannerStatus {
   mode: UiPlannerMode;
@@ -68,7 +68,9 @@ export function createUiPlanner(settings: PlannerSettings = readPlannerSettings(
     return createRulesUiPlanner(
       new GeminiQueryInterpreter(new GeminiApiClient({ ...settings.gemini, timeoutMs: budget.plannerMs }), budget.plannerMs),
       "gemini",
-      new GeminiAnswerWriter(new GeminiApiClient({ ...settings.gemini, timeoutMs: budget.answerMs }), budget.answerMs),
+      budget.answerMs > 0
+        ? new GeminiAnswerWriter(new GeminiApiClient({ ...settings.gemini, timeoutMs: budget.answerMs }), budget.answerMs)
+        : undefined,
     );
   }
   if (settings.mode === "local-model") {

@@ -124,6 +124,34 @@ test("UI_PLANNER_MODE=gemini planea con Gemini y arma la interfaz sin pedírsela
   }
 });
 
+test("sin tiempo para redactar, Gemini sólo planea y la respuesta es la verificada", async () => {
+  const gemini = fakeGemini((instruction) => instruction.includes("Convierte la pregunta")
+    ? JSON.stringify({ ...PLAN, entityCodes: ["01"] })
+    : "Texto que no debería pedirse.");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = gemini.fetchImplementation;
+  try {
+    const planner = createUiPlanner({ mode: "gemini", gemini: CONFIG, geminiBudget: { plannerMs: 3_000, answerMs: 0, editMs: 3_000 } });
+    const tools = await CivicMcpClient.connect(crearServidor({ client: {} as never, user: { id: "10000000-0000-4000-8000-000000000001" } }), 5_000);
+    const orchestrator = new AgentOrchestrator(planner, tools, {
+      maxToolCalls: 4,
+      maxReasoningRepairs: 1,
+      currentDate: () => "2026-10-26",
+      permittedToolNames: [...CIVIC_TOOL_NAMES],
+    });
+    const events: AgentStreamEvent[] = [];
+    try {
+      for await (const event of orchestrator.stream("¿Cuál fue la participación en Aguascalientes en 2024?")) events.push(event);
+    } finally {
+      await tools.close();
+    }
+    assert.equal(events.at(-1)?.type, "completed");
+    assert.equal(gemini.calls.length, 1, "sólo la llamada para planear");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("el texto del formulario de datos consulta esos datos aunque Gemini proponga otra cosa", async () => {
   const context = { recentConversation: [{ user: "¿Cómo se calcula la participación?", assistant: "Metodología" }] };
   const form = "Estos son los datos para continuar: estado: Coahuila; grupo de edad: 20–24; sexo: Hombres; año electoral: 2018. "
