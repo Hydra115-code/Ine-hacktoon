@@ -64,4 +64,8 @@
 
 *(La cámara comienza a desenfocarse y se aleja lentamente mientras muestra el logo brillante de la mascota y el proyecto).*
 
-* **Narrador** `(03:00 - 03:20)`: [Nombre de la mascota] no es
+* **Narrador** `(03:00 - 03:20)`: [Nombre de la mascota] no es solo una cara amigable... es la herramienta que revoluciona el acceso a la información electoral: intuitiva, visual y al alcance de todos. Míralo... es un ganador.
+
+*(Aparece en pantalla el logo final del proyecto y del INE-Hackathon).*
+
+* **Cierre** `(03:20 - 03:30)`: *(Música final de cierre / Fade out)*
