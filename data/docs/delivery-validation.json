@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "ccpc-delivery-validation/v1",
+  "verifiedAtUTC": "2026-10-15T05:47:57.215525+00:00",
+  "status": "pass",
+  "node": "v24.14.1",
+  "npm": "11.11.0",
+  "installation": "Fresh isolated copy; no node_modules or full data initially present.",
+  "commands": [
+    {
+      "command": "npm ci --ignore-scripts",
+      "exitCode": 0,
+      "log": "docs/evidence/handoff/01-install.log"
+    },
+    {
+      "command": "npm run ccpc:check",
+      "exitCode": 0,
+      "log": "docs/evidence/handoff/02-check.log"
+    },
+    {
+      "command": "node --check scripts/audit/data03/check_queries.mjs",
+      "exitCode": 0,
+      "log": "docs/evidence/handoff/03-audit-syntax.log"
+    },
+    {
+      "command": "python -X utf8 scripts/audit/data03/independent_queries.py",
+      "exitCode": 0,
+      "log": "docs/evidence/handoff/04-independent-python.log"
+    },
+    {
+      "command": "node scripts/audit/data03/check_queries.mjs",
+      "exitCode": 0,
+      "log": "docs/evidence/handoff/05-independent-engine.log"
+    }
+  ],
+  "tests": {
+    "passed": 114,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sampleExamplesExactBytesEqual": true,
+  "independentQueryChecks": {
+    "passed": 14,
+    "failed": 0,
+    "input": "Previously validated full DATA-02 artifacts copied into the isolated verification directory only.",
+    "fullDatasetSha256": "55c2cabcc9197e768b5c6092d277b77f2aa1bf9e9efa91805a9ffec47eea8df1",
+    "fixtureDatasetSha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1"
+  },
+  "sourceZipDownloadOrFullEtlRepeated": false,
+  "deliveryIncludesRawOrFullData": false,
+  "data01PrivacyStatus": "8/9 closed; privacy reservation preserved."
+}

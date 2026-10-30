@@ -1,0 +1,144 @@
+
+> ine-ccpc-data01-2009-2024@1.0.0 ccpc:check
+> npm run typecheck && npm test && npm run ccpc:validate -- --input data/ccpc/sample/data02/participation.json && npm run ccpc:queries
+
+
+> ine-ccpc-data01-2009-2024@1.0.0 typecheck
+> tsc --noEmit
+
+
+> ine-ccpc-data01-2009-2024@1.0.0 test
+> node --test tests/*.test.ts tests/data/*.test.ts
+
+✔ aggregate before dividing; preserve NS and entity-only dimensions (12.1862ms)
+✔ six years and arrival order produce fixed canonical bytes and manifests (10.5297ms)
+✔ normalization rejects conflicting categories, missing/extra mappings and duplicates (3.6096ms)
+✔ exact sourceRows and NS zero/null cases are retained (1.1044ms)
+✔ sample selector requires validated full data and retains complete selected groups (15.1464ms)
+✔ age and percentage comparisons preserve explicit units and endpoints (0.6932ms)
+✔ publication validates before I/O; a held lock preserves previous bytes (69.5052ms)
+✔ bad CLI/ZIP inputs and full output inside fixture fail without replacing files (14.6414ms)
+✔ directory output targets are rejected without deleting existing content (6.4249ms)
+✔ malformed bytes/JSON and altered manifest fail explicitly (1.0968ms)
+✔ actual reduced fixture validates all six years, 150 groups, units and provenance (59.6082ms)
+✔ balanced SV/NV alterations with regenerated metrics and hashes fail external reference and CLI (347.1495ms)
+✔ compensated sourceRows and coherent source metadata alterations fail (120.8495ms)
+✔ tampered checksums or a changed acquisition date cannot self-certify (99.0082ms)
+✔ civic implementation does not import prohibited financial domains (4.6013ms)
+✔ nominal ratios and official percentages use their distinct stated universes (3.968ms)
+✔ participationRate: required, exact formula and finite values in its own unit (1.4478ms)
+✔ abstentionRate: required, exact formula and finite values in its own unit (0.5854ms)
+✔ unspecifiedRate: required, exact formula and finite values in its own unit (0.4034ms)
+✔ participationPct: required, exact formula and finite values in its own unit (0.4514ms)
+✔ abstentionPct: required, exact formula and finite values in its own unit (0.5961ms)
+✔ unspecifiedPct: required, exact formula and finite values in its own unit (0.4817ms)
+✔ ccpcParticipationPct: required, exact formula and finite values in its own unit (0.3967ms)
+✔ ccpcAbstentionPct: required, exact formula and finite values in its own unit (0.485ms)
+✔ even a small nonzero metric alteration fails exact validation (0.4748ms)
+✔ LN zero and NS-only retain precise null semantics, including zero and 100 percent endpoints (0.5351ms)
+✔ nominalList: negative, fractional, nonnumeric and unsafe integers fail (0.444ms)
+✔ voted: negative, fractional, nonnumeric and unsafe integers fail (0.3869ms)
+✔ didNotVote: negative, fractional, nonnumeric and unsafe integers fail (0.7794ms)
+✔ unspecified: negative, fractional, nonnumeric and unsafe integers fail (0.3973ms)
+✔ all numerators are explicitly bounded, and counts must partition LN (0.527ms)
+✔ six years accepted, undocumented years and historical nonbinary rejected (0.779ms)
+✔ entity codes, source names, age bands and section/sex categories are enforced (0.8565ms)
+✔ unknown lower geography and missing fields are rejected at every model level (3.9101ms)
+✔ sources require exact IDs, official yearly URL/member, hashes and real ISO dates (3.4113ms)
+✔ complete coverage and source counts/rows are conserved (10.2915ms)
+✔ duplicates use dimensions alone; empty arrays and mismatched provenance fail (1.0208ms)
+✔ canonical order is enforced without sorting or repairing parsed data (3.0238ms)
+✔ annual metadata and sourceRows/count subsets cannot contradict themselves (1.6121ms)
+✔ version, scope, years and units cannot drift; safeParse returns an explicit error (0.5475ms)
+✔ streams, verifies and records provenance; a cache hit preserves the download date (110.853ms)
+✔ a local ZIP without provenance is verified without inventing a download date or final URL (17.6124ms)
+✔ HTTP error leaves no ZIP, temporary file or false provenance (9.1436ms)
+✔ HTML response leaves no ZIP, temporary file or false provenance (8.2561ms)
+✔ truncated signature leaves no ZIP, temporary file or false provenance (7.5756ms)
+✔ wrong checksum leaves no ZIP, temporary file or false provenance (9.2312ms)
+✔ an official redirect is followed and recorded (16.5214ms)
+✔ redirects outside official HTTPS domains are rejected before a second request (6.4006ms)
+✔ a modified local ZIP is preserved and not silently replaced (10.4475ms)
+✔ official URL validation rejects lookalikes, HTTP and credentials (0.5273ms)
+✔ CLI arguments reject missing values and unsupported years (1.6534ms)
+✔ all six cuts stream and preserve each original acquisition on a later cache run (60.458ms)
+✔ unknown cached download dates and final URLs stay unknown across verifications (11.0128ms)
+✔ malformed cached metadata fails before network use or provenance replacement (22.457ms)
+✔ duplicate source years, URLs or case-insensitive filenames fail before downloading (2.5881ms)
+✔ CLI validates the entire catalog before a single-year run and documents all six years (306.843ms)
+✔ inspect CLI rejects output at or inside the fixture before reading ZIPs; existing fixture bytes remain unchanged (755.1969ms)
+✔ inspect CLI rejects an unsupported year before accessing archives or changing the fixture (311.7753ms)
+✔ inspect CLI requires all six cuts for sample mode and preserves an existing fixture on rejection (284.2797ms)
+✔ límites oficiales y edades altas preservadas en100+ (7.5376ms)
+✔ NS excluido del denominador; agrega conteos antes de dividir (0.4592ms)
+✔ no aceptar conteos negativos, decimales, vacíos o inconsistentes (1.7624ms)
+✔ sexo y año por diccionario; salida sólo entidad (1.1384ms)
+✔ los seis cortes admiten los códigos comunes; no_binario sólo en 2024 (0.576ms)
+✔ fixture independiente del orden de entrada y sin alterar los conteos (1.4069ms)
+✔ repository loads the real validated six-year fixture with DATA-02 manifest fingerprint (5.0157ms)
+✔ all six year selectors return exactly their real CSV groups, counts and sources (1.5916ms)
+✔ exact conjunction selects a documented 2009 group and preserves all its values (1.1551ms)
+✔ arrays mean OR within a filter and AND across dimensions, without reordering evidence (0.7046ms)
+✔ empty matches retain documented year/entity source context and never fabricate records (0.4792ms)
+✔ source selection matches real provenance, including hashes, member and acquisition date (4.3918ms)
+✔ runtime filters reject unknown dimensions, coercion, empty/duplicate arrays and invalid categories (4.0496ms)
+✔ runtime dataset validation rejects inconsistent metrics, dimensions and provenance (9.8986ms)
+✔ factory and queries never mutate caller input and cannot be changed through returned aliases (9.477ms)
+✔ repeated construction and selections are deterministic and retain canonical evidence order (5.2418ms)
+✔ summary returns a real validated group with both universes, sources and exact contributing rows (11.17ms)
+✔ summary sums selected counts first, then recalculates rates instead of averaging percentages (2.0465ms)
+✔ default year is explicit and never pools different elections (9.7407ms)
+✔ comparison is chronological with separate yearly totals, pp and relative percentages (7.0661ms)
+✔ breakdown entity conserves counts and evidence in deterministic groups (6.2705ms)
+✔ breakdown year conserves counts and evidence in deterministic groups (4.6936ms)
+✔ breakdown sex conserves counts and evidence in deterministic groups (7.0771ms)
+✔ breakdown ageGroup conserves counts and evidence in deterministic groups (6.6174ms)
+✔ breakdown sectionType conserves counts and evidence in deterministic groups (3.1716ms)
+✔ supporting records are the exact counted evidence with a reproducible digest (0.9599ms)
+✔ missing historical sex data remains no_data/null with official source context (2.1129ms)
+✔ a year missing from the loaded dataset has a catalog citation without fabricated source hashes (2.3009ms)
+✔ observed zero LN is different from absent records and preserves null metric semantics (0.8698ms)
+✔ filters, year lists and unsupported breakdown dimensions fail explicitly (2.3571ms)
+✔ outputs and input objects are isolated and all four methods are deterministic (19.7185ms)
+✔ Zod output schemas reject stale metrics, missing sources, invalid changes and unknown fields (4.2165ms)
+✔ production query files have no Gemini, network, filesystem, clock or random dependency (10.7666ms)
+✔ dos perfiles del mismo año no acreditan una comparación entre años (2.7081ms)
+✔ faltantes por las 16 columnas distinguen vacíos, espacios y marcadores; cero es un valor (1.913ms)
+✔ perfiles combinados conservan denominadores y todas las categorías por columna (0.386ms)
+✔ nombres de entidad conservan variantes originales y detectan el cambio histórico de clave 09 (0.4771ms)
+✔ conflictos del mismo año y espacios se reportan sin reescribir nombres (0.3769ms)
+✔ comparación de nombres es determinista y registra ausencia en un año como inventario vacío (0.4821ms)
+✔ UTF-8 sin BOM y LF conserva exactamente los bytes (6.1256ms)
+✔ BOM, carácter multibyte y CRLF partidos entre bloques se validan por flujo (2.258ms)
+✔ cuenta LF, CRLF y CR aislados incluso el CR final y no comparte objetos de resultado (1.6853ms)
+✔ UTF-8 inválido y secuencias incompletas al cierre fallan sin producir verificación (7.1177ms)
+✔ no se declara verificación antes del cierre; flujo vacío es UTF-8 válido sin BOM (1.4456ms)
+✔ fixture reducido: checksums, cobertura, claves únicas y porcentajes verificables (65.6525ms)
+✔ fixture conserva bytes al serializar sus conteos y seleccionar en orden inverso (12.7601ms)
+✔ checklist: perfil completo, nombres entre años y codificación de los 192 CSV (7.3012ms)
+✔ catalog validates exactly all six sources before filtering a selected year (6.6901ms)
+✔ catalog rejects malformed schema, duplicate years or URLs, unsafe names and unofficial sources before filtering (1.3596ms)
+✔ year helpers admit only the six exact numeric cuts or their string selections (0.564ms)
+✔ acquisition matches exact year, URL, checksum and byte length (1.9042ms)
+✔ cache provenance can keep an unknown original date and final URL (0.4077ms)
+✔ malformed dates and metadata fail even if the affected record does not match (1.2615ms)
+✔ provenance validates every allowed year and all dates before a selected acquisition (0.6239ms)
+✔ real ISO dates with explicit timezones are accepted; hashes normalize to lowercase (0.3739ms)
+ℹ tests 114
+ℹ suites 0
+ℹ pass 114
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1577.8913
+
+> ine-ccpc-data01-2009-2024@1.0.0 ccpc:validate
+> node scripts/ccpc/validate-data.ts --input data/ccpc/sample/data02/participation.json
+
+VALIDADO: sample, 150 grupos, años 2009,2012,2015,2018,2021,2024; fórmulas, conteos, procedencia y referencias de origen correctos.
+
+> ine-ccpc-data01-2009-2024@1.0.0 ccpc:queries
+> node scripts/ccpc/query-examples.ts
+
+DATA-03 ejemplos: sample, cuatro consultas, SHA-256 08fafad9b4d8310fe76935395b1e7b32d5751da437852e32258b3d8831199cd2. Salida: [verification-workspace]\docs\data03-examples\sample

@@ -1,0 +1,950 @@
+{
+  "calls": [
+    {
+      "input": {
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ],
+          "year": 2024
+        }
+      },
+      "method": "getParticipationSummary",
+      "result": {
+        "evidence": {
+          "catalogSources": [
+            {
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ],
+          "contributions": [
+            {
+              "records": 1,
+              "sourceId": "2024:01",
+              "sourceRows": 1025
+            }
+          ],
+          "dataset": {
+            "kind": "sample",
+            "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+            "schemaVersion": "ccpc-participation/v1",
+            "validation": "runtime_schema",
+            "years": [
+              2009,
+              2012,
+              2015,
+              2018,
+              2021,
+              2024
+            ]
+          },
+          "matchedRecords": 1,
+          "matchedSourceRows": 1025,
+          "recordsSha256": "770c66b88ef7e0caec27c7fe5835e1fc6148299b4ca24dcd64f7b500b13adf7e",
+          "sources": [
+            {
+              "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+              "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+              "downloadedAt": "2026-10-13T15:16:32.767Z",
+              "entityCode": "01",
+              "id": "2024:01",
+              "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+              "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+              "rawRows": 91826,
+              "totals": {
+                "didNotVote": 441222,
+                "nominalList": 1097171,
+                "unspecified": 29865,
+                "voted": 626084
+              },
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ]
+        },
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ],
+          "year": 2024
+        },
+        "query": "getParticipationSummary",
+        "status": "ok",
+        "totals": {
+          "abstentionPct": 48.946874161524015,
+          "abstentionRate": 0.4894687416152401,
+          "ccpcAbstentionPct": 50.03085361672952,
+          "ccpcParticipationPct": 49.969146383270484,
+          "classified": 14585,
+          "didNotVote": 7297,
+          "nominalList": 14908,
+          "participationPct": 48.88650389052857,
+          "participationRate": 0.48886503890528576,
+          "unspecified": 323,
+          "unspecifiedPct": 2.1666219479474105,
+          "unspecifiedRate": 0.021666219479474107,
+          "voted": 7288
+        },
+        "units": {
+          "ccpcDenominator": "voted+didNotVote",
+          "comparisonUnit": "percentage_point",
+          "nominalDenominator": "nominalList",
+          "percentageUnit": "percent",
+          "rateUnit": "ratio"
+        },
+        "warnings": [
+          {
+            "code": "NS_EXCLUDED_FROM_CCPC",
+            "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+          },
+          {
+            "code": "SAMPLE_DATA",
+            "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ]
+        },
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      "method": "compareElections",
+      "result": {
+        "baselineYear": 2018,
+        "changes": [
+          {
+            "abstentionPercentagePoints": 3.0598437255492428,
+            "baselineYear": 2018,
+            "ccpcAbstentionPercentagePoints": 3.612436031263883,
+            "ccpcParticipationPercentagePoints": -3.6124360312638757,
+            "participationPercentagePoints": -4.0816891448429615,
+            "participationRelativePercent": -7.705924840813916,
+            "year": 2024
+          }
+        ],
+        "elections": [
+          {
+            "summary": {
+              "evidence": {
+                "catalogSources": [
+                  {
+                    "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+                    "year": 2018
+                  }
+                ],
+                "contributions": [
+                  {
+                    "records": 1,
+                    "sourceId": "2018:01",
+                    "sourceRows": 940
+                  }
+                ],
+                "dataset": {
+                  "kind": "sample",
+                  "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+                  "schemaVersion": "ccpc-participation/v1",
+                  "validation": "runtime_schema",
+                  "years": [
+                    2009,
+                    2012,
+                    2015,
+                    2018,
+                    2021,
+                    2024
+                  ]
+                },
+                "matchedRecords": 1,
+                "matchedSourceRows": 940,
+                "recordsSha256": "597b2b1101e72f282f436be0f7b12749663f961972c67bd6222b270a56a7ae85",
+                "sources": [
+                  {
+                    "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+                    "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+                    "downloadedAt": "2026-10-13T15:16:28.824Z",
+                    "entityCode": "01",
+                    "id": "2018:01",
+                    "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_ags.csv",
+                    "memberSha256": "00b0591bad9e924f1de41dc85e20d450c6fd97133bd6af2bdf34dad6c84f384a",
+                    "rawRows": 82051,
+                    "totals": {
+                      "didNotVote": 391032,
+                      "nominalList": 943459,
+                      "unspecified": 13434,
+                      "voted": 538993
+                    },
+                    "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+                    "year": 2018
+                  }
+                ]
+              },
+              "filters": {
+                "ageGroups": [
+                  "18-19"
+                ],
+                "entityCodes": [
+                  "01"
+                ],
+                "sectionTypes": [
+                  "urbana"
+                ],
+                "sexes": [
+                  "hombre"
+                ],
+                "year": 2018
+              },
+              "query": "getParticipationSummary",
+              "status": "ok",
+              "totals": {
+                "abstentionPct": 45.88703043597477,
+                "abstentionRate": 0.45887030435974774,
+                "ccpcAbstentionPct": 46.41841758546564,
+                "ccpcParticipationPct": 53.58158241453436,
+                "classified": 14421,
+                "didNotVote": 6694,
+                "nominalList": 14588,
+                "participationPct": 52.968193035371534,
+                "participationRate": 0.5296819303537154,
+                "unspecified": 167,
+                "unspecifiedPct": 1.144776528653688,
+                "unspecifiedRate": 0.01144776528653688,
+                "voted": 7727
+              },
+              "units": {
+                "ccpcDenominator": "voted+didNotVote",
+                "comparisonUnit": "percentage_point",
+                "nominalDenominator": "nominalList",
+                "percentageUnit": "percent",
+                "rateUnit": "ratio"
+              },
+              "warnings": [
+                {
+                  "code": "NS_EXCLUDED_FROM_CCPC",
+                  "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+                },
+                {
+                  "code": "SAMPLE_DATA",
+                  "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+                }
+              ]
+            },
+            "year": 2018
+          },
+          {
+            "summary": {
+              "evidence": {
+                "catalogSources": [
+                  {
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ],
+                "contributions": [
+                  {
+                    "records": 1,
+                    "sourceId": "2024:01",
+                    "sourceRows": 1025
+                  }
+                ],
+                "dataset": {
+                  "kind": "sample",
+                  "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+                  "schemaVersion": "ccpc-participation/v1",
+                  "validation": "runtime_schema",
+                  "years": [
+                    2009,
+                    2012,
+                    2015,
+                    2018,
+                    2021,
+                    2024
+                  ]
+                },
+                "matchedRecords": 1,
+                "matchedSourceRows": 1025,
+                "recordsSha256": "770c66b88ef7e0caec27c7fe5835e1fc6148299b4ca24dcd64f7b500b13adf7e",
+                "sources": [
+                  {
+                    "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+                    "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+                    "downloadedAt": "2026-10-13T15:16:32.767Z",
+                    "entityCode": "01",
+                    "id": "2024:01",
+                    "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+                    "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+                    "rawRows": 91826,
+                    "totals": {
+                      "didNotVote": 441222,
+                      "nominalList": 1097171,
+                      "unspecified": 29865,
+                      "voted": 626084
+                    },
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ]
+              },
+              "filters": {
+                "ageGroups": [
+                  "18-19"
+                ],
+                "entityCodes": [
+                  "01"
+                ],
+                "sectionTypes": [
+                  "urbana"
+                ],
+                "sexes": [
+                  "hombre"
+                ],
+                "year": 2024
+              },
+              "query": "getParticipationSummary",
+              "status": "ok",
+              "totals": {
+                "abstentionPct": 48.946874161524015,
+                "abstentionRate": 0.4894687416152401,
+                "ccpcAbstentionPct": 50.03085361672952,
+                "ccpcParticipationPct": 49.969146383270484,
+                "classified": 14585,
+                "didNotVote": 7297,
+                "nominalList": 14908,
+                "participationPct": 48.88650389052857,
+                "participationRate": 0.48886503890528576,
+                "unspecified": 323,
+                "unspecifiedPct": 2.1666219479474105,
+                "unspecifiedRate": 0.021666219479474107,
+                "voted": 7288
+              },
+              "units": {
+                "ccpcDenominator": "voted+didNotVote",
+                "comparisonUnit": "percentage_point",
+                "nominalDenominator": "nominalList",
+                "percentageUnit": "percent",
+                "rateUnit": "ratio"
+              },
+              "warnings": [
+                {
+                  "code": "NS_EXCLUDED_FROM_CCPC",
+                  "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+                },
+                {
+                  "code": "SAMPLE_DATA",
+                  "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+                }
+              ]
+            },
+            "year": 2024
+          }
+        ],
+        "evidence": {
+          "catalogSources": [
+            {
+              "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+              "year": 2018
+            },
+            {
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ],
+          "contributions": [
+            {
+              "records": 1,
+              "sourceId": "2018:01",
+              "sourceRows": 940
+            },
+            {
+              "records": 1,
+              "sourceId": "2024:01",
+              "sourceRows": 1025
+            }
+          ],
+          "dataset": {
+            "kind": "sample",
+            "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+            "schemaVersion": "ccpc-participation/v1",
+            "validation": "runtime_schema",
+            "years": [
+              2009,
+              2012,
+              2015,
+              2018,
+              2021,
+              2024
+            ]
+          },
+          "matchedRecords": 2,
+          "matchedSourceRows": 1965,
+          "recordsSha256": "00014a4f4254595655cf3524271a57e3e9280c33a4fd4716282bdb9de17deb45",
+          "sources": [
+            {
+              "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+              "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+              "downloadedAt": "2026-10-13T15:16:28.824Z",
+              "entityCode": "01",
+              "id": "2018:01",
+              "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_ags.csv",
+              "memberSha256": "00b0591bad9e924f1de41dc85e20d450c6fd97133bd6af2bdf34dad6c84f384a",
+              "rawRows": 82051,
+              "totals": {
+                "didNotVote": 391032,
+                "nominalList": 943459,
+                "unspecified": 13434,
+                "voted": 538993
+              },
+              "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+              "year": 2018
+            },
+            {
+              "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+              "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+              "downloadedAt": "2026-10-13T15:16:32.767Z",
+              "entityCode": "01",
+              "id": "2024:01",
+              "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+              "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+              "rawRows": 91826,
+              "totals": {
+                "didNotVote": 441222,
+                "nominalList": 1097171,
+                "unspecified": 29865,
+                "voted": 626084
+              },
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ]
+        },
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ]
+        },
+        "query": "compareElections",
+        "status": "ok",
+        "units": {
+          "ccpcDenominator": "voted+didNotVote",
+          "comparisonUnit": "percentage_point",
+          "nominalDenominator": "nominalList",
+          "percentageUnit": "percent",
+          "rateUnit": "ratio"
+        },
+        "warnings": [
+          {
+            "code": "CARTOGRAPHIC_FRAMES_DIFFER",
+            "message": "Los ZIP 2009–2021 describen marcos DERFE 2021 y el de 2024 DERFE 2023; entidad no acredita equivalencia de distrito o sección."
+          },
+          {
+            "code": "ELECTIONS_NOT_A_PANEL",
+            "message": "Cada elección tiene su propio universo y contexto; los conteos no representan un panel de las mismas personas ni prueban causas."
+          },
+          {
+            "code": "NS_EXCLUDED_FROM_CCPC",
+            "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+          },
+          {
+            "code": "SAMPLE_DATA",
+            "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+          },
+          {
+            "code": "SECTION_TYPES_MAY_CHANGE",
+            "message": "La clasificación urbana/mixta/rural procede de marcos distintos; el filtro no garantiza las mismas secciones a través del tiempo."
+          }
+        ],
+        "years": [
+          2018,
+          2024
+        ]
+      }
+    },
+    {
+      "input": {
+        "dimension": "sex",
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "year": 2024
+        }
+      },
+      "method": "getParticipationBreakdown",
+      "result": {
+        "dimension": "sex",
+        "evidence": {
+          "catalogSources": [
+            {
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ],
+          "contributions": [
+            {
+              "records": 6,
+              "sourceId": "2024:01",
+              "sourceRows": 2637
+            }
+          ],
+          "dataset": {
+            "kind": "sample",
+            "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+            "schemaVersion": "ccpc-participation/v1",
+            "validation": "runtime_schema",
+            "years": [
+              2009,
+              2012,
+              2015,
+              2018,
+              2021,
+              2024
+            ]
+          },
+          "matchedRecords": 6,
+          "matchedSourceRows": 2637,
+          "recordsSha256": "caa0902a281fcead09795c607408c289f7b12b9f36e15dfcff5132820159d6d1",
+          "sources": [
+            {
+              "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+              "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+              "downloadedAt": "2026-10-13T15:16:32.767Z",
+              "entityCode": "01",
+              "id": "2024:01",
+              "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+              "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+              "rawRows": 91826,
+              "totals": {
+                "didNotVote": 441222,
+                "nominalList": 1097171,
+                "unspecified": 29865,
+                "voted": 626084
+              },
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ]
+        },
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "year": 2024
+        },
+        "groups": [
+          {
+            "label": "hombre",
+            "summary": {
+              "evidence": {
+                "catalogSources": [
+                  {
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ],
+                "contributions": [
+                  {
+                    "records": 3,
+                    "sourceId": "2024:01",
+                    "sourceRows": 1318
+                  }
+                ],
+                "dataset": {
+                  "kind": "sample",
+                  "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+                  "schemaVersion": "ccpc-participation/v1",
+                  "validation": "runtime_schema",
+                  "years": [
+                    2009,
+                    2012,
+                    2015,
+                    2018,
+                    2021,
+                    2024
+                  ]
+                },
+                "matchedRecords": 3,
+                "matchedSourceRows": 1318,
+                "recordsSha256": "2eafd1141254ad316bce59e1701301daf5897e42bdd8410b7d8dfa0404e1a605",
+                "sources": [
+                  {
+                    "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+                    "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+                    "downloadedAt": "2026-10-13T15:16:32.767Z",
+                    "entityCode": "01",
+                    "id": "2024:01",
+                    "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+                    "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+                    "rawRows": 91826,
+                    "totals": {
+                      "didNotVote": 441222,
+                      "nominalList": 1097171,
+                      "unspecified": 29865,
+                      "voted": 626084
+                    },
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ]
+              },
+              "filters": {
+                "ageGroups": [
+                  "18-19"
+                ],
+                "entityCodes": [
+                  "01"
+                ],
+                "sexes": [
+                  "hombre"
+                ],
+                "year": 2024
+              },
+              "query": "getParticipationSummary",
+              "status": "ok",
+              "totals": {
+                "abstentionPct": 47.93947754116734,
+                "abstentionRate": 0.4793947754116734,
+                "ccpcAbstentionPct": 49.28647402942741,
+                "ccpcParticipationPct": 50.71352597057259,
+                "classified": 22564,
+                "didNotVote": 11121,
+                "nominalList": 23198,
+                "participationPct": 49.327528235192695,
+                "participationRate": 0.4932752823519269,
+                "unspecified": 634,
+                "unspecifiedPct": 2.732994223639969,
+                "unspecifiedRate": 0.02732994223639969,
+                "voted": 11443
+              },
+              "units": {
+                "ccpcDenominator": "voted+didNotVote",
+                "comparisonUnit": "percentage_point",
+                "nominalDenominator": "nominalList",
+                "percentageUnit": "percent",
+                "rateUnit": "ratio"
+              },
+              "warnings": [
+                {
+                  "code": "NS_EXCLUDED_FROM_CCPC",
+                  "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+                },
+                {
+                  "code": "SAMPLE_DATA",
+                  "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+                }
+              ]
+            },
+            "value": "hombre"
+          },
+          {
+            "label": "mujer",
+            "summary": {
+              "evidence": {
+                "catalogSources": [
+                  {
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ],
+                "contributions": [
+                  {
+                    "records": 3,
+                    "sourceId": "2024:01",
+                    "sourceRows": 1319
+                  }
+                ],
+                "dataset": {
+                  "kind": "sample",
+                  "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+                  "schemaVersion": "ccpc-participation/v1",
+                  "validation": "runtime_schema",
+                  "years": [
+                    2009,
+                    2012,
+                    2015,
+                    2018,
+                    2021,
+                    2024
+                  ]
+                },
+                "matchedRecords": 3,
+                "matchedSourceRows": 1319,
+                "recordsSha256": "31e0f78418736a93121bfc6c58534690294695e377dd6f9096d608d205663e48",
+                "sources": [
+                  {
+                    "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+                    "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+                    "downloadedAt": "2026-10-13T15:16:32.767Z",
+                    "entityCode": "01",
+                    "id": "2024:01",
+                    "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+                    "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+                    "rawRows": 91826,
+                    "totals": {
+                      "didNotVote": 441222,
+                      "nominalList": 1097171,
+                      "unspecified": 29865,
+                      "voted": 626084
+                    },
+                    "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+                    "year": 2024
+                  }
+                ]
+              },
+              "filters": {
+                "ageGroups": [
+                  "18-19"
+                ],
+                "entityCodes": [
+                  "01"
+                ],
+                "sexes": [
+                  "mujer"
+                ],
+                "year": 2024
+              },
+              "query": "getParticipationSummary",
+              "status": "ok",
+              "totals": {
+                "abstentionPct": 41.136488369147635,
+                "abstentionRate": 0.41136488369147634,
+                "ccpcAbstentionPct": 42.28616065616456,
+                "ccpcParticipationPct": 57.71383934383544,
+                "classified": 23043,
+                "didNotVote": 9744,
+                "nominalList": 23687,
+                "participationPct": 56.144720732891464,
+                "participationRate": 0.5614472073289146,
+                "unspecified": 644,
+                "unspecifiedPct": 2.718790897960907,
+                "unspecifiedRate": 0.027187908979609068,
+                "voted": 13299
+              },
+              "units": {
+                "ccpcDenominator": "voted+didNotVote",
+                "comparisonUnit": "percentage_point",
+                "nominalDenominator": "nominalList",
+                "percentageUnit": "percent",
+                "rateUnit": "ratio"
+              },
+              "warnings": [
+                {
+                  "code": "NS_EXCLUDED_FROM_CCPC",
+                  "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+                },
+                {
+                  "code": "SAMPLE_DATA",
+                  "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+                }
+              ]
+            },
+            "value": "mujer"
+          }
+        ],
+        "query": "getParticipationBreakdown",
+        "status": "ok",
+        "units": {
+          "ccpcDenominator": "voted+didNotVote",
+          "comparisonUnit": "percentage_point",
+          "nominalDenominator": "nominalList",
+          "percentageUnit": "percent",
+          "rateUnit": "ratio"
+        },
+        "warnings": [
+          {
+            "code": "NS_EXCLUDED_FROM_CCPC",
+            "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+          },
+          {
+            "code": "SAMPLE_DATA",
+            "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ],
+          "year": 2024
+        }
+      },
+      "method": "getSupportingRecords",
+      "result": {
+        "evidence": {
+          "catalogSources": [
+            {
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ],
+          "contributions": [
+            {
+              "records": 1,
+              "sourceId": "2024:01",
+              "sourceRows": 1025
+            }
+          ],
+          "dataset": {
+            "kind": "sample",
+            "recordsSha256": "dfeefe96d17e7a296fe5f41a793341c43299d5a5c311cfac62e214bbf301712b",
+            "schemaVersion": "ccpc-participation/v1",
+            "validation": "runtime_schema",
+            "years": [
+              2009,
+              2012,
+              2015,
+              2018,
+              2021,
+              2024
+            ]
+          },
+          "matchedRecords": 1,
+          "matchedSourceRows": 1025,
+          "recordsSha256": "770c66b88ef7e0caec27c7fe5835e1fc6148299b4ca24dcd64f7b500b13adf7e",
+          "sources": [
+            {
+              "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+              "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+              "downloadedAt": "2026-10-13T15:16:32.767Z",
+              "entityCode": "01",
+              "id": "2024:01",
+              "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+              "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+              "rawRows": 91826,
+              "totals": {
+                "didNotVote": 441222,
+                "nominalList": 1097171,
+                "unspecified": 29865,
+                "voted": 626084
+              },
+              "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+              "year": 2024
+            }
+          ]
+        },
+        "filters": {
+          "ageGroups": [
+            "18-19"
+          ],
+          "entityCodes": [
+            "01"
+          ],
+          "sectionTypes": [
+            "urbana"
+          ],
+          "sexes": [
+            "hombre"
+          ],
+          "year": 2024
+        },
+        "query": "getSupportingRecords",
+        "records": [
+          {
+            "abstentionPct": 48.946874161524015,
+            "abstentionRate": 0.4894687416152401,
+            "ageGroup": "18-19",
+            "ccpcAbstentionPct": 50.03085361672952,
+            "ccpcParticipationPct": 49.969146383270484,
+            "classified": 14585,
+            "didNotVote": 7297,
+            "entityCode": "01",
+            "entityName": "AGUASCALIENTES",
+            "nominalList": 14908,
+            "participationPct": 48.88650389052857,
+            "participationRate": 0.48886503890528576,
+            "sectionType": "urbana",
+            "sex": "hombre",
+            "sourceId": "2024:01",
+            "sourceRows": 1025,
+            "unspecified": 323,
+            "unspecifiedPct": 2.1666219479474105,
+            "unspecifiedRate": 0.021666219479474107,
+            "voted": 7288,
+            "year": 2024
+          }
+        ],
+        "status": "ok",
+        "units": {
+          "ccpcDenominator": "voted+didNotVote",
+          "comparisonUnit": "percentage_point",
+          "nominalDenominator": "nominalList",
+          "percentageUnit": "percent",
+          "rateUnit": "ratio"
+        },
+        "warnings": [
+          {
+            "code": "NS_EXCLUDED_FROM_CCPC",
+            "message": "NS se conserva separado de NV. Los porcentajes nominales usan LN y los oficiales CCPC usan SV+NV."
+          },
+          {
+            "code": "SAMPLE_DATA",
+            "message": "Muestra reducida de grupos completos; sus sumas no representan el total estatal o nacional."
+          }
+        ]
+      }
+    }
+  ],
+  "datasetKind": "sample",
+  "datasetSha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+  "schemaVersion": "ccpc-query-examples/v1"
+}

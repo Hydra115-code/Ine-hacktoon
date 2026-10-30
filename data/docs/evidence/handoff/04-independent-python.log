@@ -1,0 +1,44 @@
+{
+  "output": "C:\\Users\\david\\Documents\\Codex\\2026-10-12\\referenced-chatgpt-conversation-this-is-an\\work\\handoff\\cleanroom\\84981463cf7c44ea932963ca4f764ea5\\data\\ccpc\\processed\\audit-data03\\expected-results.json",
+  "sha256": "b948d2c07aebcecd1ae5a8247e5edae5e30c9e2d24832a4a5244a6fd9cf96566",
+  "full": {
+    "path": "data/ccpc/processed/data02/participation.json",
+    "sha256": "55c2cabcc9197e768b5c6092d277b77f2aa1bf9e9efa91805a9ffec47eea8df1",
+    "manifestSha256": "b8f5f8e2cf1a69acb6e43b37c7223d0fd5aab002cf18ce95d902520d8a80f782",
+    "kind": "full",
+    "recordCount": 20755,
+    "sourceCount": 192,
+    "rawRowCount": 54872712,
+    "sourceAnchorsSha256": "24b8f676d2a8ed7a05d32c1abdfcfc277f38edfc47c42e86220efc711b4fcdec"
+  },
+  "fixture": {
+    "path": "data/ccpc/sample/data02/participation.json",
+    "sha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+    "manifestSha256": "b354fc14e86b4fa8f41c5a71d3b075b810af9214ed39aa0bba3c0f865dcbfa75",
+    "kind": "sample",
+    "recordCount": 150,
+    "sourceCount": 10,
+    "rawRowCount": 2453655,
+    "sourceAnchorsSha256": "24b8f676d2a8ed7a05d32c1abdfcfc277f38edfc47c42e86220efc711b4fcdec"
+  },
+  "national2024": {
+    "nominalList": 98330348,
+    "voted": 54899228,
+    "didNotVote": 37105466,
+    "unspecified": 6325654
+  },
+  "colima2024": {
+    "nominalList": 584921,
+    "voted": 321763,
+    "didNotVote": 248259,
+    "unspecified": 14899
+  },
+  "comparison": {
+    "baselineYear": 2018,
+    "targetYear": 2024,
+    "participationDifferencePercentagePoints": -2.272347980101898,
+    "ccpcParticipationDifferencePercentagePoints": -2.6950739698802693,
+    "relativeParticipationChangeRatio": -0.039108445491770144,
+    "relativeParticipationChangePercent": -3.9108445491770145
+  }
+}

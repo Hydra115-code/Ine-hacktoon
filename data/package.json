@@ -1,0 +1,31 @@
+{
+  "name": "ine-ccpc-data01-2009-2024",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || >=23.6.0"
+  },
+  "scripts": {
+    "ccpc:download": "node scripts/ccpc/download-data.ts",
+    "ccpc:inspect": "node scripts/ccpc/inspect-data.ts",
+    "ccpc:normalize": "node scripts/ccpc/normalize-data.ts",
+    "ccpc:validate": "node scripts/ccpc/validate-data.ts",
+    "ccpc:pipeline": "npm run ccpc:normalize -- --year all --sample && npm run ccpc:validate",
+    "ccpc:queries": "node scripts/ccpc/query-examples.ts",
+    "test": "node --test tests/*.test.ts tests/data/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "ccpc:check": "npm run typecheck && npm test && npm run ccpc:validate -- --input data/ccpc/sample/data02/participation.json && npm run ccpc:queries",
+    "ccpc:verify-delivery": "node scripts/ccpc/verify-delivery.ts"
+  },
+  "dependencies": {
+    "csv-parse": "7.0.3",
+    "yauzl": "3.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/yauzl": "^2.10.0",
+    "typescript": "^5.9.0"
+  }
+}

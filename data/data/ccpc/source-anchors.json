@@ -1,0 +1,3271 @@
+{
+  "aggregateCsvSha256": "fc080268b7e32a932f738b05b59d4fc86897051e3e0e4664d31209901de6f490",
+  "fixtureCsvSha256": "e8319aa4f5577a3de5e768df04775812a9f71427d1e2fdfac03a10902484c2e9",
+  "schemaVersion": "ccpc-source-anchors/v1",
+  "sources": [
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "01",
+      "id": "2009:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_ags.csv",
+      "memberSha256": "e54b6c8a6071f31f4d62b0db27c7df8df8bf3ae4e74ef183ee32deb3975d7583",
+      "rawRows": 77391,
+      "totals": {
+        "didNotVote": 404607,
+        "nominalList": 773430,
+        "unspecified": 77338,
+        "voted": 291485
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "02",
+      "id": "2009:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_bc.csv",
+      "memberSha256": "62d8490d931d90fcd310679a5168a132ffdda8af1294b93908d1c01149b2dd9c",
+      "rawRows": 201728,
+      "totals": {
+        "didNotVote": 1516824,
+        "nominalList": 2273180,
+        "unspecified": 94522,
+        "voted": 661834
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "03",
+      "id": "2009:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_bcs.csv",
+      "memberSha256": "9f3c073dd08474c78cdaa773450d84c5083f579b96330a924d10f70d7fc0e55e",
+      "rawRows": 48740,
+      "totals": {
+        "didNotVote": 254908,
+        "nominalList": 392257,
+        "unspecified": 11674,
+        "voted": 125675
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "04",
+      "id": "2009:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_camp.csv",
+      "memberSha256": "530641277206ca57228aed5a20ac532f0d33457ee774ba0405531adeb0a7821c",
+      "rawRows": 64436,
+      "totals": {
+        "didNotVote": 200205,
+        "nominalList": 533813,
+        "unspecified": 6311,
+        "voted": 327297
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "05",
+      "id": "2009:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_coah.csv",
+      "memberSha256": "5dd72c39ba5e006795faf94096d184d6dab68a76a13bfd87536aeee6b3683ed8",
+      "rawRows": 204759,
+      "totals": {
+        "didNotVote": 1023516,
+        "nominalList": 1850063,
+        "unspecified": 21482,
+        "voted": 805065
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "06",
+      "id": "2009:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_col.csv",
+      "memberSha256": "215d39290a79df1ef32c5cdefe4ae6436389bc54acbe3536966fb69325f0bb1f",
+      "rawRows": 46214,
+      "totals": {
+        "didNotVote": 189881,
+        "nominalList": 452880,
+        "unspecified": 3485,
+        "voted": 259514
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "07",
+      "id": "2009:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_chis.csv",
+      "memberSha256": "8b66ff7f8908dec2b8b569f05d248ccab3dccd53eec7408829b8318c40d5c1f6",
+      "rawRows": 267825,
+      "totals": {
+        "didNotVote": 1694971,
+        "nominalList": 2854953,
+        "unspecified": 77400,
+        "voted": 1082582
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "08",
+      "id": "2009:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_chih.csv",
+      "memberSha256": "1685511d11bd0f464118f79f22203802d9fc4553e77d2245fcd948f710c2e250",
+      "rawRows": 366917,
+      "totals": {
+        "didNotVote": 1665271,
+        "nominalList": 2573727,
+        "unspecified": 136278,
+        "voted": 772178
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "09",
+      "id": "2009:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_cdmx.csv",
+      "memberSha256": "b08ee91405accd1c91d3274866ca806a5025039afbfdd0f84112c4f3ea0ebc7f",
+      "rawRows": 801738,
+      "totals": {
+        "didNotVote": 4304608,
+        "nominalList": 7320164,
+        "unspecified": 61243,
+        "voted": 2954313
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "10",
+      "id": "2009:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_dgo.csv",
+      "memberSha256": "cd1587ab013eefe5a94960a6a67f52927adb14718a1c5e09fc3f0d76775fbcc4",
+      "rawRows": 174179,
+      "totals": {
+        "didNotVote": 669090,
+        "nominalList": 1145172,
+        "unspecified": 8458,
+        "voted": 467624
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "11",
+      "id": "2009:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_gto.csv",
+      "memberSha256": "6301aefe1124195dbb94e9d4eba8fbc82c1aa12be105bf355fa73ae7b2178021",
+      "rawRows": 417088,
+      "totals": {
+        "didNotVote": 1886766,
+        "nominalList": 3746664,
+        "unspecified": 187309,
+        "voted": 1672589
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "12",
+      "id": "2009:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_gro.csv",
+      "memberSha256": "3ff9610ca9a0f2d86f6b8f8085a86d16a86f8e2b92ee8cd9784b5043b033eb0c",
+      "rawRows": 349163,
+      "totals": {
+        "didNotVote": 1527144,
+        "nominalList": 2309598,
+        "unspecified": 66459,
+        "voted": 715995
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "13",
+      "id": "2009:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_hgo.csv",
+      "memberSha256": "e9d5f3906681c89320dee866a5f64e0e5de03931d52095be6b08b15b4bc1571f",
+      "rawRows": 226787,
+      "totals": {
+        "didNotVote": 993538,
+        "nominalList": 1787822,
+        "unspecified": 54662,
+        "voted": 739622
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "14",
+      "id": "2009:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_jal.csv",
+      "memberSha256": "078df1f9982e7322d4f5e05f70a52c0aad4a898b525b66dd9bbff8756f89ae79",
+      "rawRows": 472286,
+      "totals": {
+        "didNotVote": 2450936,
+        "nominalList": 5133870,
+        "unspecified": 112661,
+        "voted": 2570273
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "15",
+      "id": "2009:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_mex.csv",
+      "memberSha256": "ae85996809204598a5376f3ff3b642d4b20269d55f9adc6f618c714fad793465",
+      "rawRows": 838433,
+      "totals": {
+        "didNotVote": 4805304,
+        "nominalList": 10020332,
+        "unspecified": 245937,
+        "voted": 4969091
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "16",
+      "id": "2009:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_mich.csv",
+      "memberSha256": "2f2b06e6bf9914a12eb1ca95af9b89a462bd4b8aa884368817882391b6eccbf8",
+      "rawRows": 374968,
+      "totals": {
+        "didNotVote": 2086574,
+        "nominalList": 3208452,
+        "unspecified": 109608,
+        "voted": 1012270
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "17",
+      "id": "2009:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_mor.csv",
+      "memberSha256": "a8ff3a6dc39a8658391b207b98d8a0011f1176f9aaaa3ad8b729c2ddbaf3f2e1",
+      "rawRows": 126948,
+      "totals": {
+        "didNotVote": 650690,
+        "nominalList": 1286210,
+        "unspecified": 11388,
+        "voted": 624132
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "18",
+      "id": "2009:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_nay.csv",
+      "memberSha256": "545326eefdd4f7929a39908096a17b9afdd72b46e92519f2176d01f43952bbc1",
+      "rawRows": 115466,
+      "totals": {
+        "didNotVote": 417486,
+        "nominalList": 733687,
+        "unspecified": 19260,
+        "voted": 296941
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "19",
+      "id": "2009:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_nl.csv",
+      "memberSha256": "9883e30805098c39dba8e1424bdab29dc77c9dbee25bb5832cdbcc51c259e911",
+      "rawRows": 287784,
+      "totals": {
+        "didNotVote": 1451247,
+        "nominalList": 3211187,
+        "unspecified": 108534,
+        "voted": 1651406
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "20",
+      "id": "2009:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_oax.csv",
+      "memberSha256": "c27f238aa3a1ec2aa39b66372e26e0b5fa6b37a6dbb9144a79174da010d28086",
+      "rawRows": 334877,
+      "totals": {
+        "didNotVote": 1473998,
+        "nominalList": 2509649,
+        "unspecified": 17664,
+        "voted": 1017987
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "21",
+      "id": "2009:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_pue.csv",
+      "memberSha256": "a089cbc81cc1b5b1060e6dceb036ab9dc19eba60cf8a8d8d17f09fd6070c4007",
+      "rawRows": 361929,
+      "totals": {
+        "didNotVote": 2327319,
+        "nominalList": 3752422,
+        "unspecified": 27677,
+        "voted": 1397426
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "22",
+      "id": "2009:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_qro.csv",
+      "memberSha256": "96f54f5633b261d997631ca380fc86d4b5236e21ece9961cf9c30d2ea6c5440b",
+      "rawRows": 103566,
+      "totals": {
+        "didNotVote": 477056,
+        "nominalList": 1154593,
+        "unspecified": 6357,
+        "voted": 671180
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "23",
+      "id": "2009:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_qroo.csv",
+      "memberSha256": "6b0da05bbeb6281859ada319fca4a206586f58ecda03f2f0e961f07c100b94e5",
+      "rawRows": 83052,
+      "totals": {
+        "didNotVote": 509757,
+        "nominalList": 811649,
+        "unspecified": 10640,
+        "voted": 291252
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "24",
+      "id": "2009:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_slp.csv",
+      "memberSha256": "4c87f2125712968f5a72958a01f51bf34faa090d7ae21d8be2130fff5c5318e6",
+      "rawRows": 234867,
+      "totals": {
+        "didNotVote": 776862,
+        "nominalList": 1729267,
+        "unspecified": 19749,
+        "voted": 932656
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "25",
+      "id": "2009:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_sin.csv",
+      "memberSha256": "33377f92736d0e2cd783ac4d5c62fe9814597f5f706f6085d0f49eac654fd57f",
+      "rawRows": 439948,
+      "totals": {
+        "didNotVote": 1046910,
+        "nominalList": 1859810,
+        "unspecified": 90778,
+        "voted": 722122
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "26",
+      "id": "2009:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_son.csv",
+      "memberSha256": "8d97cd6443cc2fd70004b1d0db7d53aadd4ca85545410f34971d5e021e652dd8",
+      "rawRows": 181623,
+      "totals": {
+        "didNotVote": 899166,
+        "nominalList": 1826173,
+        "unspecified": 18118,
+        "voted": 908889
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "27",
+      "id": "2009:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_tab.csv",
+      "memberSha256": "dff84f6eae1fc88f0eaf79065e5f2a5d576718eaf9dbdb2e8cbb67626faf961f",
+      "rawRows": 153668,
+      "totals": {
+        "didNotVote": 804737,
+        "nominalList": 1457283,
+        "unspecified": 99810,
+        "voted": 552736
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "28",
+      "id": "2009:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_tamps.csv",
+      "memberSha256": "2eb7b314dec7074420725d489f2939d90c71c6803634470dcfebe26daa4a955f",
+      "rawRows": 248211,
+      "totals": {
+        "didNotVote": 1426883,
+        "nominalList": 2429402,
+        "unspecified": 24068,
+        "voted": 978451
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "29",
+      "id": "2009:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_tlax.csv",
+      "memberSha256": "18fbf5596957acb6defb1074f2035ab49b6a4af877cef6b5a788e5fc7048ff27",
+      "rawRows": 81095,
+      "totals": {
+        "didNotVote": 490907,
+        "nominalList": 771952,
+        "unspecified": 4773,
+        "voted": 276272
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "30",
+      "id": "2009:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_ver.csv",
+      "memberSha256": "9ca5f4f71adc19f983b881a42081cd9ef043404aaf5ba3f6b94b6e52225901d4",
+      "rawRows": 649864,
+      "totals": {
+        "didNotVote": 2706908,
+        "nominalList": 5210210,
+        "unspecified": 112962,
+        "voted": 2390340
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "31",
+      "id": "2009:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_yuc.csv",
+      "memberSha256": "ad04dbf78f4c67ea4fd81f8d01ef60331078f45260ac924989ec93eef58cca1b",
+      "rawRows": 147855,
+      "totals": {
+        "didNotVote": 562771,
+        "nominalList": 1279091,
+        "unspecified": 7747,
+        "voted": 708573
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "32",
+      "id": "2009:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2009/datosabiertos_deceyec_conteoscensales2009_zac.csv",
+      "memberSha256": "04fed67cabf13038d4fa3406dc265dca47e15578d6d8fd59fa26a698367ec502",
+      "rawRows": 223438,
+      "totals": {
+        "didNotVote": 602123,
+        "nominalList": 1082869,
+        "unspecified": 11542,
+        "voted": 469204
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2009.zip",
+      "year": 2009
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "01",
+      "id": "2012:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_ags.csv",
+      "memberSha256": "3ea284a1f242776f64a0958f1200d4c04b7e4d6d455e3ad346221b3046694883",
+      "rawRows": 77141,
+      "totals": {
+        "didNotVote": 321239,
+        "nominalList": 781792,
+        "unspecified": 29,
+        "voted": 460524
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "02",
+      "id": "2012:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_bc.csv",
+      "memberSha256": "1c4ad84b15f6f72aedac8bcf9598fd677a15b34e0a3110d63e810fcb5faa62ca",
+      "rawRows": 223351,
+      "totals": {
+        "didNotVote": 1082188,
+        "nominalList": 2269512,
+        "unspecified": 2746,
+        "voted": 1184578
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "03",
+      "id": "2012:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_bcs.csv",
+      "memberSha256": "13f0c3dc2acb88d8790c136d781e5c55bb895f899bbd1c6b314f6e842cadd73b",
+      "rawRows": 50649,
+      "totals": {
+        "didNotVote": 178146,
+        "nominalList": 414778,
+        "unspecified": 26,
+        "voted": 236606
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "04",
+      "id": "2012:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_camp.csv",
+      "memberSha256": "0b1ab3007d8f57d9e2f7d9291060c0907e88fb672fdd00d95ff0fa4f979102b7",
+      "rawRows": 62831,
+      "totals": {
+        "didNotVote": 184072,
+        "nominalList": 543492,
+        "unspecified": 7,
+        "voted": 359413
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "05",
+      "id": "2012:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_coah.csv",
+      "memberSha256": "5bda966ba0fe15b9b8d2d1c78f89ea275ac6b8e1d3d508cb00f9ccf794c1cb58",
+      "rawRows": 206168,
+      "totals": {
+        "didNotVote": 695102,
+        "nominalList": 1805655,
+        "unspecified": 11007,
+        "voted": 1099546
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "06",
+      "id": "2012:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_col.csv",
+      "memberSha256": "cafc944a3cfc3b3175be6b01c3cc15cb76bc43712485c8d3b6dfe2ed524e1197",
+      "rawRows": 47113,
+      "totals": {
+        "didNotVote": 160386,
+        "nominalList": 423318,
+        "unspecified": 548,
+        "voted": 262384
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "07",
+      "id": "2012:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_chis.csv",
+      "memberSha256": "bbd2a80a615770b538915f79eee28f2c4e689b7844076b69ef464f24cde38d20",
+      "rawRows": 271147,
+      "totals": {
+        "didNotVote": 985922,
+        "nominalList": 2917062,
+        "unspecified": 5000,
+        "voted": 1926140
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "08",
+      "id": "2012:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_chih.csv",
+      "memberSha256": "17d8f97fa234ab5a49c7b74999058498cc91090235e3ab47793270060479129b",
+      "rawRows": 348044,
+      "totals": {
+        "didNotVote": 1097704,
+        "nominalList": 2275609,
+        "unspecified": 4460,
+        "voted": 1173445
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "09",
+      "id": "2012:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_cdmx.csv",
+      "memberSha256": "705f750baa6b7b454b6496158e57aec4033ed324e098c4cf918e5f60fa802e21",
+      "rawRows": 778594,
+      "totals": {
+        "didNotVote": 2401995,
+        "nominalList": 7108823,
+        "unspecified": 7323,
+        "voted": 4699505
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "10",
+      "id": "2012:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_dgo.csv",
+      "memberSha256": "71aa960d9ef29e914d25feb32dc3bd1c0b13963229c0c8837e1bfcbbaedc298e",
+      "rawRows": 169392,
+      "totals": {
+        "didNotVote": 472867,
+        "nominalList": 1131318,
+        "unspecified": 71,
+        "voted": 658380
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "11",
+      "id": "2012:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_gto.csv",
+      "memberSha256": "d1cf0b98789782a245382123c14c28945d016d88f6158009ff8f3475fb204893",
+      "rawRows": 408117,
+      "totals": {
+        "didNotVote": 1531035,
+        "nominalList": 3716421,
+        "unspecified": 916,
+        "voted": 2184470
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "12",
+      "id": "2012:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_gro.csv",
+      "memberSha256": "e781ecefc9197b6758ce682c6e9640eeed805e8890fff9939e6d43a804fa0f9e",
+      "rawRows": 333109,
+      "totals": {
+        "didNotVote": 896091,
+        "nominalList": 2209369,
+        "unspecified": 24908,
+        "voted": 1288370
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "13",
+      "id": "2012:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_hgo.csv",
+      "memberSha256": "0a4df3e02d75a70a306a582b6c8a795df6d34c28f43423d4a93ec5dd812659c7",
+      "rawRows": 219732,
+      "totals": {
+        "didNotVote": 628884,
+        "nominalList": 1789075,
+        "unspecified": 775,
+        "voted": 1159416
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "14",
+      "id": "2012:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_jal.csv",
+      "memberSha256": "7835faa1e825ed0d32607f1f9483eb52b18520ebba6e0c7a583ae9f56d5e7a85",
+      "rawRows": 473537,
+      "totals": {
+        "didNotVote": 1813052,
+        "nominalList": 5027267,
+        "unspecified": 6679,
+        "voted": 3207536
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "15",
+      "id": "2012:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_mex.csv",
+      "memberSha256": "f969fd9ef7ac6075b9f2ffd7347a4e0b3a611b93d630fb74d47fc2415ffed371",
+      "rawRows": 846432,
+      "totals": {
+        "didNotVote": 3491876,
+        "nominalList": 10104884,
+        "unspecified": 5327,
+        "voted": 6607681
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "16",
+      "id": "2012:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_mich.csv",
+      "memberSha256": "1cf07c9bc3390a32ff0448c17931080257588222df0ec85c9607ea511ce995ac",
+      "rawRows": 354970,
+      "totals": {
+        "didNotVote": 1432932,
+        "nominalList": 2953706,
+        "unspecified": 651,
+        "voted": 1520123
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "17",
+      "id": "2012:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_mor.csv",
+      "memberSha256": "b2ba361cfcbf5279cfceb7e6f32150f750228503d0d874ef9bfd9082a041959d",
+      "rawRows": 125707,
+      "totals": {
+        "didNotVote": 455814,
+        "nominalList": 1286949,
+        "unspecified": 18216,
+        "voted": 812919
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "18",
+      "id": "2012:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_nay.csv",
+      "memberSha256": "1b4e168fba9ef28152dd18c18a7747f366429e58222157d2d338dd91c43e8a52",
+      "rawRows": 116749,
+      "totals": {
+        "didNotVote": 263054,
+        "nominalList": 673994,
+        "unspecified": 634,
+        "voted": 410306
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "19",
+      "id": "2012:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_nl.csv",
+      "memberSha256": "f21a0285522ed3ad0388e15b68f2344bb5dcffc79da683d5338d1caf9874fdb0",
+      "rawRows": 307775,
+      "totals": {
+        "didNotVote": 1283457,
+        "nominalList": 3194734,
+        "unspecified": 868,
+        "voted": 1910409
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "20",
+      "id": "2012:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_oax.csv",
+      "memberSha256": "6c3f16c8b9a8a4d3729c16d992494612e47e58f68ebf2f5ab79ab5c812f01c5d",
+      "rawRows": 329773,
+      "totals": {
+        "didNotVote": 1003503,
+        "nominalList": 2548769,
+        "unspecified": 8810,
+        "voted": 1536456
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "21",
+      "id": "2012:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_pue.csv",
+      "memberSha256": "1981245a46dfa9ab91239a09b456dda089de5a25400fed5f0adeb463e50e2d24",
+      "rawRows": 357700,
+      "totals": {
+        "didNotVote": 1467540,
+        "nominalList": 3862981,
+        "unspecified": 9550,
+        "voted": 2385891
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "22",
+      "id": "2012:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_qro.csv",
+      "memberSha256": "61d5e994522a6434fdf19ae1b4273adde63e8bd80e2df21182f293ce88ad8825",
+      "rawRows": 108198,
+      "totals": {
+        "didNotVote": 420801,
+        "nominalList": 1231488,
+        "unspecified": 34,
+        "voted": 810653
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "23",
+      "id": "2012:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_qroo.csv",
+      "memberSha256": "4b05cc8a480a869774c45f96c9db1c9af8a31fec302e5133962ec5f8dd88d7cd",
+      "rawRows": 94868,
+      "totals": {
+        "didNotVote": 397708,
+        "nominalList": 910200,
+        "unspecified": 23,
+        "voted": 512469
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "24",
+      "id": "2012:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_slp.csv",
+      "memberSha256": "db92c59e81cb9d3e2a187fbd20cae44c41adec585232c96e08f7bc2220d92a60",
+      "rawRows": 228847,
+      "totals": {
+        "didNotVote": 631823,
+        "nominalList": 1704672,
+        "unspecified": 709,
+        "voted": 1072140
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "25",
+      "id": "2012:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_sin.csv",
+      "memberSha256": "6304a66a92f375db96daab48080c996c4ca651947372c882af74655716bf6c95",
+      "rawRows": 406245,
+      "totals": {
+        "didNotVote": 700856,
+        "nominalList": 1760568,
+        "unspecified": 2859,
+        "voted": 1056853
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "26",
+      "id": "2012:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_son.csv",
+      "memberSha256": "ca5b4c023f7b1a37ac5f1e2bb30085640b7ce069be589db5906f648d100314d1",
+      "rawRows": 174993,
+      "totals": {
+        "didNotVote": 730704,
+        "nominalList": 1718637,
+        "unspecified": 2952,
+        "voted": 984981
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "27",
+      "id": "2012:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_tab.csv",
+      "memberSha256": "9e8b727a90e6a7017d4cd8d37012441ec6c35c7631debf688168a571de648c52",
+      "rawRows": 150223,
+      "totals": {
+        "didNotVote": 434876,
+        "nominalList": 1455898,
+        "unspecified": 632,
+        "voted": 1020390
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "28",
+      "id": "2012:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_tamps.csv",
+      "memberSha256": "4e29c04b24172834b7a3c2d0882fda9eaee4dc94caf89a85b0d6504bfa714e31",
+      "rawRows": 244088,
+      "totals": {
+        "didNotVote": 959703,
+        "nominalList": 2253415,
+        "unspecified": 3694,
+        "voted": 1290018
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "29",
+      "id": "2012:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_tlax.csv",
+      "memberSha256": "cf5d41c66942e1cb55e8b1a21824ecf43da9ccff8e16c51fd1c2fab6318f1437",
+      "rawRows": 81164,
+      "totals": {
+        "didNotVote": 296664,
+        "nominalList": 806628,
+        "unspecified": 3303,
+        "voted": 506661
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "30",
+      "id": "2012:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_ver.csv",
+      "memberSha256": "1bb797f7ad1afb24936dc7c894b00869a8a055db05055ef5a4d20709e3747527",
+      "rawRows": 645121,
+      "totals": {
+        "didNotVote": 1784916,
+        "nominalList": 5202006,
+        "unspecified": 18463,
+        "voted": 3398627
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "31",
+      "id": "2012:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_yuc.csv",
+      "memberSha256": "bf9faa6d367156aa5f5077a09d42fa508a8c8803ef8227475421beecafb4f309",
+      "rawRows": 145433,
+      "totals": {
+        "didNotVote": 305066,
+        "nominalList": 1342368,
+        "unspecified": 26798,
+        "voted": 1010504
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "32",
+      "id": "2012:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2012/datosabiertos_deceyec_conteoscensales2012_zac.csv",
+      "memberSha256": "05648006fe9dd5c7a3c8be45208dbe6cc6b61f4bc4128407c8ea16d1e62a07be",
+      "rawRows": 217245,
+      "totals": {
+        "didNotVote": 429183,
+        "nominalList": 1065574,
+        "unspecified": 631,
+        "voted": 635760
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2012.zip",
+      "year": 2012
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "01",
+      "id": "2015:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_ags.csv",
+      "memberSha256": "8b46ab90226624d0d75bdb9b34c66e4a5032cb9f7270b70f8237e9299fbde69d",
+      "rawRows": 80573,
+      "totals": {
+        "didNotVote": 528453,
+        "nominalList": 867356,
+        "unspecified": 36289,
+        "voted": 302614
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "02",
+      "id": "2015:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_bc.csv",
+      "memberSha256": "ce84b20a22276e1dd2b32ef07ae1ecfd55bad8909497ebc24d43b13e98341a83",
+      "rawRows": 247220,
+      "totals": {
+        "didNotVote": 1710732,
+        "nominalList": 2477886,
+        "unspecified": 35563,
+        "voted": 731591
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "03",
+      "id": "2015:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_bcs.csv",
+      "memberSha256": "930be73bf202edd913166427864742c61762a49a0c03fd7a5af22a2be4a2e589",
+      "rawRows": 58949,
+      "totals": {
+        "didNotVote": 185348,
+        "nominalList": 465376,
+        "unspecified": 84312,
+        "voted": 195716
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "04",
+      "id": "2015:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_camp.csv",
+      "memberSha256": "6dba6906f42155f9d27231e75f7c1406805c1474a78624b54f44826b18dc19f3",
+      "rawRows": 68953,
+      "totals": {
+        "didNotVote": 209877,
+        "nominalList": 603611,
+        "unspecified": 80265,
+        "voted": 313469
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "05",
+      "id": "2015:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_coah.csv",
+      "memberSha256": "72799dbbf8e2b936eaed97db90c58f9b8fd478330ba178746f82378883c32843",
+      "rawRows": 218280,
+      "totals": {
+        "didNotVote": 1073307,
+        "nominalList": 1992040,
+        "unspecified": 61825,
+        "voted": 856908
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "06",
+      "id": "2015:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_col.csv",
+      "memberSha256": "197ba619df698f76f78c4cfacdbc608036340032baf44760c487ce9c1730d5fb",
+      "rawRows": 50320,
+      "totals": {
+        "didNotVote": 185868,
+        "nominalList": 498532,
+        "unspecified": 42237,
+        "voted": 270427
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "07",
+      "id": "2015:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_chis.csv",
+      "memberSha256": "4f2e77266a203456cf13a20bfdd561a3c9df5f958142018f7f8515fa2849bc68",
+      "rawRows": 282844,
+      "totals": {
+        "didNotVote": 1665118,
+        "nominalList": 3286225,
+        "unspecified": 203150,
+        "voted": 1417957
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "08",
+      "id": "2015:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_chih.csv",
+      "memberSha256": "f2617e086fa76f757f68f1081ff19744badfae798ea7194c03a1989b3a167f04",
+      "rawRows": 390660,
+      "totals": {
+        "didNotVote": 1679381,
+        "nominalList": 2567737,
+        "unspecified": 111620,
+        "voted": 776736
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "09",
+      "id": "2015:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_cdmx.csv",
+      "memberSha256": "27ca95ef187b7125ba84a5189f9b61f406acdc9670c823395cc75c346b6a8091",
+      "rawRows": 788792,
+      "totals": {
+        "didNotVote": 4001601,
+        "nominalList": 7366784,
+        "unspecified": 273419,
+        "voted": 3091764
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "10",
+      "id": "2015:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_dgo.csv",
+      "memberSha256": "0658f3ebfafd2e4458b6a922b45dd9c4d5c08a82e7a2d4454153426df88169f7",
+      "rawRows": 176208,
+      "totals": {
+        "didNotVote": 649215,
+        "nominalList": 1200244,
+        "unspecified": 92829,
+        "voted": 458200
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "11",
+      "id": "2015:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_gto.csv",
+      "memberSha256": "a48bbad1e37316f885f192dff13f997ed433dea0c2bfe23271c1671985a39736",
+      "rawRows": 435763,
+      "totals": {
+        "didNotVote": 2067579,
+        "nominalList": 4093632,
+        "unspecified": 327952,
+        "voted": 1698101
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "12",
+      "id": "2015:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_gro.csv",
+      "memberSha256": "2b0f06b21175e35532c300d62b5d67d443b63b6977a149829ecf5a0b1e123984",
+      "rawRows": 351477,
+      "totals": {
+        "didNotVote": 861932,
+        "nominalList": 2404969,
+        "unspecified": 421337,
+        "voted": 1121700
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "13",
+      "id": "2015:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_hgo.csv",
+      "memberSha256": "fbbe5ba486f892dc84e52f2468b6f534f635d5e8cdd0059259a617166f49e849",
+      "rawRows": 235278,
+      "totals": {
+        "didNotVote": 1052000,
+        "nominalList": 1969444,
+        "unspecified": 65075,
+        "voted": 852369
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "14",
+      "id": "2015:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_jal.csv",
+      "memberSha256": "82df85eac406a352f9d8595ee4f617a18faa646006e3fdb669a4ddc61648f665",
+      "rawRows": 497372,
+      "totals": {
+        "didNotVote": 2551453,
+        "nominalList": 5513033,
+        "unspecified": 191561,
+        "voted": 2770019
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "15",
+      "id": "2015:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_mex.csv",
+      "memberSha256": "ad2263f0bc6f67386fec544ac5efe2d4d78b6c31d2e8ace8915b61456d324c3c",
+      "rawRows": 880520,
+      "totals": {
+        "didNotVote": 5105234,
+        "nominalList": 11023655,
+        "unspecified": 809494,
+        "voted": 5108927
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "16",
+      "id": "2015:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_mich.csv",
+      "memberSha256": "6c9d4847d2820bf48aa9ecc77ace19828ecba97e58234928290738bfc167a936",
+      "rawRows": 373430,
+      "totals": {
+        "didNotVote": 1381670,
+        "nominalList": 3240236,
+        "unspecified": 241150,
+        "voted": 1617416
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "17",
+      "id": "2015:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_mor.csv",
+      "memberSha256": "b43518636054dd5b64796ca7a243adefc54fb390b84168e3bda32e6c54ce2a07",
+      "rawRows": 128088,
+      "totals": {
+        "didNotVote": 599264,
+        "nominalList": 1368636,
+        "unspecified": 52568,
+        "voted": 716804
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "18",
+      "id": "2015:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_nay.csv",
+      "memberSha256": "93d2ba26a45c62c2b63d2db0402c012c6ba97bee9aa8b0fbf6a67ee98823d8d3",
+      "rawRows": 124745,
+      "totals": {
+        "didNotVote": 452080,
+        "nominalList": 793544,
+        "unspecified": 30598,
+        "voted": 310866
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "19",
+      "id": "2015:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_nl.csv",
+      "memberSha256": "f499dc96ed1427dec90d5b53ab46b1573e11a6eb4471016b4215e0b8bd76c28a",
+      "rawRows": 344236,
+      "totals": {
+        "didNotVote": 1424522,
+        "nominalList": 3560462,
+        "unspecified": 173328,
+        "voted": 1962612
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "20",
+      "id": "2015:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_oax.csv",
+      "memberSha256": "37fd23c7e1c517adfaf1f22f436de9a3e298bdcaa7bf94447a7f5cbf3bcd8003",
+      "rawRows": 336281,
+      "totals": {
+        "didNotVote": 1355581,
+        "nominalList": 2718776,
+        "unspecified": 432918,
+        "voted": 930277
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "21",
+      "id": "2015:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_pue.csv",
+      "memberSha256": "fc173038c7988341f26b314ce72099ee168a20cc1417d808d9c5f03bd7f7cf13",
+      "rawRows": 375517,
+      "totals": {
+        "didNotVote": 2418071,
+        "nominalList": 4172352,
+        "unspecified": 73846,
+        "voted": 1680435
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "22",
+      "id": "2015:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_qro.csv",
+      "memberSha256": "3f9f836a6c12ead1fc7a245ff6bd89562e8057e638a16f703c7c03355e7696cb",
+      "rawRows": 116886,
+      "totals": {
+        "didNotVote": 587403,
+        "nominalList": 1413798,
+        "unspecified": 63021,
+        "voted": 763374
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "23",
+      "id": "2015:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_qroo.csv",
+      "memberSha256": "2cd72d788674115c5007307d6a99258fe8bb58d214fa731271f748edd9ecc58a",
+      "rawRows": 109269,
+      "totals": {
+        "didNotVote": 508939,
+        "nominalList": 1038774,
+        "unspecified": 192734,
+        "voted": 337101
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "24",
+      "id": "2015:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_slp.csv",
+      "memberSha256": "1498fe2317c292f2f77387745317cc2b231027adde3683fbd3dbc02ce67b82f5",
+      "rawRows": 239820,
+      "totals": {
+        "didNotVote": 751341,
+        "nominalList": 1859633,
+        "unspecified": 132530,
+        "voted": 975762
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "25",
+      "id": "2015:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_sin.csv",
+      "memberSha256": "0a8944aae2dc7de0e781dab39feecfc5b0d2d2753b648cbd5f6d00ad7a459ef0",
+      "rawRows": 446933,
+      "totals": {
+        "didNotVote": 1203500,
+        "nominalList": 2008326,
+        "unspecified": 79089,
+        "voted": 725737
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "26",
+      "id": "2015:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_son.csv",
+      "memberSha256": "980c7f5066b4cac769a5cc4934e9a993550635572e38e47c41699942ff727884",
+      "rawRows": 199501,
+      "totals": {
+        "didNotVote": 825469,
+        "nominalList": 1967629,
+        "unspecified": 291456,
+        "voted": 850704
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "27",
+      "id": "2015:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_tab.csv",
+      "memberSha256": "f8f902097cba2b93d51d447113385805377338f060e371b288c4f0ea9150a551",
+      "rawRows": 155551,
+      "totals": {
+        "didNotVote": 589650,
+        "nominalList": 1613557,
+        "unspecified": 239345,
+        "voted": 784562
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "28",
+      "id": "2015:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_tamps.csv",
+      "memberSha256": "a751dba117bf01bf1a33b115fd89a1fa1cd28c2cd858733ddb53888b423d6f93",
+      "rawRows": 268411,
+      "totals": {
+        "didNotVote": 1365838,
+        "nominalList": 2497985,
+        "unspecified": 57084,
+        "voted": 1075063
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "29",
+      "id": "2015:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_tlax.csv",
+      "memberSha256": "e626730ea71b280d203691d2e1347aa1d07e6b6b8c068bd8f545f3abb4f2bc38",
+      "rawRows": 82550,
+      "totals": {
+        "didNotVote": 518505,
+        "nominalList": 856157,
+        "unspecified": 9001,
+        "voted": 328651
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "30",
+      "id": "2015:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_ver.csv",
+      "memberSha256": "97b468d05999ccddd4d8386f48983b24c7c89295bcff63988f57e7d38ddc85a6",
+      "rawRows": 665157,
+      "totals": {
+        "didNotVote": 3009926,
+        "nominalList": 5582742,
+        "unspecified": 103484,
+        "voted": 2469332
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "31",
+      "id": "2015:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_yuc.csv",
+      "memberSha256": "b43abb79c4729fd6156b3c8e76f3718945956c3d0124f5b781a2976226f95e2d",
+      "rawRows": 153306,
+      "totals": {
+        "didNotVote": 394326,
+        "nominalList": 1436616,
+        "unspecified": 97586,
+        "voted": 944704
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "32",
+      "id": "2015:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2015/datosabiertos_deceyec_conteoscensales2015_zac.csv",
+      "memberSha256": "75049435878aa3042f6ba3f60c0f95e35f71268d98aa084af91658dfeb918bb3",
+      "rawRows": 223169,
+      "totals": {
+        "didNotVote": 604691,
+        "nominalList": 1103715,
+        "unspecified": 12310,
+        "voted": 486714
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2015.zip",
+      "year": 2015
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "01",
+      "id": "2018:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_ags.csv",
+      "memberSha256": "00b0591bad9e924f1de41dc85e20d450c6fd97133bd6af2bdf34dad6c84f384a",
+      "rawRows": 82051,
+      "totals": {
+        "didNotVote": 391032,
+        "nominalList": 943459,
+        "unspecified": 13434,
+        "voted": 538993
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "02",
+      "id": "2018:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_bc.csv",
+      "memberSha256": "9128c3052075e8fb33b3947e072ccc50acc5f9e759eee3f87506e753bbaf16a1",
+      "rawRows": 254599,
+      "totals": {
+        "didNotVote": 1302969,
+        "nominalList": 2731569,
+        "unspecified": 51644,
+        "voted": 1376956
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "03",
+      "id": "2018:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_bcs.csv",
+      "memberSha256": "a38c492b67d0bd570aea63566b4adc31188446f78ddb766c3696e5cc5e9245a7",
+      "rawRows": 60686,
+      "totals": {
+        "didNotVote": 213158,
+        "nominalList": 516152,
+        "unspecified": 29408,
+        "voted": 273586
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "04",
+      "id": "2018:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_camp.csv",
+      "memberSha256": "65b8ab725988e6b102b54fe1117c269608c6566a593e26883c7bee6145ceabd8",
+      "rawRows": 70050,
+      "totals": {
+        "didNotVote": 181761,
+        "nominalList": 642058,
+        "unspecified": 62385,
+        "voted": 397912
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "05",
+      "id": "2018:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_coah.csv",
+      "memberSha256": "b6368ab6c57b07a757f800134b336a9221005140ee1d95af21f0664727a5174c",
+      "rawRows": 222146,
+      "totals": {
+        "didNotVote": 774570,
+        "nominalList": 2154102,
+        "unspecified": 98407,
+        "voted": 1281125
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "06",
+      "id": "2018:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_col.csv",
+      "memberSha256": "7c1349064bafcea1c0b404a3f0d965551bd39ac7e1c95c88fcef00339045cf2e",
+      "rawRows": 51010,
+      "totals": {
+        "didNotVote": 199436,
+        "nominalList": 530721,
+        "unspecified": 9767,
+        "voted": 321518
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "07",
+      "id": "2018:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_chis.csv",
+      "memberSha256": "a3c8c77ddb341462a5a888a053887ea48ae4db96ffff50c2cae5dc76cad00fa3",
+      "rawRows": 287852,
+      "totals": {
+        "didNotVote": 1003433,
+        "nominalList": 3549418,
+        "unspecified": 380977,
+        "voted": 2165008
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "08",
+      "id": "2018:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_chih.csv",
+      "memberSha256": "d2e68771d6eef839caca57adee236f1f3bd711f353ea29a0169fe7b36e713042",
+      "rawRows": 399883,
+      "totals": {
+        "didNotVote": 1136840,
+        "nominalList": 2743272,
+        "unspecified": 315831,
+        "voted": 1290601
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "09",
+      "id": "2018:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_cdmx.csv",
+      "memberSha256": "7356e3390356fdd8fd4c10c6918bd2102c47bc907acfa8dc1b7f4d301b3189d5",
+      "rawRows": 796028,
+      "totals": {
+        "didNotVote": 2215649,
+        "nominalList": 7628415,
+        "unspecified": 226349,
+        "voted": 5186417
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "10",
+      "id": "2018:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_dgo.csv",
+      "memberSha256": "e9ff3522048cf8ca6f7820b8f175024ccce74c87d23c2f58352c3aa0afdd36af",
+      "rawRows": 179719,
+      "totals": {
+        "didNotVote": 528267,
+        "nominalList": 1279684,
+        "unspecified": 79903,
+        "voted": 671514
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "11",
+      "id": "2018:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_gto.csv",
+      "memberSha256": "0a955d5d7bd2a6df134950ab374de5ae460c3684de33b5e3e657caaec0f13eba",
+      "rawRows": 438743,
+      "totals": {
+        "didNotVote": 1928631,
+        "nominalList": 4359543,
+        "unspecified": 313111,
+        "voted": 2117801
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "12",
+      "id": "2018:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_gro.csv",
+      "memberSha256": "60cf3fb66981406d6409720f86fac6d22bc9167d14636e2989a97fa02c10824d",
+      "rawRows": 357049,
+      "totals": {
+        "didNotVote": 874896,
+        "nominalList": 2506957,
+        "unspecified": 176884,
+        "voted": 1455177
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "13",
+      "id": "2018:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_hgo.csv",
+      "memberSha256": "78e27788c41b4318bf3eb21d083473050d233f7feb4455490d8b8a4221a7bda7",
+      "rawRows": 238830,
+      "totals": {
+        "didNotVote": 627732,
+        "nominalList": 2118489,
+        "unspecified": 304509,
+        "voted": 1186248
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "14",
+      "id": "2018:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_jal.csv",
+      "memberSha256": "52423f5ff786845b6c04afe4a7e5b194b08f6befcb0c78eae512747c453e3758",
+      "rawRows": 503247,
+      "totals": {
+        "didNotVote": 2308286,
+        "nominalList": 5904226,
+        "unspecified": 386113,
+        "voted": 3209827
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "15",
+      "id": "2018:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_mex.csv",
+      "memberSha256": "6b5e7ff0cfc13157636c0a72c32c83f108b12b9b7c8d5dcd6a03c81bf616e46e",
+      "rawRows": 895048,
+      "totals": {
+        "didNotVote": 3666301,
+        "nominalList": 11832204,
+        "unspecified": 673664,
+        "voted": 7492239
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "16",
+      "id": "2018:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_mich.csv",
+      "memberSha256": "2229887c86e9a6ce2342c902b45df20e24085ef11deb3f859bfe02f9c6efd25f",
+      "rawRows": 377900,
+      "totals": {
+        "didNotVote": 1376416,
+        "nominalList": 3409274,
+        "unspecified": 200950,
+        "voted": 1831908
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "17",
+      "id": "2018:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_mor.csv",
+      "memberSha256": "1205f63a53154bed96dde24f9888f6def08f47380e3920f7ac32841d7feb86c3",
+      "rawRows": 129417,
+      "totals": {
+        "didNotVote": 477236,
+        "nominalList": 1439383,
+        "unspecified": 59498,
+        "voted": 902649
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "18",
+      "id": "2018:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_nay.csv",
+      "memberSha256": "1da8c10b775b164792f4aefd8c8200d1cd93e6abbd1cd1d0e07016871ab7697c",
+      "rawRows": 126741,
+      "totals": {
+        "didNotVote": 369166,
+        "nominalList": 846813,
+        "unspecified": 15737,
+        "voted": 461910
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "19",
+      "id": "2018:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_nl.csv",
+      "memberSha256": "6903f090fb5e41dd553e5398ea6c643fe9ae47bdf547010b4afc9652153e1124",
+      "rawRows": 353721,
+      "totals": {
+        "didNotVote": 1600329,
+        "nominalList": 3900556,
+        "unspecified": 358653,
+        "voted": 1941574
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "20",
+      "id": "2018:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_oax.csv",
+      "memberSha256": "b7bfa0093353557414dd22353df8c2439b7f2a32ab138d6bfd57920b59321c2b",
+      "rawRows": 341236,
+      "totals": {
+        "didNotVote": 921416,
+        "nominalList": 2863268,
+        "unspecified": 176166,
+        "voted": 1765686
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "21",
+      "id": "2018:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_pue.csv",
+      "memberSha256": "70f037426531b500c4645d43610d7917888d153ed70d01e21fc1594caef6d636",
+      "rawRows": 382518,
+      "totals": {
+        "didNotVote": 1358990,
+        "nominalList": 4500628,
+        "unspecified": 327085,
+        "voted": 2814553
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "22",
+      "id": "2018:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_qro.csv",
+      "memberSha256": "5c7d10a6d3a44c92d8140e8ca96cba47970df26631d0e32786c0a25bee96c7a2",
+      "rawRows": 119031,
+      "totals": {
+        "didNotVote": 580330,
+        "nominalList": 1582958,
+        "unspecified": 40210,
+        "voted": 962418
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "23",
+      "id": "2018:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_qroo.csv",
+      "memberSha256": "6bfb2b91325a1f963f31dc5353e5cb2a0332d4b27e2898e2bc911b540d18e85b",
+      "rawRows": 112931,
+      "totals": {
+        "didNotVote": 487665,
+        "nominalList": 1208670,
+        "unspecified": 38125,
+        "voted": 682880
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "24",
+      "id": "2018:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_slp.csv",
+      "memberSha256": "a4df73bc131054ea7a266a460db64e24731200a92a5ada9918f095ed5005fb6f",
+      "rawRows": 243452,
+      "totals": {
+        "didNotVote": 702249,
+        "nominalList": 1974334,
+        "unspecified": 91518,
+        "voted": 1180567
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "25",
+      "id": "2018:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_sin.csv",
+      "memberSha256": "8fa79b117f4fcc035d067121cd9aa54a92102b70ceaca98ba40f210e105aae8a",
+      "rawRows": 454408,
+      "totals": {
+        "didNotVote": 723409,
+        "nominalList": 2135263,
+        "unspecified": 360622,
+        "voted": 1051232
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "26",
+      "id": "2018:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_son.csv",
+      "memberSha256": "7e38fbac62f08acf8356fdf53106a729b9d132c0df4f5bb9905d6b617b844954",
+      "rawRows": 203600,
+      "totals": {
+        "didNotVote": 894834,
+        "nominalList": 2101726,
+        "unspecified": 298397,
+        "voted": 908495
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "27",
+      "id": "2018:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_tab.csv",
+      "memberSha256": "d26109f9d0826d88789566c60206cf5f69b12d868a4c22e4bdd0e950e1748e29",
+      "rawRows": 157068,
+      "totals": {
+        "didNotVote": 440353,
+        "nominalList": 1687628,
+        "unspecified": 227005,
+        "voted": 1020270
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "28",
+      "id": "2018:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_tamps.csv",
+      "memberSha256": "47760cd20a6d13d612d3fc66aed0d1fc23a1a0182d713eb78bb9c2fe007499b1",
+      "rawRows": 274386,
+      "totals": {
+        "didNotVote": 972669,
+        "nominalList": 2628755,
+        "unspecified": 178459,
+        "voted": 1477627
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "29",
+      "id": "2018:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_tlax.csv",
+      "memberSha256": "e095350236f779cf45900735dbaec25f22dd2ea2d27e8b5f3834e1065d96c2ac",
+      "rawRows": 83868,
+      "totals": {
+        "didNotVote": 304083,
+        "nominalList": 922017,
+        "unspecified": 44568,
+        "voted": 573366
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "30",
+      "id": "2018:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_ver.csv",
+      "memberSha256": "fa0d26dd4b56dfbe6faeb63d3c95c3365699cfd8b9e9039abe0341b09d6d9b25",
+      "rawRows": 672332,
+      "totals": {
+        "didNotVote": 1915641,
+        "nominalList": 5775930,
+        "unspecified": 398679,
+        "voted": 3461610
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "31",
+      "id": "2018:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_yuc.csv",
+      "memberSha256": "e6d6ee30e13255573d8224d201dbd5364ed31b00fc5b42cc46f73dc5deaadb34",
+      "rawRows": 154736,
+      "totals": {
+        "didNotVote": 361942,
+        "nominalList": 1544063,
+        "unspecified": 125837,
+        "voted": 1056284
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "32",
+      "id": "2018:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2018/datosabiertos_deceyec_conteoscensales2018_zac.csv",
+      "memberSha256": "835caec8ca76635ccb3c1d60adf24c0f535ee4e4e8acd9b604388faf09058145",
+      "rawRows": 226836,
+      "totals": {
+        "didNotVote": 410167,
+        "nominalList": 1162462,
+        "unspecified": 25847,
+        "voted": 726448
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2018.zip",
+      "year": 2018
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "01",
+      "id": "2021:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_ags.csv",
+      "memberSha256": "48daf3fb0ed42c813274ee0f58138acaf86a5d5c39ee5e45fa0e4ec32fa646ea",
+      "rawRows": 85457,
+      "totals": {
+        "didNotVote": 499413,
+        "nominalList": 1017420,
+        "unspecified": 28538,
+        "voted": 489469
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "02",
+      "id": "2021:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_bc.csv",
+      "memberSha256": "158d06d8dc23f007252b7552de33544875b79937d183302f977e4f9703ad9481",
+      "rawRows": 267397,
+      "totals": {
+        "didNotVote": 1701486,
+        "nominalList": 2919208,
+        "unspecified": 192519,
+        "voted": 1025203
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "03",
+      "id": "2021:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_bcs.csv",
+      "memberSha256": "03fa74c4346f14885614571abf708680f09924445bb71404c6e18703d1a05578",
+      "rawRows": 61731,
+      "totals": {
+        "didNotVote": 278562,
+        "nominalList": 561667,
+        "unspecified": 26780,
+        "voted": 256325
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "04",
+      "id": "2021:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_camp.csv",
+      "memberSha256": "299da1284060316c5ea4e3bfcd172aa9d686f61b8d9e1b3201678e0dd466f4d9",
+      "rawRows": 71417,
+      "totals": {
+        "didNotVote": 233582,
+        "nominalList": 668755,
+        "unspecified": 54265,
+        "voted": 380908
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "05",
+      "id": "2021:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_coah.csv",
+      "memberSha256": "7a7d7b2a00a7c92a829d96d01b27f924901fb7b85908f7a90c96421178dad698",
+      "rawRows": 226540,
+      "totals": {
+        "didNotVote": 944211,
+        "nominalList": 2262076,
+        "unspecified": 66406,
+        "voted": 1251459
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "06",
+      "id": "2021:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_col.csv",
+      "memberSha256": "d961c74169ecfbbaacad0d1da8187443c0e38ab9d38855f5ec968173406ae82e",
+      "rawRows": 51470,
+      "totals": {
+        "didNotVote": 264167,
+        "nominalList": 556321,
+        "unspecified": 7615,
+        "voted": 284539
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "07",
+      "id": "2021:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_chis.csv",
+      "memberSha256": "757e1c290b5d0db6964aada5885942ce2572382a7515265e0301f313cdb409f0",
+      "rawRows": 296328,
+      "totals": {
+        "didNotVote": 1317852,
+        "nominalList": 3781967,
+        "unspecified": 385828,
+        "voted": 2078287
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "08",
+      "id": "2021:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_chih.csv",
+      "memberSha256": "1d2fa78bd480271bee10389880b4bf0345768f4c19180d0f050cde63c1afd06b",
+      "rawRows": 407223,
+      "totals": {
+        "didNotVote": 1368788,
+        "nominalList": 2894490,
+        "unspecified": 368950,
+        "voted": 1156752
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "09",
+      "id": "2021:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_cdmx.csv",
+      "memberSha256": "c822ae1c261a0860964e970717455fef2b7167d8a506a8616bc9c3782cad507f",
+      "rawRows": 800811,
+      "totals": {
+        "didNotVote": 3688823,
+        "nominalList": 7772518,
+        "unspecified": 118918,
+        "voted": 3964777
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "10",
+      "id": "2021:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_dgo.csv",
+      "memberSha256": "48d87842e2aefc026edc9530b6c30e95a4679c8e7de5f5e017cb43a4e3960e78",
+      "rawRows": 178707,
+      "totals": {
+        "didNotVote": 752105,
+        "nominalList": 1333864,
+        "unspecified": 35458,
+        "voted": 546301
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "11",
+      "id": "2021:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_gto.csv",
+      "memberSha256": "eaaed3676a680f235b259080967beac2db5cc05cbb4540b81251a93aa5507e0a",
+      "rawRows": 444064,
+      "totals": {
+        "didNotVote": 2525104,
+        "nominalList": 4583718,
+        "unspecified": 109872,
+        "voted": 1948742
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "12",
+      "id": "2021:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_gro.csv",
+      "memberSha256": "5924f9eb1c528845b65f45e4ac84b484386c461349cf0f39aafe05cbfe72666c",
+      "rawRows": 352881,
+      "totals": {
+        "didNotVote": 1088952,
+        "nominalList": 2563061,
+        "unspecified": 68878,
+        "voted": 1405231
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "13",
+      "id": "2021:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_hgo.csv",
+      "memberSha256": "0e5ef989b258b7e19121fdf32b298647be3ef772b9c5da19b0aa2c1ebde68b1a",
+      "rawRows": 240308,
+      "totals": {
+        "didNotVote": 1174720,
+        "nominalList": 2240326,
+        "unspecified": 64430,
+        "voted": 1001176
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "14",
+      "id": "2021:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_jal.csv",
+      "memberSha256": "a9063ac201d15bd62b5f9c92c135515e707cdf839f5d9ccad26590c070d0fdfe",
+      "rawRows": 513309,
+      "totals": {
+        "didNotVote": 3160033,
+        "nominalList": 6214764,
+        "unspecified": 209897,
+        "voted": 2844834
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "15",
+      "id": "2021:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_mex.csv",
+      "memberSha256": "ab7f8d9354340c4a1e4f211cc85349df0e835a5520b7ef378e6ad95601f70d67",
+      "rawRows": 915091,
+      "totals": {
+        "didNotVote": 5608286,
+        "nominalList": 12376600,
+        "unspecified": 311357,
+        "voted": 6456957
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "16",
+      "id": "2021:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_mich.csv",
+      "memberSha256": "5720f9f7471c0598643ae36a8f70a21b7e210dde53f70a365c889d1ef66d6a22",
+      "rawRows": 383926,
+      "totals": {
+        "didNotVote": 1737229,
+        "nominalList": 3574824,
+        "unspecified": 218240,
+        "voted": 1619355
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "17",
+      "id": "2021:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_mor.csv",
+      "memberSha256": "86f89094a03ea5d96d9c6de694a7fc7f5395f75947a026f6c3783acfcc15904b",
+      "rawRows": 131347,
+      "totals": {
+        "didNotVote": 691368,
+        "nominalList": 1496082,
+        "unspecified": 59611,
+        "voted": 745103
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "18",
+      "id": "2021:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_nay.csv",
+      "memberSha256": "0aaef3c6fd0d1ef9842758bd62cc2d3921b5b34ab5dcf0fd22c3f23e03dfbacb",
+      "rawRows": 129661,
+      "totals": {
+        "didNotVote": 402586,
+        "nominalList": 891505,
+        "unspecified": 45260,
+        "voted": 443659
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "19",
+      "id": "2021:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_nl.csv",
+      "memberSha256": "78edeaacfb501f93e2e61f5db3444aa6a975937d182a88b5edb4a8fca0024b36",
+      "rawRows": 376901,
+      "totals": {
+        "didNotVote": 1905114,
+        "nominalList": 4189722,
+        "unspecified": 343459,
+        "voted": 1941149
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "20",
+      "id": "2021:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_oax.csv",
+      "memberSha256": "c707f84ae2143a511ba7670ea08a73f86eadbbec92a66c5b16f9fa5cb7e188c4",
+      "rawRows": 349307,
+      "totals": {
+        "didNotVote": 1295698,
+        "nominalList": 3013303,
+        "unspecified": 81696,
+        "voted": 1635909
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "21",
+      "id": "2021:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_pue.csv",
+      "memberSha256": "bbb72e5a77ae9ae5f2c08008e0d630c202c3f32a8b15b512b7e8d35f1de3b8fd",
+      "rawRows": 390031,
+      "totals": {
+        "didNotVote": 2055379,
+        "nominalList": 4739970,
+        "unspecified": 134593,
+        "voted": 2549998
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "22",
+      "id": "2021:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_qro.csv",
+      "memberSha256": "7d92c66f65e4c19ba63e7c33e13d6c81ed96664cffe2e0a0b92e036ed951e043",
+      "rawRows": 124751,
+      "totals": {
+        "didNotVote": 829904,
+        "nominalList": 1736388,
+        "unspecified": 40710,
+        "voted": 865774
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "23",
+      "id": "2021:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_qroo.csv",
+      "memberSha256": "78f9dffd84e682606b1804c2ad6f707ded7463678543b6c852735b13922c99ed",
+      "rawRows": 125331,
+      "totals": {
+        "didNotVote": 714924,
+        "nominalList": 1322601,
+        "unspecified": 61181,
+        "voted": 546496
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "24",
+      "id": "2021:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_slp.csv",
+      "memberSha256": "347fe338a478b96990a4b5c19e70eb460e7bdd7b519802c31905e923ec03edf1",
+      "rawRows": 244844,
+      "totals": {
+        "didNotVote": 829181,
+        "nominalList": 2068307,
+        "unspecified": 89929,
+        "voted": 1149197
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "25",
+      "id": "2021:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_sin.csv",
+      "memberSha256": "f72bbd02f3daf79d2176941d2dfac4218d7967ddbd24afc556dd2d840e4435f3",
+      "rawRows": 461998,
+      "totals": {
+        "didNotVote": 1029936,
+        "nominalList": 2252132,
+        "unspecified": 228692,
+        "voted": 993504
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "26",
+      "id": "2021:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_son.csv",
+      "memberSha256": "9eec18b135660f3e4e00bc00e34d416c2bd6364dbbd2275fd5b15f2e5fa38a9e",
+      "rawRows": 206435,
+      "totals": {
+        "didNotVote": 1165572,
+        "nominalList": 2187666,
+        "unspecified": 159384,
+        "voted": 862710
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "27",
+      "id": "2021:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_tab.csv",
+      "memberSha256": "0702cc277682c101e35d77aa608bb7793d8a24369b18c023d2f56dd0359ad385",
+      "rawRows": 160282,
+      "totals": {
+        "didNotVote": 808437,
+        "nominalList": 1752768,
+        "unspecified": 48628,
+        "voted": 895703
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "28",
+      "id": "2021:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_tamps.csv",
+      "memberSha256": "5494c648390d2c8645239c05ef71ab7dd198ea4103a59abb53ac21d1f26b4e99",
+      "rawRows": 279392,
+      "totals": {
+        "didNotVote": 1260749,
+        "nominalList": 2735951,
+        "unspecified": 128621,
+        "voted": 1346581
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "29",
+      "id": "2021:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_tlax.csv",
+      "memberSha256": "cfecb681858cf00487f14330b5c322e589f62f21913dd752dc006d0cbf3ee990",
+      "rawRows": 84673,
+      "totals": {
+        "didNotVote": 315142,
+        "nominalList": 973400,
+        "unspecified": 52726,
+        "voted": 605532
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "30",
+      "id": "2021:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_ver.csv",
+      "memberSha256": "c4dbf5a16dad9a090285fb42860a7acb5519644efddb5c7f1956f30920949172",
+      "rawRows": 686916,
+      "totals": {
+        "didNotVote": 2361724,
+        "nominalList": 5979649,
+        "unspecified": 165132,
+        "voted": 3452793
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "31",
+      "id": "2021:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_yuc.csv",
+      "memberSha256": "382f1baeeaed7646a4b971b958ee602cc0d481abb1723fbc307f191f7fdf7181",
+      "rawRows": 157799,
+      "totals": {
+        "didNotVote": 578110,
+        "nominalList": 1660072,
+        "unspecified": 94821,
+        "voted": 987141
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849",
+      "dictionarySha256": "d86b8dbb4c63eb4ef87dc2881de2589b80ef5188b75c1630552dc4f31b14e4e0",
+      "entityCode": "32",
+      "id": "2021:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2021/datosabiertos_deceyec_conteoscensales2021_zac.csv",
+      "memberSha256": "b76ba54b2a2d853864f2afc196b595542668fa278a7ecfa0712f2efbb41ea5cc",
+      "rawRows": 224174,
+      "totals": {
+        "didNotVote": 512487,
+        "nominalList": 1211038,
+        "unspecified": 40926,
+        "voted": 657625
+      },
+      "url": "https://ine.mx/wp-content/uploads/2022/04/DatosAbiertos_DECEyEC_ConteosCensales2021.zip",
+      "year": 2021
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "01",
+      "id": "2024:01",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ags.csv",
+      "memberSha256": "40d51f790c4f6d63ca3fbd6391be64617af96eddbe9f34003119c5c55d5c7ef7",
+      "rawRows": 91826,
+      "totals": {
+        "didNotVote": 441222,
+        "nominalList": 1097171,
+        "unspecified": 29865,
+        "voted": 626084
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "02",
+      "id": "2024:02",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_bc.csv",
+      "memberSha256": "8fc0a4bfd8388176c321c55e553b4d06ca43d790706c9be05e3ace4eaac6ed8f",
+      "rawRows": 284211,
+      "totals": {
+        "didNotVote": 1571676,
+        "nominalList": 3197817,
+        "unspecified": 229806,
+        "voted": 1396335
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "03",
+      "id": "2024:03",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_bcs.csv",
+      "memberSha256": "f0e2564a06c8828ea1e5bda6fa8348d58d36c4ebdc84f928b9470e6d783650dd",
+      "rawRows": 67581,
+      "totals": {
+        "didNotVote": 274921,
+        "nominalList": 613613,
+        "unspecified": 27979,
+        "voted": 310713
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "04",
+      "id": "2024:04",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_camp.csv",
+      "memberSha256": "c95ec4578478f6de6790792f258f6e1988b0e29b51736fdb2c5a34430057e934",
+      "rawRows": 73910,
+      "totals": {
+        "didNotVote": 219303,
+        "nominalList": 694600,
+        "unspecified": 103211,
+        "voted": 372086
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "05",
+      "id": "2024:05",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_coah.csv",
+      "memberSha256": "fd79af81ab6a39490796f0331394a6d2215800873247322e6281516541a573a6",
+      "rawRows": 239888,
+      "totals": {
+        "didNotVote": 728554,
+        "nominalList": 2410670,
+        "unspecified": 349472,
+        "voted": 1332644
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "06",
+      "id": "2024:06",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_col.csv",
+      "memberSha256": "2d2791a2abf5317409d6ce2ffa6d5ba8ca8cb1a50dc7ea23fdf90912ac5f1f3c",
+      "rawRows": 54817,
+      "totals": {
+        "didNotVote": 248259,
+        "nominalList": 584921,
+        "unspecified": 14899,
+        "voted": 321763
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "07",
+      "id": "2024:07",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_chis.csv",
+      "memberSha256": "1318919f9a0763c562b3def9e1fce856bd81f01318f0dd7b9b8acf16352a98e5",
+      "rawRows": 318741,
+      "totals": {
+        "didNotVote": 1349180,
+        "nominalList": 4003376,
+        "unspecified": 473993,
+        "voted": 2180203
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "08",
+      "id": "2024:08",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_chih.csv",
+      "memberSha256": "c428e385618a8b7251ab597a091f2ccd2c48fa2fc0a00093b42d75a6f395db9c",
+      "rawRows": 418127,
+      "totals": {
+        "didNotVote": 1262547,
+        "nominalList": 3082363,
+        "unspecified": 459746,
+        "voted": 1360070
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "09",
+      "id": "2024:09",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_cdmx.csv",
+      "memberSha256": "2ee37d8e64d59f1f1e8ff460367f07394e00c4e3847e3728032947a132f299ea",
+      "rawRows": 808977,
+      "totals": {
+        "didNotVote": 2383980,
+        "nominalList": 7918590,
+        "unspecified": 151322,
+        "voted": 5383288
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "10",
+      "id": "2024:10",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_dgo.csv",
+      "memberSha256": "902dd99f222a96888b597d44e2f3c99147ef2730ed8e55f49870920e37d39731",
+      "rawRows": 182555,
+      "totals": {
+        "didNotVote": 633637,
+        "nominalList": 1397549,
+        "unspecified": 27953,
+        "voted": 735959
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "11",
+      "id": "2024:11",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_gto.csv",
+      "memberSha256": "c41bf505127fc1f34b629ec71c94e2e39bf270faaa14be1af6f07ca66251aa84",
+      "rawRows": 457616,
+      "totals": {
+        "didNotVote": 2051034,
+        "nominalList": 4831159,
+        "unspecified": 187600,
+        "voted": 2592525
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "12",
+      "id": "2024:12",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_gro.csv",
+      "memberSha256": "c99c67bc0c81d41d59b25caab2e2a949f8a655992cd4f51e082afbb70939e619",
+      "rawRows": 361288,
+      "totals": {
+        "didNotVote": 1085641,
+        "nominalList": 2643256,
+        "unspecified": 133351,
+        "voted": 1424264
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "13",
+      "id": "2024:13",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_hgo.csv",
+      "memberSha256": "28c059859b7a46828eb19f7fdebfe1149273669cdc54fdb97ad4c0e7bcf8946f",
+      "rawRows": 251166,
+      "totals": {
+        "didNotVote": 816507,
+        "nominalList": 2386306,
+        "unspecified": 142755,
+        "voted": 1427044
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "14",
+      "id": "2024:14",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_jal.csv",
+      "memberSha256": "20796c13455ad5853b11da54a3dde01689e8adbf27fda354dae7b026c16aeca7",
+      "rawRows": 539890,
+      "totals": {
+        "didNotVote": 2675653,
+        "nominalList": 6619379,
+        "unspecified": 388374,
+        "voted": 3555352
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "15",
+      "id": "2024:15",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_mex.csv",
+      "memberSha256": "8d306a81b12521cf3d204aecf6270772fbf618965c614554156002fd294f1a29",
+      "rawRows": 951310,
+      "totals": {
+        "didNotVote": 4506099,
+        "nominalList": 13026772,
+        "unspecified": 561118,
+        "voted": 7959555
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "16",
+      "id": "2024:16",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_mich.csv",
+      "memberSha256": "7f2434f3a24b1db17b10b233959225c44455cc6e40ec53f6200c2dddf63bf902",
+      "rawRows": 392150,
+      "totals": {
+        "didNotVote": 1584446,
+        "nominalList": 3748985,
+        "unspecified": 308015,
+        "voted": 1856524
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "17",
+      "id": "2024:17",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_mor.csv",
+      "memberSha256": "d5be836a00fe32fcd4ab797738211e00ae4914736fdddd5ba87e4406a5d72876",
+      "rawRows": 135935,
+      "totals": {
+        "didNotVote": 559413,
+        "nominalList": 1549606,
+        "unspecified": 98729,
+        "voted": 891464
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "18",
+      "id": "2024:18",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_nay.csv",
+      "memberSha256": "a2485ad88203500fd8aa8aa1f727fb37ca0bd7f9759e4e860a1f499c0a5cfa57",
+      "rawRows": 134899,
+      "totals": {
+        "didNotVote": 389953,
+        "nominalList": 950653,
+        "unspecified": 68885,
+        "voted": 491815
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "19",
+      "id": "2024:19",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_nl.csv",
+      "memberSha256": "d2e24ecea79274233f55d0833576333011f436e26bffc6a5a4b87d6bfa3c3fef",
+      "rawRows": 391844,
+      "totals": {
+        "didNotVote": 1832065,
+        "nominalList": 4466271,
+        "unspecified": 330295,
+        "voted": 2303911
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "20",
+      "id": "2024:20",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_oax.csv",
+      "memberSha256": "c5408b8d3be24757e29373ff382ded4097428af7f6122bcc190478d6d40eb90a",
+      "rawRows": 358648,
+      "totals": {
+        "didNotVote": 1200572,
+        "nominalList": 3116671,
+        "unspecified": 212459,
+        "voted": 1703640
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "21",
+      "id": "2024:21",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_pue.csv",
+      "memberSha256": "6bab4b6fbcff44bda14742693e7651139f2c137aed6deb80ba59dd0001f41de1",
+      "rawRows": 409591,
+      "totals": {
+        "didNotVote": 1647122,
+        "nominalList": 4978673,
+        "unspecified": 368328,
+        "voted": 2963223
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "22",
+      "id": "2024:22",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_qro.csv",
+      "memberSha256": "e4d9ac165650a70fed608111ccf67f7f06ba1bf654e0e989ef405e85b5a270a0",
+      "rawRows": 134374,
+      "totals": {
+        "didNotVote": 724097,
+        "nominalList": 1899053,
+        "unspecified": 43248,
+        "voted": 1131708
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "23",
+      "id": "2024:23",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_qroo.csv",
+      "memberSha256": "c12925d81a50aeeccb893f168633cba6a4fc47101d9d953b29905233a7722c98",
+      "rawRows": 133915,
+      "totals": {
+        "didNotVote": 640198,
+        "nominalList": 1460071,
+        "unspecified": 45933,
+        "voted": 773940
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "24",
+      "id": "2024:24",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_slp.csv",
+      "memberSha256": "347aeb2e5272ef7f7433e472f64290366d6de8fae92234ee2962df817c3103ac",
+      "rawRows": 252725,
+      "totals": {
+        "didNotVote": 784885,
+        "nominalList": 2185470,
+        "unspecified": 161062,
+        "voted": 1239523
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "25",
+      "id": "2024:25",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_sin.csv",
+      "memberSha256": "2624935f25bec0a1c1b01522027c67269cdde7ad4f6b62e9689e0869be3a2512",
+      "rawRows": 473681,
+      "totals": {
+        "didNotVote": 969260,
+        "nominalList": 2360619,
+        "unspecified": 229339,
+        "voted": 1162020
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "26",
+      "id": "2024:26",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_son.csv",
+      "memberSha256": "c6002cc5585ef668130b839fc02fa9ec6d6643adb53f92f06541dd797d20e80b",
+      "rawRows": 215028,
+      "totals": {
+        "didNotVote": 1035322,
+        "nominalList": 2291013,
+        "unspecified": 237530,
+        "voted": 1018161
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "27",
+      "id": "2024:27",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_tab.csv",
+      "memberSha256": "84cee008aa3b022cff88a33bbe423e2c3548cbeeef332d91df85e90d4778b8e5",
+      "rawRows": 166627,
+      "totals": {
+        "didNotVote": 667359,
+        "nominalList": 1811510,
+        "unspecified": 147756,
+        "voted": 996395
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "28",
+      "id": "2024:28",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_tam.csv",
+      "memberSha256": "9a039580b57ebec637ba0fc05233893611fcc75ace81605cd37fb82d8602ac90",
+      "rawRows": 292663,
+      "totals": {
+        "didNotVote": 1150369,
+        "nominalList": 2848982,
+        "unspecified": 267947,
+        "voted": 1430666
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "29",
+      "id": "2024:29",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_tlax.csv",
+      "memberSha256": "b2ac210e8833a80647bf847c713300c2f811a9b47f792ee6fb4f90ace2cb26d9",
+      "rawRows": 87955,
+      "totals": {
+        "didNotVote": 291993,
+        "nominalList": 1042696,
+        "unspecified": 66418,
+        "voted": 684285
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "30",
+      "id": "2024:30",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_ver.csv",
+      "memberSha256": "71c0da37594eeba4d9e526bfcf324570592ca555d864053ef7741aa77140b3ff",
+      "rawRows": 699401,
+      "totals": {
+        "didNotVote": 2415520,
+        "nominalList": 6080517,
+        "unspecified": 272285,
+        "voted": 3392712
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "31",
+      "id": "2024:31",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_yuc.csv",
+      "memberSha256": "d8aa9bfea5271951e51855fc7ae307d9ed4415335c4db429bcdd2ce12adc0e9c",
+      "rawRows": 163017,
+      "totals": {
+        "didNotVote": 465769,
+        "nominalList": 1766077,
+        "unspecified": 134732,
+        "voted": 1165576
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    },
+    {
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2",
+      "dictionarySha256": "5f3405c39b33e8332a097affbaaf22cd2725a85bae70c4a3b8868c9a087ea0f8",
+      "entityCode": "32",
+      "id": "2024:32",
+      "member": "DatosAbiertos_DECEyEC_ConteosCensales2024/datosabiertos_deceyec_conteoscensales2024_zac.csv",
+      "memberSha256": "dfa39a218263bef1e66c7fdd1d2b276b50058bbbe188d1d79c2d22c0e45e97e4",
+      "rawRows": 229374,
+      "totals": {
+        "didNotVote": 498910,
+        "nominalList": 1265939,
+        "unspecified": 51249,
+        "voted": 715780
+      },
+      "url": "https://ine.mx/wp-content/uploads/2025/08/DatosAbiertos_DECEyEC_ConteosCensales2024.zip",
+      "year": 2024
+    }
+  ]
+}
