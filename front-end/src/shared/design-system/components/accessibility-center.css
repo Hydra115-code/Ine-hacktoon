@@ -1,0 +1,225 @@
+.accessibility-center { position: relative; }
+
+.accessibility-center__trigger,
+.accessibility-center__close {
+  display: inline-grid;
+  place-items: center;
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  border: var(--border-subtle);
+  cursor: pointer;
+}
+
+.accessibility-center__trigger {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+.accessibility-center__trigger[aria-expanded="true"] {
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.accessibility-center__trigger > span {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.04em;
+}
+
+.accessibility-center__panel {
+  position: fixed;
+  z-index: 120;
+  top: 4.75rem;
+  right: clamp(1rem, 3vw, 2.5rem);
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 5.75rem);
+  padding: var(--space-5);
+  overflow-y: auto;
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-top: 4px solid var(--color-brand-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0.55rem 0.65rem 0 var(--color-brand-soft), var(--shadow-elevated);
+}
+
+.accessibility-center__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.accessibility-center__header span,
+.accessibility-center legend {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.accessibility-center__header h2 {
+  margin: 0.2rem 0 0;
+  font-size: var(--font-size-title);
+}
+
+.accessibility-center__close {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  padding: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
+.accessibility-center__text-size {
+  padding: var(--space-4) 0;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.accessibility-center__text-size > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.accessibility-center__text-size label {
+  display: grid;
+  min-height: 4.5rem;
+  place-content: center;
+  gap: 0.15rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 3px;
+  cursor: pointer;
+}
+
+.accessibility-center__text-size label[data-selected="true"] {
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.accessibility-center__text-size input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.accessibility-center__text-size label:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.accessibility-center__text-size strong { font-size: 1.15rem; }
+.accessibility-center__text-size span { font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
+
+.accessibility-center__switches { display: grid; }
+
+.accessibility-center__switches > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 4.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+}
+
+.accessibility-center__switches label > span { display: grid; gap: 0.15rem; }
+.accessibility-center__switches strong { font-size: var(--font-size-label); }
+.accessibility-center__switches small { color: var(--color-text-muted); font-size: var(--font-size-caption); line-height: 1.35; }
+
+.accessibility-center__switches input {
+  width: 3rem;
+  height: 1.75rem;
+  flex: none;
+  appearance: none;
+  background: var(--color-border-strong);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.accessibility-center__switches input::before {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  content: "";
+  background: var(--color-surface-elevated);
+  border-radius: 50%;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.accessibility-center__switches input:checked {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.accessibility-center__switches input:checked::before { transform: translateX(1.25rem); }
+
+.accessibility-center__reset {
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: var(--space-4);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .accessibility-center__trigger:hover:not([aria-expanded="true"]),
+  .accessibility-center__close:hover,
+  .accessibility-center__reset:hover { color: var(--color-brand-primary); border-color: var(--color-brand-primary); }
+  .accessibility-center__trigger[aria-expanded="true"]:hover { color: var(--color-text-on-brand); }
+  .accessibility-center__text-size label:hover { border-color: var(--color-brand-primary); transform: translateY(-1px); }
+}
+
+@media (max-width: 36rem) {
+  .accessibility-center__panel {
+    top: 4.5rem;
+    right: var(--space-3);
+    left: var(--space-3);
+    width: auto;
+    max-height: calc(100dvh - 5.5rem);
+    overflow-y: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .accessibility-center__trigger,
+  .accessibility-center__close,
+  .accessibility-center__reset,
+  .accessibility-center__text-size label,
+  .accessibility-center__switches input {
+    color: ButtonText;
+    background: ButtonFace;
+    border-color: ButtonText;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+
+  .accessibility-center__text-size label[data-selected="true"],
+  .accessibility-center__switches input:checked {
+    color: HighlightText;
+    background: Highlight;
+    border-color: Highlight;
+  }
+}

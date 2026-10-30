@@ -1,0 +1,405 @@
+.ui-container {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.ui-container--size-sm { max-width: 40rem; }
+.ui-container--size-md { max-width: 56rem; }
+.ui-container--size-lg { max-width: 86rem; }
+.ui-container--size-full { max-width: none; }
+.ui-container--padding-none { padding: 0; }
+.ui-container--padding-sm { padding: var(--space-3); }
+.ui-container--padding-md { padding: var(--space-5); }
+.ui-container--padding-lg { padding: var(--space-8); }
+
+.ui-section {
+  min-width: 0;
+  border-radius: var(--radius-lg);
+}
+
+.ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node {
+  margin-block-start: var(--space-3);
+}
+
+.ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node:is(
+  [data-node-type="grid"],
+  [data-node-type="table"],
+  [data-node-type="visualization"],
+  [data-node-type="electionDelta"],
+  [data-node-type="territoryRanking"],
+  [data-node-type="participationTimeline"],
+  [data-node-type="dataQualityBadge"],
+  [data-node-type="demographicBreakdown"],
+  [data-node-type="comparisonMatrix"],
+  [data-node-type="evidenceSummary"],
+  [data-node-type="civicInsight"],
+  [data-node-type="mexicoChoropleth"],
+  [data-node-type="alert"]
+) {
+  margin-block-start: var(--space-6);
+}
+
+.ui-section--surface-transparent { background: transparent; }
+.ui-section--surface-primary { background: var(--color-surface-primary); }
+.ui-section--surface-secondary { background: var(--color-surface-secondary); }
+.ui-section--surface-elevated {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-brand-primary);
+  box-shadow: var(--ui-editorial-shadow, var(--shadow-hard));
+  transition: border-color var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard), transform var(--duration-normal) var(--ease-standard);
+}
+
+.ui-section--surface-elevated:hover {
+  border-color: color-mix(in srgb, var(--color-brand-primary) 45%, var(--color-border-strong));
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+  transform: translate(-1px, -1px);
+}
+.ui-section--padding-none { padding: 0; }
+.ui-section--padding-sm { padding: var(--space-3); }
+.ui-section--padding-md { padding: var(--space-5); }
+.ui-section--padding-lg { padding: var(--space-8); }
+
+.ui-stack,
+.ui-grid,
+.ui-flex,
+.ui-split {
+  min-width: 0;
+}
+
+.ui-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-grid {
+  display: grid;
+}
+
+.ui-grid--columns-1 { grid-template-columns: minmax(0, 1fr); }
+.ui-grid--columns-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ui-grid--columns-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ui-grid--columns-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* A metric must keep enough room for a full percentage or civic count. The
+   authored column count remains a preference, while the viewport decides how
+   many readable cards actually fit. */
+.ui-grid:has(> .ui-runtime-motion-node[data-node-type="metric"]) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+
+.ui-flex {
+  display: flex;
+}
+
+.ui-flex--direction-row { flex-direction: row; }
+.ui-flex--direction-column { flex-direction: column; }
+.ui-flex--wrap-wrap { flex-wrap: wrap; }
+.ui-flex--wrap-nowrap { flex-wrap: nowrap; }
+
+/* Data-dense GenUI pieces need a readable column before they may share a row.
+   Metrics and badges can remain compact; analytical components wrap as units. */
+.ui-flex--direction-row > .ui-runtime-motion-node:is(
+  [data-node-type="table"],
+  [data-node-type="visualization"],
+  [data-node-type="electionDelta"],
+  [data-node-type="territoryRanking"],
+  [data-node-type="participationTimeline"],
+  [data-node-type="demographicBreakdown"],
+  [data-node-type="comparisonMatrix"],
+  [data-node-type="evidenceSummary"],
+  [data-node-type="mexicoChoropleth"]
+) {
+  flex: 1 1 30rem;
+  min-width: min(100%, 24rem);
+}
+
+.ui-grid > .ui-runtime-motion-node:is(
+  [data-node-type="table"],
+  [data-node-type="visualization"],
+  [data-node-type="electionDelta"],
+  [data-node-type="territoryRanking"],
+  [data-node-type="participationTimeline"],
+  [data-node-type="demographicBreakdown"],
+  [data-node-type="comparisonMatrix"],
+  [data-node-type="evidenceSummary"],
+  [data-node-type="mexicoChoropleth"]
+) {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* Keep the explicit selectors as a compatibility fallback for engines that
+   fail to apply complex :is() selectors to projected motion children. */
+.ui-grid > .ui-runtime-motion-node[data-node-type="evidenceSummary"],
+.ui-grid > .ui-runtime-motion-node[data-node-type="mexicoChoropleth"],
+.ui-grid > .ui-runtime-motion-node[data-node-type="comparisonMatrix"],
+.ui-grid > .ui-runtime-motion-node[data-node-type="participationTimeline"],
+.ui-grid > .ui-runtime-motion-node[data-node-type="table"],
+.ui-grid > .ui-runtime-motion-node[data-node-type="visualization"] {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.ui-split {
+  display: grid;
+}
+
+.ui-split--ratio-equal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ui-split--ratio-sidebar-start { grid-template-columns: minmax(14rem, 1fr) minmax(0, 2fr); }
+.ui-split--ratio-sidebar-end { grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr); }
+
+.ui--gap-none { gap: 0; }
+.ui--gap-xs { gap: var(--space-1); }
+.ui--gap-sm { gap: var(--space-2); }
+.ui--gap-md { gap: var(--space-5); }
+.ui--gap-lg { gap: var(--space-8); }
+.ui--gap-xl { gap: var(--space-10); }
+.ui--align-start { align-items: start; }
+.ui--align-center { align-items: center; }
+.ui--align-end { align-items: end; }
+.ui--align-stretch { align-items: stretch; }
+.ui--justify-start { justify-content: flex-start; }
+.ui--justify-center { justify-content: center; }
+.ui--justify-end { justify-content: flex-end; }
+.ui--justify-between { justify-content: space-between; }
+
+.ui-scrollable {
+  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.ui-scrollable--axis-horizontal { overflow-x: auto; overflow-y: hidden; }
+.ui-scrollable--axis-vertical { overflow-x: hidden; overflow-y: auto; }
+.ui-scrollable--axis-both { overflow: auto; }
+.ui-scrollable--max-sm { max-height: 16rem; }
+.ui-scrollable--max-md { max-height: 28rem; }
+.ui-scrollable--max-lg { max-height: 42rem; }
+.ui-scrollable--max-viewport { max-height: min(70dvh, 56rem); }
+
+.ui-divider {
+  flex: none;
+  margin: 0;
+  background: var(--color-border-subtle);
+}
+
+.ui-divider--orientation-horizontal { width: 100%; height: 1px; }
+.ui-divider--orientation-vertical { align-self: stretch; width: 1px; min-height: 1.5rem; }
+.ui-divider--strength-strong { background: var(--color-border-strong); }
+.ui-divider--strength-strong.ui-divider--orientation-horizontal {
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand-primary) 0 36%, var(--color-civic-accent) 36% 52%, var(--color-border-strong) 52%);
+}
+
+.ui-tabs {
+  min-width: 0;
+}
+
+.ui-tabs__list {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-strong);
+  scrollbar-width: thin;
+}
+
+.ui-tabs__tab {
+  position: relative;
+  min-height: 2.75rem;
+  padding-inline: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.ui-tabs__tab::after {
+  position: absolute;
+  right: var(--space-3);
+  bottom: -1px;
+  left: var(--space-3);
+  height: 2px;
+  content: "";
+  background: transparent;
+  border-radius: var(--radius-full);
+}
+
+.ui-tabs__tab[aria-selected="true"] {
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  font-weight: var(--font-weight-bold);
+}
+
+.ui-tabs__tab[aria-selected="true"]::after {
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--color-brand-primary);
+}
+
+.ui-tabs__panel {
+  padding-block: var(--space-5);
+}
+
+.ui-accordion {
+  border: 1px solid var(--color-border-strong);
+  border-top: 3px solid var(--color-civic-accent);
+  box-shadow: var(--ui-editorial-shadow-accent, var(--shadow-hard));
+}
+
+.ui-accordion__item {
+  border-bottom: var(--border-subtle);
+}
+
+.ui-accordion__heading {
+  margin: 0;
+  font-size: inherit;
+}
+
+.ui-accordion__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  background: transparent;
+  border: 0;
+}
+
+.ui-accordion__indicator {
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.ui-accordion__trigger[aria-expanded="true"] .ui-accordion__indicator {
+  transform: rotate(45deg);
+}
+
+.ui-accordion__trigger[aria-expanded="true"] {
+  color: var(--color-brand-primary);
+  background: var(--color-brand-soft);
+}
+
+.ui-accordion__panel {
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+@media (max-width: 64rem) {
+  .ui-grid--columns-3,
+  .ui-grid--columns-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ui-split--collapse-md {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 40rem) {
+  .ui-container--padding-lg { padding: var(--space-5); }
+
+  .ui-section--padding-lg { padding: var(--space-5); }
+
+  .ui-grid--columns-2,
+  .ui-grid--columns-3,
+  .ui-grid--columns-4,
+  .ui-split,
+  .ui-split--collapse-sm,
+  .ui-split--collapse-md {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ui-flex--direction-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ui-tabs__tab {
+    min-height: 3rem;
+    padding-inline: var(--space-3);
+  }
+
+  .ui-section > .ui-runtime-motion-node + .ui-runtime-motion-node:is(
+    [data-node-type="grid"],
+    [data-node-type="table"],
+    [data-node-type="visualization"],
+    [data-node-type="electionDelta"],
+    [data-node-type="territoryRanking"],
+    [data-node-type="participationTimeline"],
+    [data-node-type="dataQualityBadge"],
+    [data-node-type="demographicBreakdown"],
+    [data-node-type="comparisonMatrix"],
+    [data-node-type="evidenceSummary"],
+    [data-node-type="civicInsight"],
+    [data-node-type="mexicoChoropleth"],
+    [data-node-type="alert"]
+  ) {
+    margin-block-start: var(--space-5);
+  }
+}
+
+@media (min-width: 90rem) {
+  .ui-container--size-lg { max-width: 100rem; }
+
+  .ui-flex--direction-row > .ui-runtime-motion-node:is(
+    [data-node-type="table"],
+    [data-node-type="visualization"],
+    [data-node-type="electionDelta"],
+    [data-node-type="territoryRanking"],
+    [data-node-type="participationTimeline"],
+    [data-node-type="demographicBreakdown"],
+    [data-node-type="comparisonMatrix"],
+    [data-node-type="evidenceSummary"],
+    [data-node-type="mexicoChoropleth"]
+  ) {
+    flex-basis: 36rem;
+  }
+}
+
+/* Paper editorial tab navigation */
+.ui-tabs__list {
+  gap: 0;
+  padding: var(--space-2);
+  background: var(--color-ink);
+  border: 1px solid var(--color-ink);
+  box-shadow: 4px 4px 0 var(--color-brand-border);
+}
+
+.ui-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  color: var(--color-text-on-brand);
+  border-right: 1px solid color-mix(in srgb, var(--color-text-on-brand) 22%, transparent);
+}
+
+.ui-tabs__index {
+  color: var(--color-civic-accent);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+}
+
+.ui-tabs__tab::after { right: var(--space-4); left: var(--space-4); background: transparent; }
+.ui-tabs__tab:hover { color: var(--color-brand-primary); background: color-mix(in srgb, var(--color-surface-primary) 8%, transparent); }
+.ui-tabs__tab[aria-selected="true"] { color: var(--color-text-primary); background: var(--color-surface-primary); }
+.ui-tabs__tab[aria-selected="true"] .ui-tabs__index { color: var(--color-brand-primary); }
+.ui-tabs__tab[aria-selected="true"]::after { right: var(--space-3); left: var(--space-3); background: var(--color-brand-primary); }
+.ui-tabs__panel { margin-top: var(--space-4); padding: clamp(var(--space-4), 2.4vw, var(--space-6)); background: var(--color-surface-elevated); border: 1px solid var(--color-border-strong); border-top: 3px solid var(--color-civic-accent); box-shadow: 4px 4px 0 color-mix(in srgb, var(--color-civic-accent) 16%, transparent); }
+
+@media (max-width: 40rem) {
+  .ui-tabs__list { padding: var(--space-1); }
+  .ui-tabs__tab { padding-inline: var(--space-2); }
+  .ui-tabs__panel { margin-top: var(--space-3); padding: var(--space-4); }
+}

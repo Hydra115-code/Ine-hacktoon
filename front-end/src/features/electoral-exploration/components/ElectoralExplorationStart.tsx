@@ -1,0 +1,44 @@
+"use client";
+
+import { electoralExplorationIntents } from "../electoral-exploration-intents";
+
+interface ElectoralExplorationStartProps {
+  onSelect?: (prompt: string) => void;
+}
+
+function IntentIcon({ focus }: { focus: "period" | "territory" | "evidence" }) {
+  if (focus === "period") {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18V9m7 9V5m7 13v-7M3 20h18" /></svg>;
+  }
+  if (focus === "territory") {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 5-3 6 3 5-3v13l-5 3-6-3-5 3V7Zm5-3v13m6-10v13" /></svg>;
+  }
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8m-8 4h8m-8 4h5" /></svg>;
+}
+
+export function ElectoralExplorationStart({ onSelect }: ElectoralExplorationStartProps) {
+  return (
+    <section className="electoral-start" aria-label="Opciones para comenzar">
+      <div className="electoral-start__intents" aria-label="Ideas para comenzar">
+        {electoralExplorationIntents.map((intent) => (
+          <button
+            key={intent.id}
+            type="button"
+            data-focus={intent.focus}
+            aria-label={`${intent.label}: ${intent.title}. ${intent.description}`}
+            onClick={() => onSelect?.(intent.prompt)}
+          >
+            <span className="electoral-start__icon"><IntentIcon focus={intent.focus} /></span>
+            <span className="electoral-start__card-copy">
+              <small>{intent.label}</small>
+              <strong>{intent.title}</strong>
+            </span>
+            <svg className="electoral-start__arrow" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4 10h11M11 6l4 4-4 4" />
+            </svg>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}

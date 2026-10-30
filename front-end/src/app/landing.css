@@ -1,0 +1,172 @@
+.landing-shell {
+  min-height: 100dvh;
+  background: var(--color-surface-page);
+  overflow: hidden;
+}
+
+.public-nav {
+  min-height: 64px;
+  padding-inline: clamp(1rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, var(--color-surface-page) 92%, transparent);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.public-nav__how {
+  padding: 0.45rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.public-nav__how:hover,
+.public-nav__how:focus-visible { border-bottom-color: var(--color-brand-primary); }
+
+.landing-main {
+  width: min(100% - 3rem, 1320px);
+  margin: 0 auto;
+  padding: clamp(2.5rem, 5vh, 5rem) 0 2rem;
+}
+
+.landing-hero {
+  min-height: min(670px, calc(100dvh - 205px));
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 7rem);
+}
+
+.landing-copy { position: relative; z-index: 2; max-width: 760px; }
+
+.landing-overline {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.landing-copy h1 {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.landing-copy h1 em {
+  display: block;
+  color: var(--color-brand-primary);
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.landing-intro {
+  max-width: 610px;
+  margin: 2rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  line-height: 1.6;
+}
+
+.landing-sticker {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 var(--color-text-primary);
+  transform: rotate(-2.5deg);
+}
+
+.landing-sticker--primary { margin: 0 0 1.8rem 0.25rem; }
+.landing-sticker--paper { display: none; }
+
+.landing-paper-stage { position: relative; min-height: 620px; display: grid; grid-template-rows: minmax(470px, auto) auto; place-items: center; align-content: center; }
+.landing-paper-stage .paper-avatar-wrapper { z-index: 2; grid-row: 1; width: min(100%, 500px); height: 490px; }
+.landing-paper-stage .paper-avatar-wrapper--hero::before { display: none; }
+
+.landing-paper-note {
+  grid-row: 2;
+  justify-self: end;
+  width: min(86%, 410px);
+  margin: 1rem 0 0;
+  transform: rotate(-0.6deg);
+  animation: landing-note-in 420ms var(--ease-standard) both;
+}
+
+@keyframes landing-note-in {
+  from { opacity: 0; transform: translateY(8px) rotate(-1deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-1deg); }
+}
+
+
+.landing-question {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+  padding: 0.8rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-elevated);
+  box-shadow: 4px 4px 0 color-mix(in srgb, var(--color-border-strong) 32%, transparent);
+}
+
+.landing-question:focus-within { border-color: var(--color-brand-primary); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+.landing-question > label { padding-left: 0.35rem; color: var(--color-brand-primary); font-size: var(--font-size-caption); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.landing-question__control { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-left: 1px solid var(--color-border-subtle); }
+.landing-question__control input { width: 100%; min-width: 0; height: 50px; padding: 0 1rem; border: 0; background: transparent; color: var(--color-text-primary); font: inherit; font-size: 1rem; outline: none; }
+.landing-question__control input::placeholder { color: var(--color-text-muted); }
+.landing-question__control button { height: 46px; padding: 0 1.15rem; border: 1px solid var(--color-brand-primary); background: var(--color-brand-primary); color: var(--color-text-on-brand); font: inherit; font-weight: 700; cursor: pointer; }
+.landing-question__control button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+@media (max-width: 980px) {
+  .landing-main { width: min(100% - 2rem, 780px); }
+  .landing-hero { grid-template-columns: 1fr; gap: 0; }
+  .landing-copy { padding-top: 1.5rem; }
+  .landing-paper-stage { min-height: 540px; grid-template-rows: 420px auto; }
+  .landing-paper-stage .paper-avatar-wrapper { height: 420px; }
+  .landing-sticker--paper { right: 8%; }
+}
+
+@media (max-width: 680px) {
+  .landing-shell { background-image: none; }
+  .landing-main { width: min(100% - 1.5rem, 560px); padding-top: 2rem; padding-bottom: 2.5rem; }
+  .landing-copy h1 { font-size: 2.6rem; line-height: 1.08; letter-spacing: -0.015em; }
+  .landing-sticker { transform: none; clip-path: polygon(2% 8%, 100% 0, 98% 92%, 0 100%); }
+  .landing-sticker--paper { transform: none; }
+  .landing-paper-stage { min-height: 0; grid-template-rows: 340px auto; }
+  .landing-paper-stage .paper-avatar-wrapper { width: 330px; height: 340px; }
+  .landing-paper-note { justify-self: center; width: 100%; margin-top: 1rem; transform: none; animation-name: landing-note-in-mobile; }
+  .landing-question { grid-template-columns: 1fr; }
+  .landing-question__control { border-top: 1px solid var(--color-border-subtle); border-left: 0; }
+}
+
+@keyframes landing-note-in-mobile {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 390px) {
+  .landing-copy h1 { font-size: 2.35rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-sticker,
+  .landing-paper-note { animation: none; transform: none; }
+}
