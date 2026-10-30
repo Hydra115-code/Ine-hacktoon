@@ -176,12 +176,3 @@ Con backend y frontend iniciados en terminales separadas, ejecuta desde la raíz
 node scripts/verify-live-e2e.mjs
 ```
 
-La prueba comprueba el estado de ambos servicios, la compatibilidad contractual, la autenticación privada entre servidores y una consulta ciudadana completa con datos oficiales, texto e interfaz generativa. No imprime tokens ni el contenido de los archivos de entorno.
-
-## Reglas de seguridad
-
-- No subir `.env`, `.env.local`, bases SQLite, logs, builds ni `node_modules`.
-- Mantener Gemini, ElevenLabs y cualquier token de servicio únicamente en el backend.
-- Usar datos agregados y públicos; no incorporar padrones ni identificadores personales.
-- Revisar `git status` antes de cada commit.
-- Ejecutar la auditoría de seguridad antes de abrir un pull request.
