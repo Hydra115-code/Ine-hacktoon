@@ -19,7 +19,7 @@
   background: transparent;
   color: var(--color-text-primary);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   cursor: pointer;
 }
@@ -46,7 +46,7 @@
 .landing-overline {
   margin: 0 0 1rem;
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -85,7 +85,7 @@
   border: 1px solid var(--color-text-primary);
   background: var(--color-surface-elevated);
   color: var(--color-text-primary);
-  font-size: 0.7rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -128,7 +128,7 @@
 }
 
 .landing-question:focus-within { border-color: var(--color-brand-primary); box-shadow: 0 0 0 3px var(--color-focus-ring); }
-.landing-question > label { padding-left: 0.35rem; color: var(--color-brand-primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.landing-question > label { padding-left: 0.35rem; color: var(--color-brand-primary); font-size: var(--font-size-caption); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .landing-question__control { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-left: 1px solid var(--color-border-subtle); }
 .landing-question__control input { width: 100%; min-width: 0; height: 50px; padding: 0 1rem; border: 0; background: transparent; color: var(--color-text-primary); font: inherit; font-size: 1rem; outline: none; }
 .landing-question__control input::placeholder { color: var(--color-text-muted); }

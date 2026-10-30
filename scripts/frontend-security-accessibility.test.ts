@@ -17,6 +17,11 @@ test("la copia ciudadana oculta etiquetas internas y traduce términos de eviden
     cleanGeneratedCopy("SIMULATED: numerator 50 de denominator 100."),
     "Escenario simulado: personas que votaron 50 de lista nominal 100.",
   );
+  assert.equal(
+    cleanGeneratedCopy("Compara resultados por partido y partidos políticos."),
+    "Compara participación por territorio y opciones electorales.",
+  );
+  assert.doesNotMatch(cleanGeneratedCopy("Resultados por partido"), /partido/iu);
 });
 
 test("los diagnósticos internos sólo se exponen en desarrollo explícito", () => {

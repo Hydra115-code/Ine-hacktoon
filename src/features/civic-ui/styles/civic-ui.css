@@ -62,7 +62,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-full);
@@ -150,7 +150,7 @@
   grid-template-columns: 110px 1fr 60px;
   align-items: center;
   gap: var(--space-3);
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
 }
 
 .civic-bar-item--interactive {
@@ -300,7 +300,7 @@
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-full);
   padding: 0.45rem 0.95rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   line-height: 1.4;
   color: var(--color-text-primary);
   cursor: pointer;
@@ -352,7 +352,7 @@
 }
 
 .civic-territorial-tile__name {
-  font-size: 0.82rem;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text-primary);
   display: block;

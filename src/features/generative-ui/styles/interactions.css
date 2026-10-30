@@ -12,7 +12,7 @@
 .ui-field__label-row,
 .ui-switch-row {
   color: var(--color-text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-medium);
 }
 
@@ -88,7 +88,7 @@
   width: fit-content;
   min-height: 2.75rem;
   padding-inline: var(--space-5);
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-sm);
   transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);

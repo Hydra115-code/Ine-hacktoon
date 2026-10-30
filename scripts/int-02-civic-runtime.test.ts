@@ -32,6 +32,9 @@ test("el adaptador conserva compatibilidad con el wire financiero del backend", 
 
 test("formato y protección admiten datos cívicos sin supuestos financieros", () => {
   assert.equal(formatDataValue(123456, "number", { locale: "es-MX", currency: "MXN" }), "123,456");
+  assert.equal(formatDataValue(0.614, "percent", { locale: "es-MX", currency: "MXN" }), "61.4%");
+  assert.equal(formatDataValue(61.4, "percent", { locale: "es-MX", currency: "MXN" }), "61.4%");
+  assert.equal(formatDataValue(61.4, "percentage", { locale: "es-MX", currency: "MXN" }), "61.4%");
   assert.equal(formatDataValue("official", "status", { locale: "es-MX", currency: "MXN" }), "Fuente oficial");
   assert.equal(isSensitiveIdentifierField("persona.claveElector"), true);
   assert.equal(isSensitiveIdentifierField("aggregate.nominalList"), false);

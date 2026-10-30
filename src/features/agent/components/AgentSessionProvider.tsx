@@ -445,7 +445,6 @@ export function AgentSessionProvider({ children, ownerKey }: { children: ReactNo
         else if (part.data.stage === "ready") {
           if (part.data.message === "Paper está listo para ayudarte") {
             isFollowUpRequestRef.current = false;
-            setActivityMessage(part.data.message);
             dispatchExperience({ type: "CONVERSATION_COMPLETED" });
             return;
           }

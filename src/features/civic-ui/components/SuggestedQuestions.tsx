@@ -7,7 +7,7 @@ interface SuggestedQuestionsProps {
 }
 
 const DEFAULT_QUESTIONS = [
-  "¿Cómo votaron las juventudes de 18 a 29 años en 2024?",
+  "¿Cómo participó la población de 18 a 29 años en 2024?",
   "Compara la participación de Nuevo León vs Ciudad de México",
   "¿Cuál ha sido la brecha histórica entre mujeres y hombres?",
 ];

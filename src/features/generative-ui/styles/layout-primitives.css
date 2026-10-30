@@ -81,6 +81,13 @@
 .ui-grid--columns-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ui-grid--columns-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
+/* A metric must keep enough room for a full percentage or civic count. The
+   authored column count remains a preference, while the viewport decides how
+   many readable cards actually fit. */
+.ui-grid:has(> .ui-runtime-motion-node[data-node-type="metric"]) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+
 .ui-flex {
   display: flex;
 }
@@ -202,7 +209,7 @@
   min-height: 2.75rem;
   padding-inline: var(--space-4);
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   background: transparent;
@@ -379,7 +386,7 @@
 
 .ui-tabs__index {
   color: var(--color-civic-accent);
-  font-size: 0.68rem;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }

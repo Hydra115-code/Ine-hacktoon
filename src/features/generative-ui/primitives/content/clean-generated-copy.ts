@@ -13,6 +13,9 @@ export function cleanGeneratedCopy(content: string): string {
     .replace(/\bdenominator\b/giu, "lista nominal")
     .replace(/\bconfidence interval\b/giu, "intervalo de confianza")
     .replace(/\bstack trace\b/giu, "detalle de la incidencia")
+    .replace(/\bresultados?\s+por\s+partidos?\b/giu, "participación por territorio")
+    .replace(/\bpartidos?\s+pol[ií]ticos?\b/giu, "opciones electorales")
+    .replace(/\bpartidos?\b/giu, "opciones electorales")
     .replace(/\(\s*sin registros adicionales pendientes de paginación,?\s*hasMore\s*:\s*false\s*\)/giu, "con el historial completo")
     .trim());
 }

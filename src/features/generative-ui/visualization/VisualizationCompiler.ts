@@ -1,6 +1,6 @@
 import type { EChartsOption } from "echarts";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
-import type { VisualizationNode } from "../schemas/visualization-node";
+import type { VisualizationChannel, VisualizationNode } from "../schemas/visualization-node";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { formatDataValue } from "../data-binding/formatting/format-data-value";
@@ -48,6 +48,11 @@ function unique(values: string[]) {
 
 function channelLabel(channel: { field: string; label?: string }) {
   return cleanGeneratedCopy(channel.label ?? channel.field);
+}
+
+function formatQuantitativeValue(value: unknown, format: VisualizationChannel["format"]) {
+  if (typeof value !== "number" || !Number.isFinite(value) || !format) return String(value ?? "—");
+  return formatDataValue(value, format, { locale: "es-MX", currency: "MXN" }) ?? "—";
 }
 
 function formatTemporalCategories(values: string[], declaredTemporal: boolean) {
@@ -117,6 +122,7 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
   }
 
   const seriesType = spec.mark === "scatter" ? "scatter" : spec.mark.includes("bar") || spec.mark === "bar" ? "bar" : "line";
+  const formatYValue = (value: unknown) => formatQuantitativeValue(value, y.format);
   const series = groups.map((group) => ({
     name: group,
     type: seriesType,
@@ -128,14 +134,24 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
     showSymbol: spec.mark === "line" || spec.mark === "area" ? true : undefined,
     lineStyle: spec.mark === "line" || spec.mark === "area" ? { width: 3 } : undefined,
     barMaxWidth: seriesType === "bar" ? 44 : undefined,
-    label: seriesType === "bar" ? { show: true, position: "top", fontWeight: 600 } : undefined,
+    label: seriesType === "bar"
+      ? { show: true, position: "top", fontSize: 14, fontWeight: 600, formatter: ({ value }: { value?: unknown }) => formatYValue(value) }
+      : undefined,
     emphasis: { focus: "series" },
   }));
 
   if (spec.mark === "scatter") {
     return {
-      xAxis: { type: "value", name: channelLabel(x) },
-      yAxis: { type: "value", name: channelLabel(y) },
+      xAxis: {
+        type: "value",
+        name: channelLabel(x),
+        axisLabel: x.format ? { formatter: (value: number) => formatQuantitativeValue(value, x.format) } : undefined,
+      },
+      yAxis: {
+        type: "value",
+        name: channelLabel(y),
+        axisLabel: y.format ? { formatter: (value: number) => formatYValue(value) } : undefined,
+      },
       series: groups.map((group) => ({
         name: group,
         type: "scatter",
@@ -156,7 +172,11 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
       data: formatTemporalCategories(categories, x.type === "temporal"),
       boundaryGap: seriesType === "bar",
     },
-    yAxis: { type: "value", name: channelLabel(y) },
+    yAxis: {
+      type: "value",
+      name: channelLabel(y),
+      axisLabel: y.format ? { formatter: (value: number) => formatYValue(value) } : undefined,
+    },
     series,
   };
 }
@@ -231,19 +251,29 @@ function heatmapOption(spec: VisualizationNode, rows: VisualizationDataRow[]) {
 function applyThemeToMarkOption(markOption: object, theme: VisualizationTheme) {
   const option = markOption as Record<string, unknown>;
   const axisTheme = {
-    axisLabel: { color: theme.mutedText, fontSize: 11, margin: 12 },
+    axisLabel: { color: theme.mutedText, fontSize: 14, margin: 12 },
     axisLine: { lineStyle: { color: theme.border } },
     axisTick: { show: false },
     splitLine: { lineStyle: { color: theme.border, type: "dashed" } },
-    nameTextStyle: { color: theme.mutedText },
+    nameTextStyle: { color: theme.mutedText, fontSize: 14 },
   };
   const themed: Record<string, unknown> = { ...option };
 
   if (option.xAxis && typeof option.xAxis === "object") {
-    themed.xAxis = { ...(option.xAxis as object), ...axisTheme };
+    const axis = option.xAxis as Record<string, unknown>;
+    themed.xAxis = {
+      ...axis,
+      ...axisTheme,
+      axisLabel: { ...axisTheme.axisLabel, ...(axis.axisLabel && typeof axis.axisLabel === "object" ? axis.axisLabel : {}) },
+    };
   }
   if (option.yAxis && typeof option.yAxis === "object") {
-    themed.yAxis = { ...(option.yAxis as object), ...axisTheme };
+    const axis = option.yAxis as Record<string, unknown>;
+    themed.yAxis = {
+      ...axis,
+      ...axisTheme,
+      axisLabel: { ...axisTheme.axisLabel, ...(axis.axisLabel && typeof axis.axisLabel === "object" ? axis.axisLabel : {}) },
+    };
   }
   if (option.visualMap && typeof option.visualMap === "object") {
     themed.visualMap = {
@@ -308,7 +338,7 @@ export function compileVisualizationOption(
     },
     legend: {
       show: spec.legend?.show ?? Boolean(spec.encoding.group),
-      textStyle: { color: theme.mutedText, fontSize: 12 },
+      textStyle: { color: theme.mutedText, fontSize: 14 },
       itemWidth: 12,
       itemHeight: 12,
       itemGap: 18,

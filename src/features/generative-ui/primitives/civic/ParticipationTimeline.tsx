@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { ParticipationTimelineNode } from "@ine/contracts";
 import type { DataValue } from "../../data-binding/schemas/data-registry-schema";
-import { formatCivicValue, isDataRecord, readCivicLabel, readCivicNumber } from "./civic-data";
+import { formatCivicValue, isDataRecord, percentagePointScale, readCivicLabel, readCivicNumber } from "./civic-data";
 import { useInteractionEvent, useInteractionValue } from "../../interactions/events/UIEventProvider";
 import { cleanGeneratedCopy } from "../content/clean-generated-copy";
 import { Visualization } from "../../visualization/Visualization";
@@ -36,8 +36,9 @@ export function ParticipationTimeline({ data, locale = "es-MX", spec }: Particip
       : Math.min(selectedIndex, Math.max(items.length - 1, 0));
   const selectedItem = safeIndex >= 0 ? items[safeIndex] : undefined;
   const previousItem = safeIndex > 0 ? items[safeIndex - 1] : undefined;
+  const differenceScale = percentagePointScale(items.map((item) => item.value), spec.format);
   const selectedDifference = selectedItem && previousItem
-    ? (selectedItem.value - previousItem.value) * (spec.format === "percent" ? 100 : 1)
+    ? (selectedItem.value - previousItem.value) * differenceScale
     : undefined;
   const selectedChart = useMemo(() => {
     if (!selectedItem) return undefined;
@@ -129,7 +130,7 @@ export function ParticipationTimeline({ data, locale = "es-MX", spec }: Particip
           const previousValue = index > 0 ? items[index - 1]?.value : undefined;
           const difference = previousValue === undefined
             ? undefined
-            : (item.value - previousValue) * (spec.format === "percent" ? 100 : 1);
+            : (item.value - previousValue) * differenceScale;
           return (
             <button
               aria-checked={selected}

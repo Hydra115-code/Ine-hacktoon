@@ -42,6 +42,7 @@ test("las composiciones generativas apilan columnas en pantallas angostas", () =
   assert.match(layouts, /@media \(max-width:\s*40rem\)[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
   assert.match(civic, /@media \(max-width:\s*64rem\)[\s\S]*?\.ui-mexico-map__body\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
   assert.match(civic, /@media \(max-width:\s*40rem\)[\s\S]*?\.ui-election-delta__periods\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
+  assert.match(layouts, /\.ui-grid:has\(> \.ui-runtime-motion-node\[data-node-type="metric"\]\)[\s\S]*?minmax\(min\(100%, 13rem\), 1fr\)/u);
 });
 
 test("tablas y visualizaciones contienen el desplazamiento horizontal", () => {

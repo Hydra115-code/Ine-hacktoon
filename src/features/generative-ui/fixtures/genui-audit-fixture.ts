@@ -26,7 +26,7 @@ export const genUIAuditData = dataRegistrySchema.parse({
   ],
   tableRows: Array.from({ length: 28 }, (_, index) => ({
     id: `entity-${index + 1}`, entity: `Entidad ${String.fromCharCode(65 + index % 26)}`,
-    period: `202${index % 5}`, participation: Number(((46.2 + (index * 3.7) % 23) / 100).toFixed(3)),
+    period: `202${index % 5}`, participation: Number((46.2 + (index * 3.7) % 23).toFixed(1)),
     observations: 120000 + index * 8750, updatedAt: `2026-10-${String((index % 17) + 1).padStart(2, "0")}`,
     status: index % 3 === 0 ? "Revisado" : index % 3 === 1 ? "Disponible" : "Precaución",
   })),

@@ -195,7 +195,7 @@
 .paper-result-intro footer span {
   padding: 0.2rem 0.45rem;
   color: var(--color-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-caption);
   font-weight: var(--font-weight-semibold);
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border-subtle);
@@ -230,7 +230,7 @@
 .paper-suggestions__avatar .paper-sprite__hand { display: none; }
 
 .paper-suggestions > header > div { display: grid; gap: 0.1rem; }
-.paper-suggestions > header span:not(.paper-suggestions__avatar) { color: var(--color-brand-primary); font-size: 0.68rem; font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-label); text-transform: uppercase; }
+.paper-suggestions > header span:not(.paper-suggestions__avatar) { color: var(--color-brand-primary); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-label); text-transform: uppercase; }
 .paper-suggestions h3 { margin: 0; color: var(--color-text-primary); font-family: var(--font-family-display); font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
 
 .paper-suggestions ul {
@@ -265,11 +265,11 @@
 .paper-suggestions li button:hover,
 .paper-suggestions li button:focus-visible { border-color: var(--color-brand-primary); box-shadow: 0.4rem 0.45rem 0 color-mix(in srgb, var(--color-brand-primary) 16%, transparent); transform: translate(-0.15rem, -0.15rem); }
 .paper-suggestions li button:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 3px; }
-.paper-suggestions li button > span { color: var(--color-civic-accent); font-size: 0.68rem; font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-label); text-transform: uppercase; }
+.paper-suggestions li button > span { color: var(--color-civic-accent); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-label); text-transform: uppercase; }
 .paper-suggestions li button strong { font-size: 0.98rem; }
-.paper-suggestions li button small { color: var(--color-text-secondary); font-size: 0.78rem; line-height: 1.4; }
+.paper-suggestions li button small { color: var(--color-text-secondary); font-size: var(--font-size-caption); line-height: 1.45; }
 .paper-suggestions li button i { position: absolute; top: 50%; right: var(--space-4); color: var(--color-brand-primary); font-size: 1.3rem; font-style: normal; transform: translateY(-50%); }
-.paper-suggestions > p { margin: 0; color: var(--color-text-muted); font-size: 0.72rem; }
+.paper-suggestions > p { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-caption); }
 
 @media (max-width: 44rem) {
   .paper-result-intro { grid-template-columns: 2.75rem minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); }
@@ -483,7 +483,7 @@
   position: relative;
   display: block;
   color: var(--color-brand-primary);
-  font-size: 0.64rem;
+  font-size: var(--font-size-caption);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -616,7 +616,7 @@
   padding: 0.15rem 0.5rem;
   background: var(--color-brand-soft);
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   color: var(--color-brand-primary);
   font-weight: 600;
 }
@@ -645,7 +645,7 @@
   border-left: 2px solid var(--color-crayon);
   padding: var(--space-2) var(--space-3);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
 }
 
@@ -676,7 +676,7 @@
   right: 12px;
   background: var(--color-surface-page);
   padding: 0 6px;
-  font-size: 0.65rem;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-text-muted);

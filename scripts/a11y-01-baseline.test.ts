@@ -63,6 +63,16 @@ test("A11Y-01 mantiene contraste AA en los textos y estados principales", () => 
   }
 });
 
+test("A11Y-01 conserva un tamaño mínimo legible para texto auxiliar", () => {
+  const typography = read("src/shared/design-system/tokens/typography.css");
+  assert.match(typography, /--font-size-caption:\s*0\.9375rem/u);
+  assert.match(typography, /--font-size-label:\s*1rem/u);
+
+  const chartCompiler = read("src/features/generative-ui/visualization/VisualizationCompiler.ts");
+  assert.doesNotMatch(chartCompiler, /fontSize:\s*(?:11|12)\b/u);
+  assert.match(chartCompiler, /fontSize:\s*14/u);
+});
+
 test("A11Y-01 permite saltar navegación y enfoca destinos reales", () => {
   const publicNav = read("src/features/workspace/components/PublicNav.tsx");
   const appShell = read("src/features/workspace/components/AppShell.tsx");

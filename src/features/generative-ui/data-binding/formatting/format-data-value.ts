@@ -47,6 +47,17 @@ function numericDisplayValue(value: DataValue, format: "currency" | "number") {
   throw new TypeError(`${format} requiere un valor numérico válido`);
 }
 
+function percentageRatio(value: DataValue, format: "percent" | "percentage") {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new TypeError("percentage requiere un número válido");
+  }
+
+  // `percent` conserva compatibilidad con contratos que envían una razón (0.614),
+  // pero también tolera porcentajes cívicos ya expresados de 0 a 100 (61.4).
+  // Las columnas `percentage` usan explícitamente la escala de 0 a 100.
+  return format === "percentage" || Math.abs(value) > 1 ? value / 100 : value;
+}
+
 export function formatDataValue(
   value: DataValue,
   format: DataDisplayFormat | undefined,
@@ -71,8 +82,11 @@ export function formatDataValue(
   }
 
   if (format === "percent" || format === "percentage") {
-    if (typeof value !== "number") throw new TypeError("percentage requiere un número");
-    return new Intl.NumberFormat(options.locale, { style: "percent", maximumFractionDigits: 1 }).format(value);
+    return new Intl.NumberFormat(options.locale, {
+      style: "percent",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(percentageRatio(value, format));
   }
 
   if (format === "date" || format === "datetime") {

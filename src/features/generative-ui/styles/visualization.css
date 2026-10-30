@@ -106,7 +106,7 @@
   min-height: 14rem;
   padding: var(--space-6);
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-caption);
   text-align: center;
   background: var(--color-surface-secondary);
   border: 1px solid var(--color-border-strong);
