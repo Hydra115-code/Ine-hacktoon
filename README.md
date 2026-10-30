@@ -14,6 +14,19 @@ scripts/     Inicialización segura y verificación integral
 
 Los commits utilizados para construir esta integración están registrados en [`integration-sources.json`](integration-sources.json).
 
+## Inicio rápido
+
+En una máquina nueva, después de clonar `main`, sólo necesitas dos comandos:
+
+```bash
+./scripts/setup-local.sh
+./scripts/start-local.sh
+```
+
+El primero prepara el release CCPC, instala Data, Back y Front con pnpm, crea los archivos privados de entorno y valida la configuración. El segundo levanta ambos servicios, espera a que estén listos y los cierra juntos al presionar `Ctrl+C`.
+
+Abre `http://127.0.0.1:3000`.
+
 ## Requisitos
 
 - Git.
@@ -55,6 +68,18 @@ También puede instalarse y validarse todo con:
 
 ```bash
 ./scripts/verify-all.sh --install
+```
+
+La instalación simplificada equivalente es:
+
+```bash
+./scripts/setup-local.sh
+```
+
+Agrega `--verify` para ejecutar también todas las pruebas:
+
+```bash
+./scripts/setup-local.sh --verify
 ```
 
 ## Archivos de entorno
@@ -121,6 +146,14 @@ GEMINI_MODEL="gemini-3.7-flash"
 No copies `GEMINI_API_KEY` al frontend y nunca uses un prefijo `NEXT_PUBLIC_` para secretos.
 
 ## Ejecución
+
+La forma recomendada es iniciar todo desde la raíz:
+
+```bash
+./scripts/start-local.sh
+```
+
+También puedes iniciar cada servicio por separado:
 
 Terminal 1:
 
