@@ -28,10 +28,12 @@ for environment_file in back-end/.env front-end/.env.local; do
   fi
 done
 
+node "$repository_root/scripts/configure-local-env.mjs"
+
 cat <<'MESSAGE'
 
-Completa los valores locales antes de iniciar los servicios.
-- AGENT_API_TOKEN debe ser el mismo en backend y frontend.
+Configuración local conectada.
+- Se generó o conservó un AGENT_API_TOKEN privado y se sincronizó sin mostrarlo.
 - GEMINI_API_KEY pertenece únicamente a back-end/.env.
 - No modifiques las plantillas .env.example con valores reales.
 MESSAGE

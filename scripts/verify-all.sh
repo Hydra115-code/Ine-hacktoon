@@ -14,7 +14,7 @@ case "${1:-}" in
     ;;
 esac
 
-for command_name in node npm corepack; do
+for command_name in node corepack; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     printf 'ERROR: falta el comando requerido: %s\n' "$command_name" >&2
     exit 1
@@ -25,14 +25,15 @@ node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if
 
 "$repository_root/scripts/check-repository-safety.sh"
 "$repository_root/scripts/prepare-data-release.sh"
+node "$repository_root/scripts/check-local-config.mjs"
 
 if [[ "$install_dependencies" == true ]]; then
-  (cd "$data_release" && npm ci --ignore-scripts)
+  "$repository_root/scripts/install-data-dependencies.sh"
   (cd "$repository_root/back-end" && corepack pnpm install --frozen-lockfile)
   (cd "$repository_root/front-end" && corepack pnpm install --frozen-lockfile)
 fi
 
-(cd "$data_release" && npm run ccpc:verify-delivery && npm run ccpc:check)
+(cd "$data_release" && corepack pnpm@10.34.5 run ccpc:verify-delivery && corepack pnpm@10.34.5 run ccpc:check)
 (cd "$repository_root/back-end" && corepack pnpm int-08:verify)
 (cd "$repository_root/front-end" && corepack pnpm int-08:verify)
 

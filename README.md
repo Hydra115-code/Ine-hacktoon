@@ -19,7 +19,7 @@ Los commits utilizados para construir esta integración están registrados en [`
 - Git.
 - Node.js 22 desde la versión 22.18, o Node.js 23.6 o posterior.
 - Corepack, incluido con Node.js.
-- `npm`, incluido con Node.js.
+- `pnpm`, administrado mediante Corepack.
 - `unzip` y `sha256sum` en Linux, o `unzip` y `shasum` en macOS.
 
 No se requiere una suscripción de base de datos. El modo local utiliza SQLite y el planificador por reglas funciona sin Gemini.
@@ -28,8 +28,8 @@ Comprueba las versiones:
 
 ```bash
 node --version
-npm --version
 corepack --version
+corepack pnpm --version
 ```
 
 ## Instalación
@@ -40,11 +40,9 @@ Desde la raíz del repositorio:
 corepack enable
 
 ./scripts/prepare-data-release.sh
+./scripts/install-data-dependencies.sh
 
-cd data-release/Ine-hacktoon-DATA-06
-npm ci --ignore-scripts
-
-cd ../../back-end
+cd back-end
 corepack pnpm install --frozen-lockfile
 
 cd ../front-end
@@ -75,6 +73,8 @@ front-end/.env.local
 ```
 
 Ambos archivos están ignorados por Git y se crean con permisos privados. Nunca escribas credenciales en `.env.example`, el README, un commit o una captura de pantalla.
+
+Además conecta el release completo de datos, genera un token local cuando hace falta y lo sincroniza entre backend y frontend sin imprimirlo. Si los archivos ya existen, conserva las claves privadas y sólo normaliza los valores locales de integración.
 
 ### Configuración local mínima
 
@@ -164,7 +164,7 @@ Validaciones individuales:
 
 ```bash
 cd data-release/Ine-hacktoon-DATA-06
-npm run ccpc:verify-delivery && npm run ccpc:check
+corepack pnpm@10.34.5 run ccpc:verify-delivery && corepack pnpm@10.34.5 run ccpc:check
 cd ../../back-end && corepack pnpm int-08:verify
 cd ../front-end && corepack pnpm int-08:verify
 ```
