@@ -1,0 +1,53 @@
+# Credenciales y configuración local
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Dependencias
+**/node_modules/
+**/.pnpm-store/
+
+# Builds, cobertura y cachés
+**/.next/
+**/out/
+**/dist/
+**/coverage/
+**/.nyc_output/
+**/.cache/
+**/.turbo/
+**/*.tsbuildinfo
+
+# Estado local y bases de datos
+**/.local/
+**/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal
+**/*.db
+/data-release/
+/.data-release.*
+
+# Logs y procesos
+**/*.log
+**/*.pid
+**/*.pid.lock
+**/npm-debug.log*
+**/pnpm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Resultados de herramientas
+**/playwright-report/
+**/test-results/
+**/.vercel/
+
+# Temporales, editores y sistema operativo
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.swp
+**/*~
+**/.vscode/
+**/.idea/
+**/.DS_Store
+**/Thumbs.db
