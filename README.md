@@ -163,9 +163,8 @@ Validación completa con dependencias ya instaladas:
 Validaciones individuales:
 
 ```bash
-cd data-release/Ine-hacktoon-DATA-06
-corepack pnpm@10.34.5 run ccpc:verify-delivery && corepack pnpm@10.34.5 run ccpc:check
-cd ../../back-end && corepack pnpm int-08:verify
+./scripts/verify-data.sh
+cd back-end && corepack pnpm int-08:verify
 cd ../front-end && corepack pnpm int-08:verify
 ```
 

@@ -33,7 +33,7 @@ if [[ "$install_dependencies" == true ]]; then
   (cd "$repository_root/front-end" && corepack pnpm install --frozen-lockfile)
 fi
 
-(cd "$data_release" && corepack pnpm@10.34.5 run ccpc:verify-delivery && corepack pnpm@10.34.5 run ccpc:check)
+"$repository_root/scripts/verify-data.sh"
 (cd "$repository_root/back-end" && corepack pnpm int-08:verify)
 (cd "$repository_root/front-end" && corepack pnpm int-08:verify)
 

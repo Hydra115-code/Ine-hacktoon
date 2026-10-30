@@ -49,8 +49,8 @@ test("un conflicto conserva exactamente el snapshot e índice vigentes", () => {
 test("el conflicto no ofrece reintento ciego ni repite una operación", () => {
   assert.deepEqual(presentAgentFailure({ code: "ui_revision_conflict", recoverable: true, hasPartialData: true }), {
     code: "ui_revision_conflict",
-    title: "Paper necesita recuperar la última vista",
-    message: "Conservamos el resultado anterior. Recupéralo antes de pedir otro cambio; no repetiremos la operación automáticamente.",
+    title: "La vista cambió mientras trabajábamos",
+    message: "Tu resultado anterior sigue disponible. Recupéralo antes de pedir otro cambio.",
     canRetry: false,
     canContinue: false,
   });

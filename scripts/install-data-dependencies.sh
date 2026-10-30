@@ -10,6 +10,6 @@ if [[ ! -f "$data_release/pnpm-lock.yaml" ]]; then
   (cd "$data_release" && corepack pnpm@10.34.5 import)
 fi
 
-(cd "$data_release" && corepack pnpm@10.34.5 install --frozen-lockfile --ignore-scripts)
+(cd "$data_release" && corepack pnpm@10.34.5 install --frozen-lockfile --ignore-scripts --node-linker=hoisted --force)
 
 printf 'Dependencias del release de datos instaladas con pnpm.\n'
