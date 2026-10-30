@@ -5,7 +5,8 @@ import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { uiSpecificationSchema } from "@ine/contracts";
 import {
-  BRYAN_BACKEND_CONTRACT_FINGERPRINT,
+  CURRENT_BACKEND_CONTRACT_FINGERPRINT,
+  LEGACY_BACKEND_CONTRACT_FINGERPRINT,
   isSupportedBackendContractFingerprint,
   normalizeBackendContractPayload,
   normalizeFrontendContractPayloadForBackend,
@@ -73,7 +74,8 @@ const frontendSpecification = {
 } as const;
 
 test("sólo reconoce el contrato nativo y el fingerprint explícito del backend", () => {
-  assert.equal(isSupportedBackendContractFingerprint(BRYAN_BACKEND_CONTRACT_FINGERPRINT), true);
+  assert.equal(isSupportedBackendContractFingerprint(CURRENT_BACKEND_CONTRACT_FINGERPRINT), true);
+  assert.equal(isSupportedBackendContractFingerprint(LEGACY_BACKEND_CONTRACT_FINGERPRINT), true);
   assert.equal(isSupportedBackendContractFingerprint("a".repeat(64)), false);
 });
 

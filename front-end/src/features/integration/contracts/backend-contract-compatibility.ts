@@ -5,12 +5,19 @@ import { CONTRACT_FINGERPRINT } from "@ine/contracts";
  * contract package. The frontend keeps its neutral internal vocabulary and
  * adapts the two known legacy wire differences only at the HTTP boundary.
  */
-export const BRYAN_BACKEND_CONTRACT_FINGERPRINT =
+export const CURRENT_BACKEND_CONTRACT_FINGERPRINT =
+  "765814b41d32ea8a6ba24d6d00293e50854304e20401793cacb6ed7f12e0006d" as const;
+
+export const LEGACY_BACKEND_CONTRACT_FINGERPRINT =
   "1d5ca770e9c1e26dd437e04038a70477d3498b64a27f886eb0f1667b4b9976e5" as const;
+
+/** @deprecated Use CURRENT_BACKEND_CONTRACT_FINGERPRINT. */
+export const BRYAN_BACKEND_CONTRACT_FINGERPRINT = LEGACY_BACKEND_CONTRACT_FINGERPRINT;
 
 const supportedBackendFingerprints = new Set<string>([
   CONTRACT_FINGERPRINT,
-  BRYAN_BACKEND_CONTRACT_FINGERPRINT,
+  CURRENT_BACKEND_CONTRACT_FINGERPRINT,
+  LEGACY_BACKEND_CONTRACT_FINGERPRINT,
 ]);
 
 const inboundSemanticStates: Readonly<Record<string, string>> = {

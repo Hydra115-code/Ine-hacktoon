@@ -168,6 +168,16 @@ cd back-end && corepack pnpm int-08:verify
 cd ../front-end && corepack pnpm int-08:verify
 ```
 
+### Prueba end-to-end en ejecución
+
+Con backend y frontend iniciados en terminales separadas, ejecuta desde la raíz:
+
+```bash
+node scripts/verify-live-e2e.mjs
+```
+
+La prueba comprueba el estado de ambos servicios, la compatibilidad contractual, la autenticación privada entre servidores y una consulta ciudadana completa con datos oficiales, texto e interfaz generativa. No imprime tokens ni el contenido de los archivos de entorno.
+
 ## Reglas de seguridad
 
 - No subir `.env`, `.env.local`, bases SQLite, logs, builds ni `node_modules`.
