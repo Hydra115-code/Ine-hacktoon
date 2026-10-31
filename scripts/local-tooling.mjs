@@ -152,7 +152,7 @@ export async function installDataDependencies() {
   }
   await run(
     corepackCommand,
-    ["pnpm@12.16.1", "install", "--frozen-lockfile", "--ignore-scripts", "--node-linker=hoisted", "--force"],
+    ["pnpm@12.16.1", "--config.node-linker=hoisted", "install", "--frozen-lockfile", "--ignore-scripts", "--force"],
     { cwd: dataRelease },
   );
   console.log("Dependencias del release de datos instaladas con pnpm.");
