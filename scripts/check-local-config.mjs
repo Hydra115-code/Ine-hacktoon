@@ -86,6 +86,7 @@ function assertNoPublicSecrets(environment, filename) {
 }
 
 async function assertPrivate(filename, label) {
+  if (process.platform === "win32") return;
   const info = await stat(filename);
   if ((info.mode & 0o077) !== 0) throw new Error(`${label} debe tener permisos 600`);
 }

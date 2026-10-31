@@ -91,5 +91,5 @@ async function writePrivateFile(filename, contents) {
   const temporary = `${filename}.${process.pid}.tmp`;
   await writeFile(temporary, contents, { encoding: "utf8", mode: 0o600 });
   await rename(temporary, filename);
-  await chmod(filename, 0o600);
+  if (process.platform !== "win32") await chmod(filename, 0o600);
 }
