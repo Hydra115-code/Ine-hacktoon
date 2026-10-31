@@ -51,12 +51,12 @@ Si ya descargaste esta rama, no vuelvas a clonarla: entra a su carpeta y contin√
 
 ```bash
 corepack enable
-corepack prepare pnpm@11.25.0 --activate
+corepack prepare pnpm@12.16.1 --activate
 pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-El resultado de `pnpm --version` debe ser `11.25.0`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
+El resultado de `pnpm --version` debe ser `12.16.1`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
 
 ### 4. Crear la configuraci√≥n local
 
@@ -274,7 +274,7 @@ En ese caso agrega `http://localhost:3001,http://127.0.0.1:3001` a `AGENT_API_AL
 Desde `front-end/`:
 
 ```bash
-corepack prepare pnpm@11.25.0 --activate
+corepack prepare pnpm@12.16.1 --activate
 pnpm --version
 pnpm install --frozen-lockfile
 ```

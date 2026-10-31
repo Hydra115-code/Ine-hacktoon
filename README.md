@@ -49,8 +49,10 @@ Comprueba las versiones:
 ```bash
 node --version
 corepack --version
-corepack pnpm --version
+corepack pnpm@12.16.1 --version
 ```
+
+La versión esperada de pnpm es `12.16.1`.
 
 ## Instalación paso a paso
 

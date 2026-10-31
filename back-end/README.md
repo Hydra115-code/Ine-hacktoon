@@ -54,12 +54,12 @@ Si ya descargaste esta rama, no vuelvas a clonarla: entra a `back-end/` y contin
 
 ```bash
 corepack enable
-corepack prepare pnpm@10.34.5 --activate
+corepack prepare pnpm@12.16.1 --activate
 pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-El resultado de `pnpm --version` debe ser `10.34.5`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
+El resultado de `pnpm --version` debe ser `12.16.1`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
 
 ### 4. Crear la configuración local
 
@@ -375,11 +375,11 @@ Confirma que `AGENT_API_TOKEN` sea idéntico en `back-end/.env` y `front-end/.en
 ```bash
 npm install --global corepack
 corepack enable
-corepack prepare pnpm@10.34.5 --activate
+corepack prepare pnpm@12.16.1 --activate
 pnpm --version
 ```
 
-Ejecuta estos comandos desde `back-end/`. La versión esperada es `10.34.5`.
+Ejecuta estos comandos desde `back-end/`. La versión esperada es `12.16.1`.
 
 ### El estado no abre o `curl` muestra `Connection refused`
 
@@ -402,7 +402,7 @@ Si alguno no imprime `OK`, revisa dónde descomprimiste el release y corrige `CC
 
 ### La instalación de dependencias falla
 
-Confirma la versión de Node con `node --version`, activa pnpm 10.34.5 y vuelve a ejecutar:
+Confirma la versión de Node con `node --version`, activa pnpm 12.16.1 y vuelve a ejecutar:
 
 ```bash
 pnpm install --frozen-lockfile

@@ -148,11 +148,11 @@ export async function prepareDataRelease(root = repositoryRoot) {
 export async function installDataDependencies() {
   const dataRelease = await prepareDataRelease();
   if (!(await exists(path.join(dataRelease, "pnpm-lock.yaml")))) {
-    await run(corepackCommand, ["pnpm@10.34.5", "import"], { cwd: dataRelease });
+    await run(corepackCommand, ["pnpm@12.16.1", "import"], { cwd: dataRelease });
   }
   await run(
     corepackCommand,
-    ["pnpm@10.34.5", "install", "--frozen-lockfile", "--ignore-scripts", "--node-linker=hoisted", "--force"],
+    ["pnpm@12.16.1", "install", "--frozen-lockfile", "--ignore-scripts", "--node-linker=hoisted", "--force"],
     { cwd: dataRelease },
   );
   console.log("Dependencias del release de datos instaladas con pnpm.");

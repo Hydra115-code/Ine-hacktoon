@@ -3,7 +3,7 @@
 import { corepackCommand, prepareDataRelease, run } from "./local-tooling.mjs";
 
 const dataRelease = await prepareDataRelease();
-const pnpm = (...args) => run(corepackCommand, ["pnpm@10.34.5", ...args], { cwd: dataRelease });
+const pnpm = (...args) => run(corepackCommand, ["pnpm@12.16.1", ...args], { cwd: dataRelease });
 
 await pnpm("run", "ccpc:verify-delivery");
 await pnpm("run", "typecheck");
