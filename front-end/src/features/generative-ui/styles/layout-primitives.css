@@ -97,6 +97,22 @@
 .ui-flex--wrap-wrap { flex-wrap: wrap; }
 .ui-flex--wrap-nowrap { flex-wrap: nowrap; }
 
+/* Analytical children must not collapse to their intrinsic width inside an
+   older generated column that omitted its alignment preference. */
+.ui-flex--direction-column > .ui-runtime-motion-node:is(
+  [data-node-type="table"],
+  [data-node-type="visualization"],
+  [data-node-type="evidenceSummary"],
+  [data-node-type="comparisonMatrix"],
+  [data-node-type="participationTimeline"],
+  [data-node-type="demographicBreakdown"],
+  [data-node-type="territoryRanking"],
+  [data-node-type="mexicoChoropleth"]
+) {
+  width: 100%;
+  align-self: stretch;
+}
+
 /* Data-dense GenUI pieces need a readable column before they may share a row.
    Metrics and badges can remain compact; analytical components wrap as units. */
 .ui-flex--direction-row > .ui-runtime-motion-node:is(

@@ -127,6 +127,17 @@ test("la comparación conserva formato porcentual en gráfica, tabla y datos nor
   assert.equal(values.every((value) => value > 0 && value <= 1), true);
 });
 
+test("la composición vertical estira la tabla al ancho disponible", async () => {
+  const response = await ask("¿Cuál fue la participación en Aguascalientes en 2024?");
+  const payload = adaptUiPayload(response.ui, response.dataSources, 1);
+
+  assert.equal(payload.specification.root.type, "flex");
+  if (payload.specification.root.type !== "flex") return;
+  assert.equal(payload.specification.root.direction, "column");
+  assert.equal(payload.specification.root.align, "stretch");
+  assert.ok(payload.specification.root.children.some((node) => node.type === "table"));
+});
+
 test("respeta las preferencias del usuario", async () => {
   const onlyTable = await ask("Participación por estado en 2024, sólo la tabla");
   assert.ok(!types(onlyTable).some((type) => type.startsWith("chart")));

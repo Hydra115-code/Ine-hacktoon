@@ -24,6 +24,14 @@ test("el desbordamiento de datos permanece dentro del componente", () => {
   assert.match(styles, /@media \(max-width:\s*40rem\)[\s\S]*?\.ui-table__pagination\s*\{[^}]*flex-direction:\s*column;/u);
 });
 
+test("las composiciones verticales reservan todo el ancho para tablas analíticas", () => {
+  const flex = source("src/features/generative-ui/primitives/layout/Flex.tsx");
+  const layouts = source("src/features/generative-ui/styles/layout-primitives.css");
+
+  assert.match(flex, /align \?\? \(direction === "column" \? "stretch" : "center"\)/u);
+  assert.match(layouts, /\.ui-flex--direction-column > \.ui-runtime-motion-node:is\([\s\S]*?\[data-node-type="table"\][\s\S]*?\)\s*\{[^}]*width:\s*100%;[^}]*align-self:\s*stretch;/u);
+});
+
 test("las densidades cómoda y compacta mantienen ritmos distintos", () => {
   const styles = source("src/features/generative-ui/styles/table.css");
 

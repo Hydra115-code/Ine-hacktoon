@@ -161,6 +161,7 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
         type: "flex",
         id,
         direction: node.direction === "horizontal" ? "row" : "column",
+        align: node.direction === "horizontal" ? "center" : "stretch",
         gap: "md",
         children: addDataQualityBadge(node.id, node.children.map((child) => adaptNode(child, context)), context),
       };

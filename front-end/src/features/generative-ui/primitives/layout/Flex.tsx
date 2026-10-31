@@ -8,11 +8,13 @@ export function Flex({
   direction = "row",
   wrap = "wrap",
   justify = "start",
-  align = "center",
+  align,
   gap = "md",
 }: FlexProps) {
+  const resolvedAlign = align ?? (direction === "column" ? "stretch" : "center");
+
   return (
-    <div className={`ui-flex ${variantClass("ui-flex", "direction", direction)} ${variantClass("ui-flex", "wrap", wrap)} ${variantClass("ui", "justify", justify)} ${variantClass("ui", "align", align)} ${variantClass("ui", "gap", gap)}`}>
+    <div className={`ui-flex ${variantClass("ui-flex", "direction", direction)} ${variantClass("ui-flex", "wrap", wrap)} ${variantClass("ui", "justify", justify)} ${variantClass("ui", "align", resolvedAlign)} ${variantClass("ui", "gap", gap)}`}>
       {children}
     </div>
   );
