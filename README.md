@@ -1,411 +1,241 @@
 # INE Explora — Backend
 
-API y servidor MCP para consultas de participación electoral. El servicio interpreta preguntas, consulta datos CCPC agregados, valida la evidencia y transmite texto, datos e interfaces declarativas al frontend.
+API que responde preguntas ciudadanas sobre participación electoral con datos oficiales del CCPC. Interpreta la pregunta, consulta los datos con herramientas MCP, verifica las cifras y envía al frontend el texto, los datos y una interfaz declarativa (gráficas, tablas, rankings, líneas del tiempo) que después se puede editar conversando.
 
-## Instalación local paso a paso
-
-Esta guía está pensada para Linux, macOS o WSL. El backend puede arrancar de dos formas:
-
-- **Prueba rápida:** reglas locales, SQLite y una muestra de datos incluida. No requiere cuenta, suscripción ni clave de IA.
-- **Producto completo:** dataset CCPC 1.0.0 y, opcionalmente, Gemini para comprender preguntas abiertas.
-
-### 1. Instalar los requisitos
-
-- [Git](https://git-scm.com/downloads).
-- [Node.js 22.18 LTS](https://nodejs.org/) o superior. El backend admite Node 22, pero el release completo de Datos requiere 22.18 o posterior.
-- Acceso al repositorio de GitHub.
-
-Comprueba la instalación en una terminal:
-
-```bash
-git --version
-node --version
-corepack --version
-```
-
-Si `corepack` no existe, instálalo y vuelve a comprobarlo:
-
-```bash
-npm install --global corepack
-corepack --version
-```
-
-### 2. Descargar la rama del backend
-
-Desde la carpeta donde quieras guardar el proyecto:
-
-```bash
-mkdir -p INE-Integracion
-cd INE-Integracion
-git clone --branch Back-end --single-branch git@github.com:Hydra115-code/Ine-hacktoon.git back-end
-cd back-end
-```
-
-Si Git muestra `Permission denied (publickey)`, configura una llave SSH en GitHub o, si tu cuenta tiene acceso, usa la URL HTTPS:
-
-```bash
-git clone --branch Back-end --single-branch https://github.com/Hydra115-code/Ine-hacktoon.git back-end
-cd back-end
-```
-
-Si ya descargaste esta rama, no vuelvas a clonarla: entra a `back-end/` y continúa.
-
-### 3. Instalar la versión correcta de pnpm y las dependencias
-
-```bash
-corepack enable
-corepack prepare pnpm@10.34.5 --activate
-pnpm --version
-pnpm install --frozen-lockfile
-```
-
-El resultado de `pnpm --version` debe ser `10.34.5`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
-
-### 4. Crear la configuración local
-
-```bash
-cp .env.example .env
-```
-
-Genera un token local:
-
-```bash
-openssl rand -hex 32
-```
-
-Copia el resultado. Abre `.env` en un editor y deja, como mínimo:
-
-```dotenv
-AUTH_MODE=local_sqlite
-SQLITE_DATABASE_PATH=.local/ine-explora.sqlite
-LOCAL_ACTOR_ID=10000000-0000-4000-8000-000000000001
-UI_PLANNER_MODE=rules
-AGENT_API_HOST=127.0.0.1
-AGENT_API_PORT=3101
-AGENT_API_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-AGENT_API_TOKEN=pega-aqui-el-token-generado
-```
-
-El token debe tener al menos 32 caracteres. Guarda el mismo valor en `front-end/.env.local`; si no coincide, el frontend recibirá un error `401`.
-
-No borres las demás variables del archivo: pueden conservar sus valores de ejemplo mientras la función correspondiente esté desactivada. Nunca subas `.env` a Git.
-
-### 5. Elegir la fuente de datos
-
-#### Opción A — Muestra incluida
-
-Para comprobar rápidamente que el sistema funciona, deja estas variables vacías:
-
-```dotenv
-CCPC_DATA_DIR=
-CCPC_DATASET_PATH=
-```
-
-La API marcará las respuestas como datos de muestra. Esta opción sirve para desarrollo, no para demostrar la cobertura completa del producto.
-
-#### Opción B — Dataset CCPC completo recomendado
-
-La rama `Data` distribuye el módulo completo dentro de un ZIP verificado. Desde `INE-Integracion/`, en otra terminal:
-
-```bash
-git clone --branch Data --single-branch git@github.com:Hydra115-code/Ine-hacktoon.git data
-cd data
-sha256sum -c Entrega-final-CCPC-1.0.0.zip.sha256
-unzip Entrega-final-CCPC-1.0.0.zip -d ../data-release
-cd ../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06
-npm ci --ignore-scripts
-```
-
-En macOS, sustituye la línea de `sha256sum` por esta línea antes de descomprimir:
-
-```bash
-shasum -a 256 -c Entrega-final-CCPC-1.0.0.zip.sha256
-```
-
-Después configura `back-end/.env` con estas rutas. Son relativas a la carpeta `back-end/`:
-
-```dotenv
-CCPC_DATA_DIR=../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06
-CCPC_DATASET_PATH=data/ccpc/full/participation.compact.json
-```
-
-No edites ni reformatees los archivos del release: el backend valida su integridad antes de aceptar consultas.
-
-La estructura recomendada queda así:
+## Cómo funciona
 
 ```text
-INE-Integracion/
-├── back-end/
-├── front-end/
-├── data/
-└── data-release/
-    └── Entrega-final-CCPC-1.0.0/
-        └── Ine-hacktoon-DATA-06/
+POST /api/agent
+  ├─ autenticación por token, CORS y límites de uso
+  ├─ filtro de temas: sólo participación electoral; sin datos personales,
+  │  predicciones ni recomendaciones de voto
+  ├─ planificador (reglas, Gemini o modelo local) → plan validado con Zod
+  ├─ herramientas MCP → datos CCPC
+  ├─ respuesta verificada: conserva cifras, numerador y denominador, fuente
+  ├─ compositor de interfaz según la intención y la forma de los datos
+  ├─ sesión y última vista en SQLite
+  └─ stream NDJSON hacia el frontend
 ```
 
-### 6. Elegir cómo se interpretan las preguntas
+Las ediciones de la vista ("deja sólo la tabla", "ordénalo de menor a mayor", "regresa a la vista anterior") se aplican sobre la vista guardada, sin volver a consultar los datos.
 
-Sin servicios externos:
+## Requisitos
 
-```dotenv
-UI_PLANNER_MODE=rules
+- Node.js 22.18 o posterior (el release de datos CCPC no funciona con versiones anteriores).
+- pnpm mediante Corepack, en la versión indicada en `packageManager` de `package.json`. No uses `npm install`.
+- El release de datos CCPC 1.0.0 de la rama `Data`.
+
+## Instalación
+
+### Desde el repositorio integrado (recomendado)
+
+Si clonaste la rama `main`, el backend está en `back-end/` y se instala junto con los datos y el frontend desde la raíz:
+
+```bash
+node setup.mjs
+node start.mjs
 ```
 
-Con Gemini para preguntas abiertas:
+`setup.mjs` prepara los datos, instala dependencias y crea `back-end/.env` con modo `local_sqlite`, planificador `rules` y un token compartido con el frontend. Consulta el `README.md` de la raíz para más detalles.
+
+### Sólo el backend
+
+1. Instala dependencias desde la carpeta del backend:
+
+   ```bash
+   corepack enable
+   corepack pnpm install --frozen-lockfile
+   ```
+
+   En Windows, si `corepack enable` falla por permisos, instala los accesos en una carpeta de usuario y agrégala al `PATH`:
+
+   ```powershell
+   corepack enable --install-directory "$env:LOCALAPPDATA\corepack-shims" pnpm
+   $env:PATH = "$env:LOCALAPPDATA\corepack-shims;$env:PATH"
+   ```
+
+2. Prepara los datos. Desde la rama `Data`, verifica y descomprime el release junto a la carpeta del backend:
+
+   ```bash
+   sha256sum -c Entrega-final-CCPC-1.0.0.zip.sha256
+   unzip Entrega-final-CCPC-1.0.0.zip -d ../data-release
+   cd ../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06
+   npm ci --ignore-scripts
+   ```
+
+   En Windows (PowerShell), compara el resultado de `Get-FileHash Entrega-final-CCPC-1.0.0.zip` con el archivo `.sha256` y descomprime con `Expand-Archive Entrega-final-CCPC-1.0.0.zip ..\data-release`. No modifiques los archivos del release: el backend verifica su integridad al arrancar.
+
+3. Crea la configuración local copiando `.env.example` a `.env` y deja, como mínimo:
+
+   ```dotenv
+   AUTH_MODE=local_sqlite
+   SQLITE_DATABASE_PATH=.local/ine-explora.sqlite
+   CCPC_DATA_DIR=../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06
+   CCPC_DATASET_PATH=data/ccpc/full/participation.compact.json
+   UI_PLANNER_MODE=rules
+   AGENT_API_HOST=127.0.0.1
+   AGENT_API_PORT=3101
+   AGENT_API_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+   AGENT_API_TOKEN=token-local-de-32-caracteres-o-mas
+   ```
+
+   `AUTH_MODE=local_sqlite` debe escribirse explícitamente. Genera el token con:
+
+   ```bash
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   El frontend debe usar exactamente el mismo `AGENT_API_TOKEN`. Nunca subas `.env` a Git.
+
+4. Inicia la API:
+
+   ```bash
+   corepack pnpm api
+   ```
+
+5. Comprueba el estado en otra terminal:
+
+   ```bash
+   curl http://127.0.0.1:3101/api/system/status
+   ```
+
+   En PowerShell: `Invoke-RestMethod http://127.0.0.1:3101/api/system/status`. El encabezado `X-Ui-Planner` indica el planificador activo.
+
+## Planificadores
+
+| `UI_PLANNER_MODE` | Requiere | Comportamiento |
+|---|---|---|
+| `rules` (por defecto) | Nada | Reglas deterministas: entienden estados, gentilicios, años, sexo, edad, tipo de sección y el tipo de análisis. Si falta información, piden aclaración. |
+| `gemini` | `GEMINI_API_KEY` | Primero responden las reglas; Gemini interpreta las preguntas abiertas y las ediciones que las reglas no entienden. Si tarda o propone algo inválido, contestan las reglas. |
+| `local-model` | Servidor local compatible con OpenAI | Un modelo local interpreta la pregunta y, si falla o tarda, contestan las reglas. En la evaluación con 40 preguntas fue menos preciso que las reglas, por eso es opcional. |
+
+En modo `gemini`:
+
+- La interfaz siempre la arma el backend, nunca Gemini.
+- Las ediciones de la vista se eligen de una lista cerrada de operaciones (por ejemplo "dámelo en formato gráfica").
+- A Gemini se le pide no pensar (`thinkingBudget: 0`) para responder rápido; si el modelo no acepta esa opción, se usa la siguiente que sí acepte.
+- La respuesta escrita es la verificada. Con `GEMINI_ANSWER_TIMEOUT_MS` mayor que `0`, Gemini la redacta con otras palabras sin poder cambiar cifras.
+
+Configuración mínima:
 
 ```dotenv
 UI_PLANNER_MODE=gemini
-GEMINI_API_KEY=pega-aqui-tu-clave
+GEMINI_API_KEY=tu-clave
 GEMINI_MODEL=gemini-3.7-flash
 ```
-
-No agregues comillas extra ni espacios alrededor de la clave. Gemini es opcional: si sólo necesitas comprobar instalación y datos, empieza con `rules`.
-
-En modo `gemini`, Gemini interpreta la pregunta y entiende ediciones de la vista ("dámelo en formato gráfica"). La interfaz siempre la arma el backend con los datos, y las cifras se verifican antes de mostrarse. Si Gemini no responde a tiempo, el planificador por reglas contesta en su lugar. La respuesta escrita es la verificada; si se quiere que Gemini la redacte con otras palabras, se activa con `GEMINI_ANSWER_TIMEOUT_MS` (suma unos segundos por pregunta). Para responder rápido se le pide a Gemini no pensar (`thinkingBudget: 0`); si el modelo no acepta esa opción, se usa la siguiente que sí acepte.
-
-### 7. Iniciar la API
-
-Desde `back-end/`:
-
-```bash
-pnpm api
-```
-
-El proceso correcto muestra que la API escucha en `http://127.0.0.1:3101`. Mantén la terminal abierta; para detenerla, presiona `Ctrl+C`.
-
-### 8. Comprobar el estado
-
-En otra terminal:
-
-```bash
-curl -sS http://127.0.0.1:3101/api/system/status
-```
-
-Debes recibir JSON y no una página HTML. Revisa que el estado sea saludable y que la fuente indicada corresponda a muestra o al release CCPC que elegiste.
-
-Después configura e inicia el frontend siguiendo su `README.md`.
-
-### Lista de comprobación
-
-- `pnpm api` permanece en ejecución sin terminar con error.
-- `curl http://127.0.0.1:3101/api/system/status` devuelve JSON.
-- Backend y frontend usan exactamente el mismo `AGENT_API_TOKEN`.
-- El frontend apunta a `http://127.0.0.1:3101/api/agent`.
-- Si instalaste el release completo, el estado no lo identifica como muestra.
 
 ## Variables de entorno
 
 | Variable | Descripción |
 |---|---|
-| `AUTH_MODE` | `local_sqlite` o `supabase`. |
-| `SQLITE_DATABASE_PATH` | Archivo local para sesiones y snapshots. |
-| `CCPC_DATA_DIR` | Carpeta del motor CCPC. Vacía utiliza la muestra incluida. |
-| `CCPC_DATASET_PATH` | Archivo dentro de `CCPC_DATA_DIR`. |
-| `UI_PLANNER_MODE` | `rules`, `local-model` o `gemini`. |
-| `LOCAL_MODEL_URL` | Servidor local compatible con OpenAI. |
-| `LOCAL_MODEL_NAME` | Identificador del modelo local. |
-| `GEMINI_API_KEY` | Clave requerida únicamente en modo `gemini`. |
-| `GEMINI_MODEL` | Modelo usado por Gemini. |
-| `GEMINI_PLANNER_TIMEOUT_MS` | Tiempo máximo para que Gemini planee; después responden las reglas (8000). |
-| `GEMINI_ANSWER_TIMEOUT_MS` | `0` (por defecto) usa la respuesta verificada sin Gemini. Con un valor entre 1000 y 30000, Gemini la redacta y, si no termina en ese tiempo, se usa la verificada. |
-| `GEMINI_EDIT_TIMEOUT_MS` | Tiempo máximo para que Gemini interprete una edición de la vista (4000). |
-| `SESSION_RESET_ON_START` | Con `local_sqlite`, borra las sesiones guardadas al iniciar la API (`true`). |
-| `AGENT_API_TOKEN` | Token compartido con el frontend. |
-| `AGENT_API_ALLOWED_ORIGINS` | Orígenes permitidos separados por comas. |
-| `ELEVENLABS_API_KEY` | Habilita transcripción en tiempo real. |
-| `SUPABASE_URL` | Proyecto utilizado en modo `supabase`. |
-| `SUPABASE_PUBLISHABLE_KEY` | Clave pública de Supabase. |
+| `AUTH_MODE` | Usar `local_sqlite`. |
+| `SQLITE_DATABASE_PATH` | Archivo de sesiones y vistas guardadas. La carpeta `.local/` no se sube a Git. |
+| `SESSION_RESET_ON_START` | `true` (por defecto) borra las sesiones guardadas al iniciar la API. |
+| `CCPC_DATA_DIR` | Carpeta del release de datos CCPC. |
+| `CCPC_DATASET_PATH` | Archivo del dataset dentro de `CCPC_DATA_DIR`. |
+| `UI_PLANNER_MODE` | `rules`, `gemini` o `local-model`. |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Sólo en modo `gemini`. |
+| `GEMINI_PLANNER_TIMEOUT_MS` | Límite para que Gemini planee; después contestan las reglas (8000). |
+| `GEMINI_EDIT_TIMEOUT_MS` | Límite para que Gemini interprete una edición de la vista (4000). |
+| `GEMINI_ANSWER_TIMEOUT_MS` | `0` (por defecto) usa la respuesta verificada; entre 1000 y 30000 activa la redacción con Gemini. |
+| `LOCAL_MODEL_URL`, `LOCAL_MODEL_NAME`, `LOCAL_MODEL_TIMEOUT_MS` | Sólo en modo `local-model`. |
+| `AGENT_API_HOST`, `AGENT_API_PORT` | Dirección de la API (`127.0.0.1:3101`). |
+| `AGENT_API_TOKEN` | Token compartido con el frontend (32 caracteres o más). |
+| `AGENT_API_ALLOWED_ORIGINS` | Orígenes permitidos, separados por comas. |
+| `ELEVENLABS_API_KEY` | Opcional: transcripción de voz en tiempo real. |
 
-Consulta `.env.example` para límites, timeouts y variables adicionales. Las claves de Gemini, ElevenLabs y Supabase sólo son necesarias al habilitar esas integraciones.
+`.env.example` incluye los límites y tiempos adicionales.
 
-## Otras formas de ejecución
+## Endpoints
 
-Servidor MCP por `stdio`, útil para desarrollo de herramientas:
+| Método | Ruta | Token | Descripción |
+|---|---|:---:|---|
+| `GET` | `/api/system/status` | No | Salud, fuente de datos y capacidades. |
+| `GET` | `/api/capabilities` | No | Capacidades del release CCPC. |
+| `GET` | `/api/dataset` | No | Descripción del dataset cargado. |
+| `GET` | `/api/release` | No | Datos de la publicación CCPC. |
+| `POST` | `/api/agent` | Sí | Pregunta, edición o evento de la interfaz; responde con NDJSON. |
+| `POST` | `/api/agent/snapshot` | Sí | Recupera la última vista válida de la sesión. |
+| `POST` | `/api/transcription/realtime-session` | Sí | Crea una sesión de voz de corta duración. |
 
-```bash
-pnpm dev
-```
-
-Build y ejecución compilada:
-
-```bash
-pnpm build
-pnpm api:start
-```
-
-## Planificadores
-
-| Modo | Dependencia externa | Comportamiento |
-|---|---:|---|
-| `rules` | No | Extrae intención y filtros mediante reglas deterministas. |
-| `local-model` | Modelo local | Usa un endpoint compatible con OpenAI y vuelve a reglas si la respuesta es inválida. |
-| `gemini` | Google Gemini | Interpreta preguntas abiertas y selecciona herramientas. |
-
-El plan se valida con Zod antes de ejecutar herramientas. Si faltan filtros necesarios, la API solicita contexto y no genera conclusiones.
-
-## Arquitectura
-
-```text
-POST /api/agent
-  ├─ autenticación, CORS y rate limit
-  ├─ política de alcance cívico
-  ├─ planificador
-  ├─ cliente MCP
-  │    └─ herramientas cívicas
-  │         └─ CivicDataSource
-  │              ├─ motor CCPC externo
-  │              └─ muestra incluida
-  ├─ validación de razonamiento
-  ├─ composición y validación de UI
-  ├─ sesión y snapshot
-  └─ stream NDJSON
-```
+Si los datos CCPC no están configurados o no pasan la verificación, la API inicia en modo degradado y `/api/agent` responde `503`.
 
 ## Herramientas MCP
 
 | Herramienta | Resultado |
 |---|---|
-| `get_participation_summary` | Totales e indicadores de un territorio y una elección. |
-| `compare_elections` | Comparación temporal y diferencia en puntos porcentuales. |
-| `get_participation_breakdown` | Desglose por entidad, sexo, edad o tipo de sección. |
+| `get_participation_summary` | Participación de un territorio en una elección. |
+| `compare_elections` | Comparación entre elecciones y diferencia en puntos porcentuales. |
+| `get_participation_breakdown` | Desglose por entidad, sexo, grupo de edad o tipo de sección. |
 | `get_supporting_records` | Registros que respaldan una cifra. |
 
 Recursos: `civic://metric-definitions` y `civic://coverage`.
 
-## Endpoints HTTP
-
-| Método | Ruta | Autenticación | Descripción |
-|---|---|---:|---|
-| `GET` | `/api/system/status` | No | Salud, fuente activa y planificador. |
-| `POST` | `/api/agent` | Sí | Pregunta, edición o evento de UI; responde con NDJSON. |
-| `POST` | `/api/agent/snapshot` | Sí | Recupera la última vista válida. |
-| `POST` | `/api/transcription/realtime-session` | Sí | Crea una sesión efímera de voz. |
-
-El stream puede contener progreso, texto, llamadas de herramientas, registros, especificación de UI, patches, estado y errores recuperables.
-
-## Datos
-
-La fuente implementa `CivicDataSource` en `src/application/ports/civic-data.ts`.
-
-- Sin `CCPC_DATA_DIR`: utiliza la muestra en `src/fixtures` y marca la respuesta como muestra.
-- Con `CCPC_DATA_DIR`: carga el dataset compacto CCPC y verifica versión y estructura antes de abrir la API.
-
 ```text
-participación oficial = votaron / (votaron + no votaron)
-abstención oficial    = no votaron / (votaron + no votaron)
+participación = votaron / (votaron + no votaron)
+abstención    = no votaron / (votaron + no votaron)
 ```
 
-Las respuestas conservan fuente, universo, periodo, advertencias y campos usados en cada cálculo.
+## Interfaz generada
 
-## Interfaz generativa
+El compositor elige entre resumen, comparación de dos elecciones, línea del tiempo, ranking territorial, desglose por grupo, pirámide de edad y sexo, evidencia, metodología o datos insuficientes. Siempre incluye una tabla alternativa, salvo que la persona pida lo contrario.
 
-El compositor selecciona componentes según la intención y los datos disponibles: resumen, comparación, línea del tiempo, ranking territorial, mapa, desglose demográfico, evidencia o metodología.
+La salida es una especificación validada con Zod contra el contrato compartido de `packages/contracts`; no contiene HTML ni código ejecutable.
 
-La salida es una DSL validada; no contiene HTML ni JavaScript ejecutable. Las interacciones visuales simples se resuelven sin invocar el modelo. Los cambios que requieren datos vuelven al planificador y a las herramientas.
-
-## Persistencia
-
-El modo `local_sqlite` crea el archivo indicado en `SQLITE_DATABASE_PATH`. La carpeta `.local/` está excluida de Git.
-
-El modo `supabase` utiliza las migraciones de sesión y snapshots incluidas en `supabase/migrations`. El directorio conserva migraciones heredadas porque las RPC de sesión actuales mantienen referencias a ese esquema. El modo predeterminado `local_sqlite` no las ejecuta.
-
-## Validación
+## Pruebas
 
 ```bash
-pnpm typecheck
-pnpm test
-pnpm test:civic
-pnpm acceptance:verify
-pnpm build
-pnpm security:audit
+corepack pnpm typecheck
+corepack pnpm test
 ```
 
-Evaluación opcional:
+`pnpm test` corre todas las pruebas sin conexión ni claves. Dos pruebas se omiten si `CCPC_DATA_DIR` no está configurado, porque usan el release real.
 
-```bash
-pnpm eval:planner
-```
+Otros comandos:
 
-El reporte se escribe en `.local/planner-evaluation.md` y no se versiona.
+| Comando | Uso |
+|---|---|
+| `pnpm test:civic` | Planificador, herramientas, validadores e interfaz. |
+| `pnpm acceptance:verify` | Ediciones de la vista y continuidad de la conversación. |
+| `pnpm build` | Compila a `dist/`. Después se inicia con `pnpm api:start`. |
+| `pnpm security:audit` | Revisa vulnerabilidades en dependencias de producción. |
+| `pnpm eval:planner` | Compara planificadores con 40 preguntas; el reporte queda en `.local/planner-evaluation.md`. |
 
 ## Estructura
 
 ```text
-src/http/                    API HTTP y transporte
-src/agent/                   planificación, políticas, prompts y stream
-src/tools/                   herramientas MCP
-src/services/                servicio de datos cívicos
-src/application/ports/       interfaces de datos, sesión y voz
-src/infrastructure/ccpc/     adaptador CCPC
-src/fixtures/                muestra cívica incluida
-src/ui/                      composición y validación de UI
-src/integration/             sesión, eventos y transformaciones
-src/repositories/            persistencia SQLite y Supabase
-packages/contracts/          contrato compartido
-tests/                       pruebas unitarias, integración y aceptación
+src/http/                API HTTP, seguridad y estado
+src/agent/               orquestador, planificadores, filtro de temas y validación de respuestas
+src/tools/               herramientas MCP
+src/services/            consultas de participación
+src/infrastructure/      adaptadores del release CCPC y de voz
+src/ui/                  compositor y validadores de la interfaz
+src/integration/         sesión, ediciones de la vista y adaptación al contrato
+src/repositories/        persistencia de sesiones
+src/fixtures/            datos de muestra para las pruebas
+packages/contracts/      contrato compartido con el frontend
+tests/                   pruebas unitarias, de integración y de aceptación
+scripts/                 evaluación del planificador
 ```
 
 ## Seguridad
 
-- CORS sólo permite orígenes explícitos.
-- Las solicitudes tienen límite de tamaño.
-- Autenticación, herramientas y operaciones costosas tienen rate limits separados.
-- La política cívica rechaza datos personales, predicciones y recomendaciones de voto.
-- El logger filtra tokens y claves.
-- Las herramientas tienen timeout, reintentos limitados y validación de entrada y salida.
+- CORS sólo acepta los orígenes configurados y las solicitudes tienen límite de tamaño.
+- Autenticación, consultas y herramientas tienen límites de uso por minuto.
+- El filtro de temas rechaza datos personales, predicciones y recomendaciones de voto.
+- El logger oculta tokens y claves.
+- Las herramientas tienen tiempo límite y validan entradas y salidas.
 
 ## Solución de problemas
 
-### `EADDRINUSE`
+- **`EADDRINUSE`:** el puerto 3101 ya está ocupado. Cierra la otra instancia con `Ctrl+C`.
+- **`401`:** el `AGENT_API_TOKEN` no coincide entre backend y frontend. Corrígelo y reinicia ambos.
+- **`503` en `/api/agent`:** los datos CCPC no están configurados o no pasaron la verificación. Revisa `CCPC_DATA_DIR` y `CCPC_DATASET_PATH`; la terminal de la API indica la causa.
+- **`Cannot find module '@banorte/contracts/dist/index.js'`:** el contrato no está compilado. Ejecuta `corepack pnpm contracts:build`.
+- **`ERR_PNPM_BAD_PM_VERSION`:** se está usando otra versión de pnpm. Ejecuta los comandos con `corepack pnpm`.
+- **El frontend rechaza el contrato (`contract_fingerprint_mismatch`):** en Windows, Git puede descargar los archivos del contrato con saltos de línea CRLF y la huella cambia. Configura `git config core.autocrlf false`, vuelve a descargar `packages/contracts/src` y compila de nuevo.
+- **Gemini no responde:** revisa `GEMINI_API_KEY` y la conexión. Con `UI_PLANNER_MODE=rules` la API funciona sin Gemini.
 
-Ya existe otro proceso usando el puerto 3101. Identifícalo:
+## Modo Supabase (heredado)
 
-```bash
-ss -ltnp '( sport = :3101 )'
-```
-
-Detén la instancia anterior con `Ctrl+C` en la terminal donde se inició. Sólo si esa terminal ya no existe, toma el número que aparece como `pid=...` y ejecuta `kill NUMERO`; después vuelve a usar `pnpm api`.
-
-### `401 Unauthorized`
-
-Confirma que `AGENT_API_TOKEN` sea idéntico en `back-end/.env` y `front-end/.env.local`. Reinicia ambos procesos después de corregirlo.
-
-### `corepack` o `pnpm` no existe
-
-```bash
-npm install --global corepack
-corepack enable
-corepack prepare pnpm@10.34.5 --activate
-pnpm --version
-```
-
-Ejecuta estos comandos desde `back-end/`. La versión esperada es `10.34.5`.
-
-### El estado no abre o `curl` muestra `Connection refused`
-
-Revisa la terminal de `pnpm api`: ahí aparece la causa del fallo. Confirma que `AGENT_API_HOST=127.0.0.1`, `AGENT_API_PORT=3101` y que no haya otra instancia usando el puerto.
-
-### Gemini no responde
-
-Verifica `UI_PLANNER_MODE=gemini`, `GEMINI_API_KEY`, el modelo y la conexión a internet. Después de cambiar `.env`, reinicia `pnpm api`. Para aislar el problema y operar sin Gemini usa temporalmente `UI_PLANNER_MODE=rules`.
-
-### El motor CCPC no carga
-
-Ejecuta esta comprobación desde `back-end/`:
-
-```bash
-test -f ../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06/src/data/dataset-v1.ts && echo "Módulo: OK"
-test -f ../data-release/Entrega-final-CCPC-1.0.0/Ine-hacktoon-DATA-06/data/ccpc/full/participation.compact.json && echo "Dataset: OK"
-```
-
-Si alguno no imprime `OK`, revisa dónde descomprimiste el release y corrige `CCPC_DATA_DIR`. Si ambos existen, entra a la carpeta del release y ejecuta `npm ci --ignore-scripts`. El endpoint de estado informa la fuente activa.
-
-### La instalación de dependencias falla
-
-Confirma la versión de Node con `node --version`, activa pnpm 10.34.5 y vuelve a ejecutar:
-
-```bash
-pnpm install --frozen-lockfile
-```
-
-No borres el lockfile ni cambies a `npm install`, porque produciría un árbol de dependencias diferente al validado.
+El código todavía admite `AUTH_MODE=supabase`, que es el valor por defecto de `env.ts`, junto con los comandos de terminal con inicio de sesión (`pnpm agent`, `pnpm agent:login`, `pnpm dev`). El proyecto no lo usa: por eso `AUTH_MODE=local_sqlite` debe escribirse en `.env`. Se retirará en una limpieza posterior.

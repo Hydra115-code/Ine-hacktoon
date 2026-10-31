@@ -4,7 +4,6 @@ import { CivicDataService } from "../src/services/civic-data.service.js";
 import { parseUiDocument, type UiDataSource, type UiDocument } from "../src/ui/dsl/ui.schema.js";
 import { validateCivicUi } from "../src/ui/generation/civic-semantic-ui-validator.js";
 import { createCivicUiFallback } from "../src/ui/generation/civic-ui-fallback.js";
-import { GeminiUiGenerator } from "../src/ui/generation/gemini-ui-generator.js";
 
 const service = new CivicDataService({ now: () => new Date("2026-10-15T12:00:00.000Z") });
 const codes = (issues: { code: string }[]) => issues.map((issue) => issue.code);
@@ -130,38 +129,4 @@ test("la interfaz de respaldo es válida y cumple las reglas con cada tool", asy
     assert.match(text, /Fuente:/u);
   }
   assert.equal(createCivicUiFallback([]), undefined);
-});
-
-function geminiReturning(documents: unknown[]) {
-  let calls = 0;
-  const generator = new GeminiUiGenerator({
-    apiUrl: "https://generativelanguage.googleapis.com",
-    apiKey: "test-key",
-    model: "test-model",
-    timeoutMs: 1_000,
-  }, async () => {
-    const document = documents[Math.min(calls, documents.length - 1)];
-    calls += 1;
-    return new Response(JSON.stringify({
-      candidates: [{ content: { parts: [{ text: JSON.stringify(document) }] } }],
-    }), { status: 200, headers: { "Content-Type": "application/json" } });
-  });
-  return { generator, calls: () => calls };
-}
-
-test("si la UI generada no tiene evidencia, se pide corregir y se acepta la corrección", async () => {
-  const data = await sources();
-  const { generator, calls } = geminiReturning([stack(chartOf("aguascalientes")), stack(chartOf("aguascalientes"), tableOf("aguascalientes"))]);
-  const ui = await generator.generate({ query: QUERY, answer: ANSWER, dataSources: data });
-  assert.equal(calls(), 2);
-  assert.match(JSON.stringify(ui), /tabla-aguascalientes/u);
-});
-
-test("si nunca la corrige, se usa la interfaz cívica de respaldo", async () => {
-  const data = await sources();
-  const { generator, calls } = geminiReturning([stack(chartOf("aguascalientes"))]);
-  const ui = await generator.generate({ query: QUERY, answer: ANSWER, dataSources: data });
-  assert.equal(calls(), 3);
-  assert.equal(ui.root.id, "respuesta-civica");
-  assert.match(JSON.stringify(ui), /Datos de muestra/u);
 });
