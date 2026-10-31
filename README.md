@@ -1,247 +1,126 @@
 # INE Explora con Paper
 
-Repositorio integrado del explorador ciudadano de datos públicos del INE. La aplicación recibe preguntas abiertas, consulta la información disponible del CCPC y construye vistas verificables con tablas, gráficas, mapas, líneas del tiempo y controles interactivos.
+Explorador ciudadano de datos públicos del Instituto Nacional Electoral. Paper recibe preguntas en lenguaje natural, consulta los Conteos Censales de Participación Ciudadana (CCPC) y construye respuestas verificables mediante tablas, gráficas, mapas, líneas del tiempo e indicadores.
 
-## Estructura
+## Características
 
-```text
-front-end/   Aplicación Next.js y motor de interfaz generativa
-back-end/    API, agente, herramientas cívicas y persistencia SQLite
-data/        Datos CCPC, normalización, validación y consultas
-docs/qa/     Casos de aceptación, accesibilidad y evidencia de QA
-scripts/     Inicialización segura y verificación integral
-```
-
-Los commits utilizados para construir esta integración están registrados en [`integration-sources.json`](integration-sources.json).
+- Consultas abiertas sobre participación y abstención electoral.
+- Comparaciones entre entidades, grupos demográficos y elecciones disponibles.
+- Interfaces generativas validadas mediante un contrato compartido.
+- Evidencia, fuentes y notas metodológicas asociadas a cada resultado.
+- Mapa interactivo de México, tablas accesibles y visualizaciones responsivas.
+- Continuidad conversacional para refinar una vista sin repetir la consulta completa.
+- Persistencia local con SQLite; no requiere una suscripción de base de datos.
+- Planificador local por reglas y compatibilidad opcional con Gemini.
 
 ## Inicio rápido
 
-En una máquina nueva, después de clonar `main`, sólo necesitas dos comandos. Son idénticos en Windows, Linux y macOS:
+### Requisitos
+
+- Git.
+- Node.js `22.18` o posterior compatible.
+- Corepack.
+- `unzip` en Linux o macOS. Windows utiliza PowerShell para extraer el release.
+
+Comprueba el entorno:
 
 ```bash
+git --version
+node --version
+corepack --version
+```
+
+### Instalación
+
+Clona la rama `main` mediante HTTPS:
+
+```bash
+git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
+cd Ine-hacktoon
+```
+
+Prepara los datos, dependencias, contratos y archivos privados de entorno:
+
+```bash
+node setup.mjs
+```
+
+Inicia el producto completo:
+
+```bash
+node start.mjs
+```
+
+Cuando aparezcan los mensajes `backend: listo` y `frontend: listo`, abre [http://127.0.0.1:3000](http://127.0.0.1:3000). Presiona `Ctrl+C` para detener ambos servicios.
+
+> No ejecutes `npm install`. El repositorio utiliza pnpm `12.16.1` mediante Corepack y los scripts de la raíz administran cada módulo.
+
+## Instalación por sistema operativo
+
+Los comandos `node setup.mjs` y `node start.mjs` funcionan en Windows, Linux y macOS. También existen accesos directos por plataforma.
+
+### Windows 10 u 11
+
+Desde PowerShell o CMD:
+
+```powershell
+git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
+cd Ine-hacktoon
 node setup.mjs
 node start.mjs
 ```
 
-El primero prepara el release CCPC, instala Data, Back y Front con pnpm, crea los archivos privados de entorno y valida la configuración. El segundo levanta ambos servicios, espera a que estén listos y los cierra juntos al presionar `Ctrl+C`.
-
-También puedes usar los accesos directos nativos:
-
-```text
-Windows (PowerShell o CMD):  .\setup.cmd       y .\start.cmd
-Linux, macOS o Git Bash:     ./scripts/setup-local.sh y ./scripts/start-local.sh
-```
-
-Abre `http://127.0.0.1:3000`.
-
-## Requisitos
-
-- Git.
-- Node.js 22 desde la versión 22.18, o Node.js 23.6 o posterior.
-- Corepack, incluido con Node.js.
-- `pnpm`, administrado mediante Corepack.
-- `unzip` en Linux o macOS. En Windows se utiliza PowerShell para extraer el release.
-
-No se requiere una suscripción de base de datos. El modo local utiliza SQLite y el planificador por reglas funciona sin Gemini.
-
-Comprueba las versiones:
-
-```bash
-node --version
-corepack --version
-corepack pnpm@12.16.1 --version
-```
-
-La versión esperada de pnpm es `12.16.1`.
-
-## Instalación paso a paso
-
-No ejecutes `npm install`. El repositorio usa `pnpm` mediante Corepack y los scripts se encargan de instalar cada módulo con la versión correcta.
-
-### Windows 10 con Git Bash
-
-1. Instala **Git for Windows** y una versión compatible de **Node.js**.
-2. Cierra y vuelve a abrir Git Bash para actualizar el `PATH`.
-3. Comprueba que las herramientas estén disponibles:
-
-   ```bash
-   git --version
-   node --version
-   corepack --version
-   ```
-
-   `node --version` debe mostrar `v22.18.0` o una versión posterior compatible.
-
-4. Entra en la carpeta donde guardarás el proyecto y clona `main`:
-
-   ```bash
-   cd ~/Documents
-   git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
-   cd Ine-hacktoon
-   ```
-
-5. Confirma que estás en la raíz correcta. Debes ver `front-end`, `back-end`, `data` y `setup.mjs`:
-
-   ```bash
-   pwd
-   ls
-   git branch --show-current
-   ```
-
-6. Prepara datos, dependencias y configuración local:
-
-   ```bash
-   node setup.mjs
-   ```
-
-   El proceso conserva cualquier `.env` existente, genera un token local sin mostrarlo y conecta frontend y backend con SQLite.
-
-7. Inicia el producto completo:
-
-   ```bash
-   node start.mjs
-   ```
-
-8. Espera a ver `backend: listo` y `frontend: listo`. Después abre `http://127.0.0.1:3000`.
-9. Para detener ambos servicios, vuelve a Git Bash y presiona `Ctrl+C` una vez.
-
-También puedes usar los accesos directos de Windows desde PowerShell o CMD:
+Accesos directos equivalentes:
 
 ```powershell
-cd "$HOME\Documents\Ine-hacktoon"
 .\setup.cmd
 .\start.cmd
 ```
 
-### Linux
+Git Bash también admite los comandos generales indicados en Inicio rápido.
 
-1. Instala Git, `unzip`, Node.js y Corepack. En Ubuntu o Debian, Git y `unzip` pueden instalarse con:
-
-   ```bash
-   sudo apt update
-   sudo apt install -y git unzip
-   ```
-
-2. Comprueba las versiones:
-
-   ```bash
-   git --version
-   node --version
-   corepack --version
-   ```
-
-3. Clona `main` y entra al repositorio:
-
-   ```bash
-   cd ~/Documents
-   git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
-   cd Ine-hacktoon
-   ```
-
-4. Instala y configura todo:
-
-   ```bash
-   node setup.mjs
-   ```
-
-5. Inicia frontend y backend:
-
-   ```bash
-   node start.mjs
-   ```
-
-6. Abre `http://127.0.0.1:3000`. Presiona `Ctrl+C` para cerrar ambos servicios.
-
-### Activar Gemini opcionalmente
-
-La instalación usa el planificador local por reglas de forma predeterminada. Para usar Gemini, abre `back-end/.env` y configura únicamente en ese archivo:
-
-```dotenv
-UI_PLANNER_MODE="gemini"
-GEMINI_API_KEY="TU_CLAVE_REAL"
-GEMINI_MODEL="gemini-3.7-flash"
-```
-
-Guarda el archivo y reinicia con `node start.mjs`. La clave no debe copiarse al frontend ni subirse a Git.
-
-### Actualizar una instalación existente
-
-Detén los servicios y, desde la raíz del repositorio, ejecuta:
+### Linux o macOS
 
 ```bash
-git switch main
-git pull --ff-only origin main
+git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
+cd Ine-hacktoon
 node setup.mjs
 node start.mjs
 ```
 
-### Diagnóstico rápido
-
-- `No such file or directory`: confirma con `pwd` y `ls` que estás dentro de `Ine-hacktoon`, no dentro de `front-end` o `back-end`.
-- `node: command not found` o `node no se reconoce`: instala Node.js compatible y vuelve a abrir la terminal.
-- `corepack no se reconoce`: la instalación de Node está incompleta o no quedó en el `PATH`; reinstálala y abre una terminal nueva.
-- `EADDRINUSE`: los puertos `3000` o `3101` ya están ocupados. Cierra la ejecución anterior antes de iniciar otra.
-- `contract_fingerprint_mismatch`: actualiza `main` y vuelve a ejecutar `node setup.mjs`. Los contratos se generan de forma estable en Windows, Linux y macOS; no copies manualmente archivos `dist` ni edites el fingerprint.
-- Instalación incompleta: vuelve a ejecutar `node setup.mjs`; el proceso es seguro para repetirse y conserva las claves existentes.
-- Para validar todo después de instalar: ejecuta `node verify.mjs`.
-
-## Instalación
-
-Desde la raíz del repositorio, si quieres ejecutar cada paso manualmente:
+Accesos directos equivalentes:
 
 ```bash
-node scripts/prepare-data-release.mjs
-node scripts/install-data-dependencies.mjs
-
-cd back-end
-corepack pnpm install --frozen-lockfile
-
-cd ../front-end
-corepack pnpm install --frozen-lockfile
-
-cd ..
+./scripts/setup-local.sh
+./scripts/start-local.sh
 ```
 
-También puede instalarse y validarse todo con:
+## Qué hace la instalación
 
-```bash
-node verify.mjs --install
-```
+`node setup.mjs` ejecuta un proceso reproducible y seguro:
 
-La instalación simplificada y multiplataforma es:
+1. Verifica y prepara el release CCPC.
+2. Instala las dependencias de Datos, Backend y Frontend con pnpm.
+3. Compila los contratos compartidos.
+4. Crea `back-end/.env` y `front-end/.env.local` si no existen.
+5. Genera un token local y lo sincroniza entre ambos servicios.
+6. Comprueba rutas, secretos e integridad del repositorio.
 
-```bash
-node setup.mjs
-```
+El proceso puede repetirse después de actualizar el repositorio. Conserva las claves privadas existentes.
 
-Agrega `--verify` para ejecutar también todas las pruebas:
+Para instalar y ejecutar también la validación integral:
 
 ```bash
 node setup.mjs --verify
 ```
 
-## Archivos de entorno
+## Configuración
 
-Inicializa las configuraciones locales con el script portable:
+La configuración local recomendada usa SQLite y el planificador por reglas. Los archivos `.env` están ignorados por Git y nunca deben incluirse en commits o capturas.
 
-```bash
-node scripts/init-local-env.mjs
-```
+### Backend
 
-El script crea, sólo cuando no existen:
-
-```text
-back-end/.env
-front-end/.env.local
-```
-
-Ambos archivos están ignorados por Git y se crean con permisos privados. Nunca escribas credenciales en `.env.example`, el README, un commit o una captura de pantalla.
-
-Además conecta el release completo de datos, genera un token local cuando hace falta y lo sincroniza entre backend y frontend sin imprimirlo. Si los archivos ya existen, conserva las claves privadas y sólo normaliza los valores locales de integración.
-
-### Configuración local mínima
-
-En `back-end/.env`:
+Archivo `back-end/.env`:
 
 ```dotenv
 AUTH_MODE="local_sqlite"
@@ -252,10 +131,12 @@ UI_PLANNER_MODE="rules"
 AGENT_API_HOST="127.0.0.1"
 AGENT_API_PORT="3101"
 AGENT_API_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
-AGENT_API_TOKEN="REEMPLAZAR_CON_UN_TOKEN_LOCAL_DE_32_CARACTERES_O_MAS"
+AGENT_API_TOKEN="TOKEN_LOCAL_DE_32_CARACTERES_O_MAS"
 ```
 
-En `front-end/.env.local`:
+### Frontend
+
+Archivo `front-end/.env.local`:
 
 ```dotenv
 AGENT_API_URL="http://127.0.0.1:3101/api/agent"
@@ -263,17 +144,11 @@ AGENT_SESSION_MODE="local_service"
 AGENT_API_TOKEN="EL_MISMO_TOKEN_CONFIGURADO_EN_EL_BACKEND"
 ```
 
-El instalador genera el token automáticamente. Si necesitas crear uno manualmente, este comando funciona en Windows y Linux:
-
-```bash
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
-```
-
-El token debe ser idéntico en backend y frontend.
+`AGENT_API_TOKEN` debe coincidir exactamente en ambos archivos. El instalador lo genera y sincroniza automáticamente.
 
 ### Gemini opcional
 
-Gemini sólo se configura en `back-end/.env`:
+Gemini se configura únicamente en `back-end/.env`:
 
 ```dotenv
 UI_PLANNER_MODE="gemini"
@@ -281,57 +156,98 @@ GEMINI_API_KEY="TU_CLAVE"
 GEMINI_MODEL="gemini-3.7-flash"
 ```
 
-No copies `GEMINI_API_KEY` al frontend y nunca uses un prefijo `NEXT_PUBLIC_` para secretos.
+Reinicia con `node start.mjs` después de modificar el archivo. La clave no debe copiarse al frontend ni utilizar el prefijo `NEXT_PUBLIC_`.
 
-## Ejecución
+## Uso
 
-La forma recomendada es iniciar todo desde la raíz. El comando es el mismo en Windows y Linux:
+Rutas principales:
 
-```bash
-node start.mjs
+| Ruta | Función |
+|---|---|
+| `/` | Presentación del producto. |
+| `/conversar` | Consulta ciudadana con Paper. |
+| `/historias` | Recorrido guiado con evidencia pública. |
+| `/dev/genui-audit-harness` | Catálogo visual para desarrollo y QA. |
+
+Consultas de ejemplo:
+
+```text
+Compara la participación de Jalisco y Nuevo León en 2024.
+Muéstrame un mapa de participación por entidad en 2024.
+¿Cómo cambió la participación en Aguascalientes entre 2009 y 2024?
+Compara la participación de personas de 18 a 24 años en Ciudad de México entre 2018 y 2024.
 ```
 
-También puedes iniciar cada servicio por separado:
+Paper solicita contexto adicional cuando una pregunta no identifica territorio, grupo o periodo suficiente. No genera un análisis hasta contar con evidencia compatible.
 
-Terminal 1:
+## Arquitectura
+
+```text
+Navegador
+  └─ Frontend Next.js
+       ├─ conversación e historial
+       ├─ renderer de UI generativa
+       └─ proxy server-side
+            └─ Backend HTTP
+                 ├─ intérprete y planificador cívico
+                 ├─ herramientas de consulta CCPC
+                 ├─ validación de evidencia
+                 └─ sesiones SQLite
+                      └─ release CCPC verificado
+```
+
+El navegador no ejecuta HTML o JavaScript generado. El backend emite nodos declarativos y el frontend sólo renderiza componentes permitidos por el contrato compartido.
+
+## Estructura del repositorio
+
+```text
+front-end/                aplicación Next.js e interfaz generativa
+back-end/                 API, agente, herramientas cívicas y SQLite
+data/                     release, normalización y validación CCPC
+docs/qa/                  evidencia y casos de aceptación
+scripts/                  instalación y verificación multiplataforma
+setup.mjs                 instalación completa
+start.mjs                 inicio coordinado de los servicios
+verify.mjs                validación integral
+integration-sources.json  trazabilidad de la integración
+```
+
+## Desarrollo
+
+Para iniciar cada servicio por separado:
 
 ```bash
+# Terminal 1
 cd back-end
 corepack pnpm api
 ```
 
-Terminal 2:
-
 ```bash
+# Terminal 2
 cd front-end
 corepack pnpm dev
 ```
 
-Abre `http://127.0.0.1:3000`.
+Abre [http://127.0.0.1:3000](http://127.0.0.1:3000). El backend escucha en `http://127.0.0.1:3101`.
 
-Comprueba el backend:
+### Actualizar una instalación
 
 ```bash
-curl http://127.0.0.1:3101/api/system/status
+git switch main
+git pull --ff-only origin main
+node setup.mjs
+node start.mjs
 ```
-
-La respuesta debe indicar la fuente de datos activa, el modo de autenticación y el planificador configurado.
 
 ## Validación
 
-Auditoría de seguridad del repositorio:
-
-```bash
-node scripts/check-repository-safety.mjs
-```
-
-Validación completa con dependencias ya instaladas:
+Validación integral:
 
 ```bash
 node verify.mjs
 ```
 
-Validaciones individuales:
+Validaciones por módulo:
 
 ```bash
 node scripts/verify-data.mjs
@@ -339,10 +255,79 @@ cd back-end && corepack pnpm int-08:verify
 cd ../front-end && corepack pnpm int-08:verify
 ```
 
-### Prueba end-to-end en ejecución
-
-Con backend y frontend iniciados en terminales separadas, ejecuta desde la raíz:
+Prueba end-to-end con ambos servicios activos:
 
 ```bash
 node scripts/verify-live-e2e.mjs
 ```
+
+Auditoría de archivos y secretos:
+
+```bash
+node scripts/check-repository-safety.mjs
+```
+
+## Seguridad y privacidad
+
+- Los secretos permanecen en archivos locales ignorados por Git.
+- El token compartido se agrega en el servidor y no se expone al navegador.
+- Los contratos, eventos, bindings y patches se validan antes de renderizarse.
+- Los mensajes técnicos se convierten a lenguaje ciudadano.
+- El release contiene datos públicos agregados; no incluye identificadores personales directos.
+- La presencia de celdas pequeñas no constituye una garantía formal de anonimato.
+
+## Solución de problemas
+
+### `No such file or directory`
+
+Confirma que la terminal se encuentra en la raíz del repositorio:
+
+```bash
+pwd
+ls
+```
+
+Deben existir `front-end`, `back-end`, `data` y `setup.mjs`.
+
+### Corepack no está disponible
+
+Instala una versión compatible de Node.js, abre una terminal nueva y comprueba `corepack --version`. Si tu distribución de Node no incluye Corepack, instálalo globalmente y vuelve a ejecutar `node setup.mjs`.
+
+### Error `401`
+
+Comprueba que `AGENT_API_TOKEN` sea idéntico en `back-end/.env` y `front-end/.env.local`. Reinicia ambos servicios después de corregirlo.
+
+### Error `503`
+
+Comprueba el estado del backend:
+
+```bash
+curl http://127.0.0.1:3101/api/system/status
+```
+
+Si aparece `contract_fingerprint_mismatch`, actualiza `main` y ejecuta nuevamente `node setup.mjs`.
+
+### `EADDRINUSE`
+
+Los puertos `3000` o `3101` están ocupados por otra ejecución. Detén el proceso anterior y vuelve a ejecutar `node start.mjs`.
+
+### La instalación quedó incompleta
+
+Vuelve a ejecutar:
+
+```bash
+node setup.mjs
+```
+
+El proceso es idempotente y conserva la configuración privada existente.
+
+## Ramas principales
+
+| Rama | Contenido |
+|---|---|
+| `main` | Producto integrado y ejecutable. |
+| `front-end` | Desarrollo independiente del frontend. |
+| `Back-end` | Desarrollo independiente del backend. |
+| `Data` | Entrega y validación de datos CCPC. |
+
+Para instalar el producto completo utiliza siempre `main`.
