@@ -7,6 +7,7 @@ import { uiSpecificationSchema } from "@ine/contracts";
 import {
   CURRENT_BACKEND_CONTRACT_FINGERPRINT,
   LEGACY_BACKEND_CONTRACT_FINGERPRINT,
+  PRE_FORMAT_BACKEND_CONTRACT_FINGERPRINT,
   isSupportedBackendContractFingerprint,
   normalizeBackendContractPayload,
   normalizeFrontendContractPayloadForBackend,
@@ -75,6 +76,7 @@ const frontendSpecification = {
 
 test("sólo reconoce el contrato nativo y el fingerprint explícito del backend", () => {
   assert.equal(isSupportedBackendContractFingerprint(CURRENT_BACKEND_CONTRACT_FINGERPRINT), true);
+  assert.equal(isSupportedBackendContractFingerprint(PRE_FORMAT_BACKEND_CONTRACT_FINGERPRINT), true);
   assert.equal(isSupportedBackendContractFingerprint(LEGACY_BACKEND_CONTRACT_FINGERPRINT), true);
   assert.equal(isSupportedBackendContractFingerprint("a".repeat(64)), false);
 });
@@ -87,13 +89,13 @@ test("normaliza la semántica entrante antes de validar la UI neutral", () => {
   if (metric?.type === "metric") assert.equal(metric.semanticState, "trend.increase");
 });
 
-test("adapta una edición saliente sin eliminar formatos válidos de métricas", () => {
+test("adapta una edición saliente conservando formatos de métricas y gráficas", () => {
   const normalized = normalizeFrontendContractPayloadForBackend(frontendSpecification) as typeof frontendSpecification;
   const [metric, visualization] = normalized.root.children;
   assert.equal(metric.semanticState, "financial.positive");
   assert.equal(metric.format, "percent");
-  assert.equal("format" in visualization.encoding.x, false);
-  assert.equal("format" in visualization.encoding.y, false);
+  assert.equal(visualization.encoding.x.format, "text");
+  assert.equal(visualization.encoding.y.format, "percent");
 });
 
 test("no permite contaminación de prototipo al normalizar JSON no confiable", () => {

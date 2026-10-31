@@ -47,15 +47,34 @@ function numericDisplayValue(value: DataValue, format: "currency" | "number") {
   throw new TypeError(`${format} requiere un valor numérico válido`);
 }
 
-function percentageRatio(value: DataValue, format: "percent" | "percentage") {
+function percentageRatio(value: DataValue) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new TypeError("percentage requiere un número válido");
   }
 
-  // `percent` conserva compatibilidad con contratos que envían una razón (0.614),
-  // pero también tolera porcentajes cívicos ya expresados de 0 a 100 (61.4).
-  // Las columnas `percentage` usan explícitamente la escala de 0 a 100.
-  return format === "percentage" || Math.abs(value) > 1 ? value / 100 : value;
+  // El contrato compartido usa razones (0.614), mientras que vistas antiguas
+  // pueden conservar puntos porcentuales (61.4). Ambos formatos deben verse igual.
+  return Math.abs(value) > 1 ? value / 100 : value;
+}
+
+const percentageFieldPattern = /(?:^|[._-])(?:percentage|percent|porcentaje|participation|participacion|abstention|abstencion|turnout|rate|ratio|share|pct)(?:$|[._-])|(?:Percentage|Percent|Pct)$/iu;
+const percentageLabelPattern = /%|porcentaje|participaci[oó]n|abstenci[oó]n|tasa|proporci[oó]n/iu;
+const yearFieldPattern = /(?:^|[._-])(?:year|anio|año)(?:$|[._-])/iu;
+const yearLabelPattern = /^(?:año|anio|year)$/iu;
+
+export function inferDataDisplayFormat(
+  format: DataDisplayFormat | undefined,
+  field?: string,
+  label?: string,
+): DataDisplayFormat | undefined {
+  const isPercentage = (field && percentageFieldPattern.test(field)) || (label && percentageLabelPattern.test(label));
+  if (isPercentage && (format === undefined || format === "number" || format === "percent" || format === "percentage")) {
+    return "percent";
+  }
+  const isYear = (field && yearFieldPattern.test(field)) || (label && yearLabelPattern.test(label.trim()));
+  if (isYear && (format === undefined || format === "number" || format === "text")) return "text";
+  if (format) return format;
+  return undefined;
 }
 
 export function formatDataValue(
@@ -64,6 +83,13 @@ export function formatDataValue(
   options: FormatDataValueOptions,
 ): string | null {
   if (value === null) return null;
+
+  if (format === "text") {
+    if (typeof value === "string") return localizeDisplayValue(value);
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    if (typeof value === "boolean") return value ? "Sí" : "No";
+    return null;
+  }
 
   if (format === "currency") {
     return new Intl.NumberFormat(options.locale, {
@@ -85,8 +111,8 @@ export function formatDataValue(
     return new Intl.NumberFormat(options.locale, {
       style: "percent",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 1,
-    }).format(percentageRatio(value, format));
+      maximumFractionDigits: 2,
+    }).format(percentageRatio(value));
   }
 
   if (format === "date" || format === "datetime") {

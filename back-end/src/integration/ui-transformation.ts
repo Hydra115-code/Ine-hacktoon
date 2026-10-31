@@ -229,7 +229,12 @@ function tableToVisualization(node: Extract<UINode, { type: "table" }>): UINode 
     dataBinding: node.dataBinding,
     encoding: {
       x: { field: label.field, type: "nominal", label: label.label.slice(0, 80) },
-      y: { field: value.field, type: "quantitative", label: value.label.slice(0, 80) },
+      y: {
+        field: value.field,
+        type: "quantitative",
+        label: value.label.slice(0, 80),
+        format: value.format === "percentage" ? "percent" : "number",
+      },
     },
   };
 }
@@ -272,7 +277,7 @@ function convertChartMark(node: UINode, mark: ChartMark): UINode {
       type: "visualization", ...common, mark,
       encoding: {
         x: { field: node.territoryField, type: "nominal" },
-        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel, format: node.format },
       },
       sort: { by: "y", direction: node.order ?? "descending" },
     };
@@ -282,7 +287,7 @@ function convertChartMark(node: UINode, mark: ChartMark): UINode {
       type: "visualization", ...common, mark,
       encoding: {
         x: { field: node.periodField, type: "ordinal" },
-        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel, format: node.format },
       },
     };
   }
@@ -291,7 +296,7 @@ function convertChartMark(node: UINode, mark: ChartMark): UINode {
       type: "visualization", ...common, mark,
       encoding: {
         x: { field: node.segmentField, type: "nominal" },
-        y: { field: node.valueField, type: "quantitative", label: node.valueLabel },
+        y: { field: node.valueField, type: "quantitative", label: node.valueLabel, format: node.format },
       },
       ...(node.order !== "source" ? { sort: { by: "y" as const, direction: node.order ?? "descending" } } : {}),
     };

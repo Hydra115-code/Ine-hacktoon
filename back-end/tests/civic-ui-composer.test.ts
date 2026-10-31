@@ -50,10 +50,14 @@ function assertContractValid(response: AgentResponse): void {
 }
 
 function sharedTypes(node: SharedUINode): string[] {
+  return sharedNodes(node).map((candidate) => candidate.type);
+}
+
+function sharedNodes(node: SharedUINode): SharedUINode[] {
   const children = "children" in node ? node.children
     : node.type === "tabs" || node.type === "accordion" ? node.items.flatMap((item) => item.children)
     : [];
-  return [node.type, ...children.flatMap(sharedTypes)];
+  return [node, ...children.flatMap(sharedNodes)];
 }
 
 const SCENARIOS: Array<{ query: string; composition: keyof typeof CIVIC_COMPOSITIONS; includes: string[]; excludes?: string[] }> = [
@@ -91,6 +95,27 @@ test("el ranking por entidad se ordena de mayor a menor y trae tabla alternativa
   const visualization = JSON.stringify(payload.specification);
   assert.match(visualization, /"type":"territoryRanking"/u);
   assert.match(visualization, /"order":"descending"/u);
+});
+
+test("la comparación conserva formato porcentual en gráfica, tabla y datos normalizados", async () => {
+  const response = await ask("Compara la participación de Aguascalientes entre 2018 y 2024");
+  const payload = adaptUiPayload(response.ui, response.dataSources, 1);
+  const nodes = sharedNodes(payload.specification.root);
+  const visualization = nodes.find((node) => node.type === "visualization");
+  const table = nodes.find((node) => node.type === "table");
+
+  assert.ok(visualization?.type === "visualization");
+  assert.equal(visualization.encoding.y?.format, "percent");
+  assert.ok(table?.type === "table");
+  assert.equal(table.columns.find((column) => column.field === "participationPct")?.format, "percentage");
+
+  const source = Object.values(payload.dataRegistry.data).find((value) => {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    return Array.isArray((value as Record<string, unknown>).elections);
+  }) as { elections?: Array<{ participationPct?: number }> } | undefined;
+  const values = source?.elections?.flatMap((row) => typeof row.participationPct === "number" ? [row.participationPct] : []) ?? [];
+  assert.ok(values.length >= 2);
+  assert.equal(values.every((value) => value > 0 && value <= 1), true);
 });
 
 test("respeta las preferencias del usuario", async () => {

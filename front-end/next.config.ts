@@ -1,4 +1,10 @@
 import type { NextConfig } from "next";
+import { networkInterfaces } from "node:os";
+
+const localNetworkAddresses = Object.values(networkInterfaces())
+  .flatMap((network) => network ?? [])
+  .filter((address) => address.family === "IPv4" && !address.internal)
+  .map((address) => address.address);
 
 const securityHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
@@ -9,7 +15,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["127.0.0.1"],
+  allowedDevOrigins: [...new Set(["127.0.0.1", ...localNetworkAddresses])],
   reactStrictMode: true,
   experimental: {
     // La ruta CLI de Next no captura `tsc --showConfig` correctamente en este entorno.

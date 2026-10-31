@@ -3,7 +3,7 @@ import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { VisualizationChannel, VisualizationNode } from "../schemas/visualization-node";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
-import { formatDataValue } from "../data-binding/formatting/format-data-value";
+import { formatDataValue, inferDataDisplayFormat, type DataDisplayFormat } from "../data-binding/formatting/format-data-value";
 import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 export interface VisualizationDataRow {
@@ -50,7 +50,11 @@ function channelLabel(channel: { field: string; label?: string }) {
   return cleanGeneratedCopy(channel.label ?? channel.field);
 }
 
-function formatQuantitativeValue(value: unknown, format: VisualizationChannel["format"]) {
+function effectiveChannelFormat(channel: VisualizationChannel | undefined) {
+  return channel ? inferDataDisplayFormat(channel.format, channel.field, channel.label) : undefined;
+}
+
+function formatQuantitativeValue(value: unknown, format: DataDisplayFormat | undefined) {
   if (typeof value !== "number" || !Number.isFinite(value) || !format) return String(value ?? "—");
   return formatDataValue(value, format, { locale: "es-MX", currency: "MXN" }) ?? "—";
 }
@@ -122,7 +126,9 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
   }
 
   const seriesType = spec.mark === "scatter" ? "scatter" : spec.mark.includes("bar") || spec.mark === "bar" ? "bar" : "line";
-  const formatYValue = (value: unknown) => formatQuantitativeValue(value, y.format);
+  const xFormat = effectiveChannelFormat(x);
+  const yFormat = effectiveChannelFormat(y);
+  const formatYValue = (value: unknown) => formatQuantitativeValue(value, yFormat);
   const series = groups.map((group) => ({
     name: group,
     type: seriesType,
@@ -145,12 +151,12 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
       xAxis: {
         type: "value",
         name: channelLabel(x),
-        axisLabel: x.format ? { formatter: (value: number) => formatQuantitativeValue(value, x.format) } : undefined,
+        axisLabel: xFormat ? { formatter: (value: number) => formatQuantitativeValue(value, xFormat) } : undefined,
       },
       yAxis: {
         type: "value",
         name: channelLabel(y),
-        axisLabel: y.format ? { formatter: (value: number) => formatYValue(value) } : undefined,
+        axisLabel: yFormat ? { formatter: (value: number) => formatYValue(value) } : undefined,
       },
       series: groups.map((group) => ({
         name: group,
@@ -175,7 +181,7 @@ function cartesianOption(spec: VisualizationNode, rows: VisualizationDataRow[]) 
     yAxis: {
       type: "value",
       name: channelLabel(y),
-      axisLabel: y.format ? { formatter: (value: number) => formatYValue(value) } : undefined,
+      axisLabel: yFormat ? { formatter: (value: number) => formatYValue(value) } : undefined,
     },
     series,
   };
@@ -319,6 +325,7 @@ export function compileVisualizationOption(
       : cartesianOption(spec, rows);
   const themedMarkOption = applyThemeToMarkOption(markOption, theme);
   const quantitativeChannel = spec.encoding.value ?? spec.encoding.y;
+  const quantitativeFormat = effectiveChannelFormat(quantitativeChannel);
   const firstCurrency = rows.find((row) => typeof row.currency === "string" && /^[A-Z]{3}$/u.test(row.currency))?.currency;
   const currency = typeof firstCurrency === "string" ? firstCurrency : "MXN";
 
@@ -352,9 +359,9 @@ export function compileVisualizationOption(
       padding: 12,
       extraCssText: "box-shadow: 3px 3px 0 rgba(0,0,0,.12); border-radius: 4px;",
       textStyle: { color: theme.text },
-      valueFormatter: quantitativeChannel?.format
+      valueFormatter: quantitativeFormat
         ? (value) => typeof value === "number"
-          ? formatDataValue(value, quantitativeChannel.format, { locale: "es-MX", currency }) ?? "—"
+          ? formatDataValue(value, quantitativeFormat, { locale: "es-MX", currency }) ?? "—"
           : String(value ?? "—")
         : undefined,
     },

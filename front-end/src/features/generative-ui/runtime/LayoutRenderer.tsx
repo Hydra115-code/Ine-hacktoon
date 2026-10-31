@@ -58,6 +58,7 @@ import { RuntimeMotionNode } from "./RuntimeMotionNode";
 import { controlCompatibilityKey } from "../interactions/reconciliation/control-compatibility-key";
 import type { InteractionNode } from "../schemas/interaction-node";
 import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
+import { inferDataDisplayFormat } from "../data-binding/formatting/format-data-value";
 
 const loadRuntimeMotionFeatures = () => import("./runtime-motion-features").then((module) => module.default);
 const MexicoChoropleth = lazy(() => import("../primitives/civic/MexicoChoropleth").then((module) => ({
@@ -234,6 +235,7 @@ const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, 
         const label = node.labelBinding
           ? resolver?.resolve({ path: node.labelBinding, expectedType: "string" }).formattedValue
           : node.label;
+        const format = inferDataDisplayFormat(node.format, node.valueBinding, label ?? node.label) as typeof node.format;
 
         return (
           <Metric
@@ -244,8 +246,8 @@ const ResolvedNodeContent = memo(function ResolvedNodeContent({ node, resolver, 
             trend={node.trendBinding ? resolver?.resolve({ path: node.trendBinding }).formattedValue : undefined}
             value={resolver?.resolve({
               path: node.valueBinding,
-              format: node.format,
-              expectedType: node.valueType ?? expectedTypeForFormat(node.format),
+              format,
+              expectedType: node.valueType ?? expectedTypeForFormat(format),
               fallback: node.fallback,
             }).formattedValue ?? undefined}
           />

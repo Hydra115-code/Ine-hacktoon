@@ -39,5 +39,5 @@ export function formatCivicValue(
 
 export function percentagePointScale(values: readonly number[], format: DataDisplayFormat | undefined) {
   if (format !== "percent" && format !== "percentage") return 1;
-  return values.some((value) => Math.abs(value) > 1) || format === "percentage" ? 1 : 100;
+  return values.some((value) => Math.abs(value) > 1) ? 1 : 100;
 }

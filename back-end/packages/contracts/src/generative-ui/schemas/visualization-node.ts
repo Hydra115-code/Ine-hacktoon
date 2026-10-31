@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { bindingReferenceSchema } from "../data-binding/schemas/binding-schema.js";
+import { bindingFormatSchema, bindingReferenceSchema } from "../data-binding/schemas/binding-schema.js";
 import { optionalNodeIdField } from "./node-id.js";
 
 const fieldSchema = z.string()
@@ -19,12 +19,14 @@ export const positionChannelSchema = z.object({
   type: channelTypeSchema,
   aggregate: aggregationSchema.optional(),
   label: z.string().trim().min(1).max(80).optional(),
+  format: bindingFormatSchema.optional(),
 }).strict();
 
 export const groupChannelSchema = z.object({
   field: fieldSchema,
   type: z.enum(["nominal", "ordinal"]),
   label: z.string().trim().min(1).max(80).optional(),
+  format: bindingFormatSchema.optional(),
 }).strict();
 
 export const visualizationMarkSchema = z.enum([

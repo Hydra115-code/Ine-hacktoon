@@ -6,6 +6,9 @@ import { CONTRACT_FINGERPRINT } from "@ine/contracts";
  * adapts the two known legacy wire differences only at the HTTP boundary.
  */
 export const CURRENT_BACKEND_CONTRACT_FINGERPRINT =
+  "c5568d47144300d1ae89a99b044f12108bade39c1cc4098c4433826405332418" as const;
+
+export const PRE_FORMAT_BACKEND_CONTRACT_FINGERPRINT =
   "765814b41d32ea8a6ba24d6d00293e50854304e20401793cacb6ed7f12e0006d" as const;
 
 export const LEGACY_BACKEND_CONTRACT_FINGERPRINT =
@@ -17,6 +20,7 @@ export const BRYAN_BACKEND_CONTRACT_FINGERPRINT = LEGACY_BACKEND_CONTRACT_FINGER
 const supportedBackendFingerprints = new Set<string>([
   CONTRACT_FINGERPRINT,
   CURRENT_BACKEND_CONTRACT_FINGERPRINT,
+  PRE_FORMAT_BACKEND_CONTRACT_FINGERPRINT,
   LEGACY_BACKEND_CONTRACT_FINGERPRINT,
 ]);
 
@@ -79,19 +83,7 @@ function adaptContractValue(
   });
   const adapted = Object.fromEntries(entries) as Record<string, unknown>;
 
-  if (direction === "to-backend" && adapted.type === "visualization" && isPlainRecord(adapted.encoding)) {
-    adapted.encoding = stripUnsupportedVisualizationFormats(adapted.encoding);
-  }
-
   return adapted;
-}
-
-function stripUnsupportedVisualizationFormats(encoding: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(encoding).map(([channelName, channel]) => {
-    if (!isPlainRecord(channel) || !("format" in channel)) return [channelName, channel];
-    const { format: _format, ...backendChannel } = channel;
-    return [channelName, backendChannel];
-  }));
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {

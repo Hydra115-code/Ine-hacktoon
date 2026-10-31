@@ -3,8 +3,7 @@ import type { DataValue } from "../data-binding/schemas/data-registry-schema";
 import type { VisualizationNode } from "../schemas/visualization-node";
 import type { VisualizationDataRow } from "./VisualizationCompiler";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
-import { formatDataValue, localizeDisplayValue } from "../data-binding/formatting/format-data-value";
-import type { BindingFormat } from "../data-binding/schemas/binding-schema";
+import { formatDataValue, inferDataDisplayFormat, localizeDisplayValue, type DataDisplayFormat } from "../data-binding/formatting/format-data-value";
 import { cleanGeneratedCopy } from "../primitives/content/clean-generated-copy";
 
 interface VisualizationDataTableProps {
@@ -15,7 +14,7 @@ interface VisualizationDataTableProps {
 interface AccessibleColumn {
   field: string;
   label: string;
-  format?: BindingFormat;
+  format?: DataDisplayFormat;
 }
 
 const MAX_ACCESSIBLE_ROWS = 100;
@@ -28,7 +27,9 @@ function getAccessibleColumns(spec: VisualizationNode): AccessibleColumn[] {
     columns.set(channel.field, {
       field: channel.field,
       label: cleanGeneratedCopy(channel.label ?? channel.field),
-      ...(channel.format ? { format: channel.format } : {}),
+      ...(inferDataDisplayFormat(channel.format, channel.field, channel.label) ? {
+        format: inferDataDisplayFormat(channel.format, channel.field, channel.label),
+      } : {}),
     });
   });
 
@@ -52,7 +53,7 @@ function formatAccessibleValue(value: DataValue | undefined, column: AccessibleC
 }
 
 function accessibleCellAlignment(column: AccessibleColumn) {
-  return column.format === "number" || column.format === "percent" || column.format === "currency"
+  return column.format === "number" || column.format === "percent" || column.format === "percentage" || column.format === "currency"
     ? "ui-visualization__data-cell--numeric"
     : "ui-visualization__data-cell--text";
 }

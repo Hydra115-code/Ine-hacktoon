@@ -83,6 +83,11 @@ const countFields = new Set([
 const percentageFieldPattern = /^(?:percentage|\w*Percentage|\w*Pct)$/u;
 const privateFieldPattern = /(?:^|_)(?:id|uuid|token|secret|password|user|owner|idempotency)(?:_|$)|(?:Id|ID|Uuid|UUID)$|^idempotencyKey$/u;
 
+function visualizationFormat(field: string): "percent" | undefined {
+  const leaf = field.split(".").at(-1) ?? field;
+  return percentageFieldPattern.test(leaf) ? "percent" : undefined;
+}
+
 function normalizeSourceData(source: UiDataSource): unknown {
   const normalized = normalizeValues(source.data);
   if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
@@ -188,7 +193,12 @@ function adaptNode(node: UiNode, context: AdapterContext): UINode {
         encoding: {
           x: { field: node.xKey, type: "nominal", label: node.xLabel },
           y: { field: node.yKey, type: "ordinal", label: node.yLabel },
-          value: { field: node.valueKey, type: "quantitative", label: node.valueLabel },
+          value: {
+            field: node.valueKey,
+            type: "quantitative",
+            label: node.valueLabel,
+            ...(visualizationFormat(node.valueKey) ? { format: visualizationFormat(node.valueKey) } : {}),
+          },
         },
         legend: { show: true, position: "top" },
       };
@@ -546,7 +556,12 @@ function adaptChart(
       dataBinding: adaptReference(node.data, context),
       encoding: {
         group: { field: node.categoryKey, type: "nominal", label: node.title },
-        value: { field: series.key, type: "quantitative", label: series.label },
+        value: {
+          field: series.key,
+          type: "quantitative",
+          label: series.label,
+          ...(visualizationFormat(series.key) ? { format: visualizationFormat(series.key) } : {}),
+        },
       },
     };
   }
@@ -559,7 +574,12 @@ function adaptChart(
     dataBinding: adaptReference(node.data, context),
     encoding: {
       x: { field: node.categoryKey, type: "nominal" },
-      y: { field: series.key, type: "quantitative", label: series.label },
+      y: {
+        field: series.key,
+        type: "quantitative",
+        label: series.label,
+        ...(visualizationFormat(series.key) ? { format: visualizationFormat(series.key) } : {}),
+      },
     },
     ...(node.sort ? { sort: { by: "y" as const, direction: node.sort } } : {}),
   };
@@ -589,7 +609,11 @@ function adaptMultiSeriesChart(
     dataBinding,
     encoding: {
       x: { field: "category", type: "nominal" },
-      y: { field: "value", type: "quantitative" },
+      y: {
+        field: "value",
+        type: "quantitative",
+        ...(node.series.every((candidate) => visualizationFormat(candidate.key) === "percent") ? { format: "percent" as const } : {}),
+      },
       group: { field: "series", type: "nominal" },
     },
     legend: { show: true, position: "top" },

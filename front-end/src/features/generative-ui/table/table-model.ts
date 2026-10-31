@@ -1,4 +1,4 @@
-import { formatDataValue } from "../data-binding/formatting/format-data-value";
+import { formatDataValue, inferDataDisplayFormat } from "../data-binding/formatting/format-data-value";
 import { maskSensitiveIdentifier } from "../data-binding/formatting/mask-sensitive-identifier";
 import { readDataField } from "../data-binding/resolver/read-data-field";
 import type { DataValue } from "../data-binding/schemas/data-registry-schema";
@@ -53,10 +53,11 @@ export function formatTableCell(
 ) {
   const value = readDataField(row, column.field);
   if (value === undefined) return "—";
+  const format = inferDataDisplayFormat(column.format, column.field, column.label);
 
   try {
     return maskSensitiveIdentifier(column.field, value)
-      ?? formatDataValue(value, column.format, options)
+      ?? formatDataValue(value, format, options)
       ?? "—";
   } catch {
     return "—";
