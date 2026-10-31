@@ -1,18 +1,30 @@
-# INE Explora — Frontend
+# INE Explora con Paper — Frontend
 
-Aplicación web para consultar datos públicos de participación electoral mediante conversación e interfaces generadas. El frontend recibe especificaciones declarativas del backend, valida el contrato y las convierte en tablas, gráficas, mapas, métricas, filtros y notas metodológicas.
+Interfaz web para explorar datos públicos de participación electoral mediante conversación. El frontend recibe especificaciones declarativas del backend, valida el contrato compartido y las representa como tablas, gráficas, mapas, indicadores, filtros y notas metodológicas.
 
-## Instalación local paso a paso
+> Esta rama contiene únicamente el frontend. Para instalar el producto completo con Backend y Datos, utiliza la rama [`main`](https://github.com/Hydra115-code/Ine-hacktoon/tree/main).
 
-Esta guía está pensada para Linux, macOS o WSL. El frontend necesita que el backend esté ejecutándose para responder consultas; la portada y el catálogo visual pueden abrirse sin él.
+## Funcionalidades
 
-### 1. Instalar los requisitos
+- Conversación abierta y solicitudes de contexto cuando faltan datos.
+- Renderizado progresivo de interfaces generativas.
+- Tablas accesibles, gráficas, mapa interactivo de México y líneas del tiempo.
+- Historial, restauración de vistas y cambios consecutivos sobre un resultado.
+- Interacciones locales para filtrar, seleccionar y ordenar sin consultas innecesarias.
+- Tema claro y oscuro, navegación por teclado y controles de accesibilidad.
+- Mensajes ciudadanos para errores, estados parciales y recuperación.
+- Paper como guía contextual de la experiencia.
+
+## Inicio rápido
+
+### Requisitos
 
 - [Git](https://git-scm.com/downloads).
-- [Node.js 22 LTS](https://nodejs.org/) recomendado; la versión mínima admitida es 20.9.
-- Acceso al repositorio de GitHub.
+- [Node.js](https://nodejs.org/) `20.9` o posterior; Node.js 22 LTS es la opción recomendada.
+- Corepack.
+- Backend compatible activo en `http://127.0.0.1:3101`.
 
-Comprueba la instalación en una terminal:
+Comprueba el entorno:
 
 ```bash
 git --version
@@ -20,34 +32,20 @@ node --version
 corepack --version
 ```
 
-Si `corepack` no existe, instálalo y vuelve a comprobarlo:
+Si `corepack` no está disponible, instala una distribución reciente de Node.js que lo incluya y abre una terminal nueva.
+
+### 1. Clonar el frontend
+
+Utiliza HTTPS:
 
 ```bash
-npm install --global corepack
-corepack --version
+git clone --branch front-end --single-branch https://github.com/Hydra115-code/Ine-hacktoon.git Ine-hacktoon-front-end
+cd Ine-hacktoon-front-end
 ```
 
-### 2. Descargar la rama del frontend
+### 2. Instalar dependencias
 
-Desde la carpeta donde quieras guardar el proyecto:
-
-```bash
-mkdir -p INE-Integracion
-cd INE-Integracion
-git clone --branch front-end --single-branch git@github.com:Hydra115-code/Ine-hacktoon.git front-end
-cd front-end
-```
-
-Si Git muestra `Permission denied (publickey)`, configura una llave SSH en GitHub o, si tu cuenta tiene acceso, usa la URL HTTPS:
-
-```bash
-git clone --branch front-end --single-branch https://github.com/Hydra115-code/Ine-hacktoon.git front-end
-cd front-end
-```
-
-Si ya descargaste esta rama, no vuelvas a clonarla: entra a su carpeta y continúa.
-
-### 3. Instalar la versión correcta de pnpm y las dependencias
+La rama fija pnpm `11.25.0`:
 
 ```bash
 corepack enable
@@ -56,102 +54,86 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-El resultado de `pnpm --version` debe ser `11.25.0`. No uses `npm install`: el proyecto fija sus dependencias con `pnpm-lock.yaml`.
+No ejecutes `npm install`: `pnpm-lock.yaml` es la fuente reproducible de dependencias.
 
-### 4. Crear la configuración local
+### 3. Configurar el entorno
+
+Linux, macOS o Git Bash:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Abre `.env.local` en un editor y deja, como mínimo:
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Configura como mínimo:
 
 ```dotenv
 AGENT_API_URL=http://127.0.0.1:3101/api/agent
 AGENT_SESSION_MODE=local_service
-AGENT_API_TOKEN=pega-aqui-el-mismo-token-del-backend
+AGENT_API_TOKEN=EL_MISMO_TOKEN_CONFIGURADO_EN_EL_BACKEND
 INE_DEMO_LOGIN_ENABLED=false
 ```
 
-`AGENT_API_TOKEN` debe contener exactamente el mismo valor que `AGENT_API_TOKEN` en `back-end/.env`. No agregues espacios y no cambies el nombre por uno que empiece con `NEXT_PUBLIC_`, porque eso expondría el token al navegador.
+`AGENT_API_TOKEN` debe coincidir exactamente con el valor de `back-end/.env`. No uses el prefijo `NEXT_PUBLIC_`: expondría el secreto al navegador.
 
-### 5. Iniciar el frontend
+### 4. Iniciar
 
-Primero inicia el backend en otra terminal. Después, desde `front-end/`, ejecuta:
+Con el backend activo en otra terminal:
 
 ```bash
 pnpm dev
 ```
 
-Espera a que la terminal muestre `Ready` y abre:
+Abre [http://127.0.0.1:3000](http://127.0.0.1:3000). Presiona `Ctrl+C` para detener el proceso.
 
-- Aplicación: `http://127.0.0.1:3000`
-- Conversación: `http://127.0.0.1:3000/conversar`
-- Catálogo visual: `http://127.0.0.1:3000/dev/genui-audit-harness`
+### 5. Verificar la conexión
 
-Mantén la terminal abierta. Para detener el frontend, presiona `Ctrl+C`.
+1. Abre [http://127.0.0.1:3000/conversar](http://127.0.0.1:3000/conversar).
+2. Envía `Compara la participación de Jalisco y Nuevo León en 2024`.
+3. Confirma que Paper responda y aparezca una vista con evidencia.
 
-### 6. Comprobar que quedó conectado
+Si falla, comprueba primero el backend en [http://127.0.0.1:3101/api/system/status](http://127.0.0.1:3101/api/system/status) y después revisa el token compartido.
 
-1. Abre `/conversar`.
-2. Envía una consulta, por ejemplo: `Compara la participación de Jalisco y Nuevo León en 2024`.
-3. Confirma que Paper responda y que aparezca una vista con datos.
+## Configuración
 
-Si la página abre pero la consulta falla, revisa primero que `http://127.0.0.1:3101/api/system/status` responda y después compara el token de ambos archivos de entorno.
-
-### Arranque de todos los días
-
-Después de instalar una vez, normalmente sólo necesitas dos terminales:
-
-```bash
-# Terminal 1
-cd INE-Integracion/back-end
-pnpm api
-```
-
-```bash
-# Terminal 2
-cd INE-Integracion/front-end
-pnpm dev
-```
-
-No vuelvas a ejecutar `pnpm install` salvo que cambie `package.json` o `pnpm-lock.yaml`.
-
-## Configuración de entorno
-
-| Variable | Requerida | Descripción |
-|---|---:|---|
-| `AGENT_API_URL` | Sí | Endpoint del agente. Valor local: `http://127.0.0.1:3101/api/agent`. |
-| `AGENT_SESSION_MODE` | Sí | Usar `local_service` para sesiones locales. |
-| `AGENT_API_TOKEN` | Sí | Debe coincidir con el token del backend. Nunca usar prefijo `NEXT_PUBLIC_`. |
-| `AI_PROVIDER` | No | Identificador informativo del proveedor activo. |
-| `SUPABASE_URL` | No | URL de Supabase cuando se habilita autenticación remota. |
+| Variable | Requerida | Uso |
+|---|:---:|---|
+| `AGENT_API_URL` | Sí | Endpoint del agente. |
+| `AGENT_SESSION_MODE` | Sí | Usa `local_service` en desarrollo local. |
+| `AGENT_API_TOKEN` | Sí | Token privado idéntico al del backend. |
+| `AI_PROVIDER` | No | Referencia informativa; el proveedor real se configura en el backend. |
+| `SUPABASE_URL` | No | URL de Supabase si se habilita autenticación remota. |
 | `SUPABASE_PUBLISHABLE_KEY` | No | Clave pública de Supabase. |
-| `INE_DEMO_LOGIN_ENABLED` | No | Habilita el acceso de demostración. |
+| `INE_DEMO_LOGIN_ENABLED` | No | Habilita el acceso sintético de demostración. |
 | `INE_DEMO_EMAIL` | No | Cuenta sintética de demostración. |
-| `INE_DEMO_PASSWORD` | No | Contraseña server-side de la cuenta sintética. |
+| `INE_DEMO_PASSWORD` | No | Contraseña server-side de demostración. |
 
-`AI_PROVIDER` es informativa; el proveedor que interpreta las preguntas se configura realmente en el backend. Supabase y el acceso de demostración no son necesarios para la instalación local recomendada.
+La instalación local recomendada no requiere Supabase. Gemini, el modelo local o el planificador por reglas se eligen exclusivamente en el backend.
 
-## Compilación de producción
+## Rutas
 
-Para comprobar que el frontend puede compilarse y ejecutarse como producción:
+| Ruta | Función |
+|---|---|
+| `/` | Presentación del producto. |
+| `/conversar` | Conversación y exploración de datos. |
+| `/historias` | Recorrido guiado con evidencia pública. |
+| `/dev/genui-audit-harness` | Catálogo de componentes para desarrollo y QA. |
 
-```bash
-pnpm build
-pnpm start
-```
-
-`pnpm start` escucha en el puerto 3000 y requiere que `pnpm build` haya terminado correctamente.
+Las rutas bajo `src/app/dev/` son herramientas internas de auditoría, no pantallas del flujo ciudadano.
 
 ## Arquitectura
 
 ```text
 Navegador
-  └─ Workspace: conversación, historial y lienzo
+  └─ Workspace: chat, historial y lienzo
        └─ Route Handler /api/agent
-            └─ Backend HTTP /api/agent
-                 └─ NDJSON: estado, texto, datos, UI y patches
+            └─ Backend /api/agent
+                 └─ stream NDJSON: estado, texto, datos, UI y patches
 
 DataRegistry + BindingResolver
   └─ UIRenderer
@@ -159,25 +141,9 @@ DataRegistry + BindingResolver
        ├─ visualizaciones ECharts
        ├─ tablas y filtros
        └─ mapa de México
-
-UIEvent
-  ├─ local: selección, orden y filtros visuales
-  └─ remoto: cambios semánticos y consultas de datos
 ```
 
-El navegador no ejecuta HTML ni JavaScript generado. Sólo renderiza nodos aprobados por el contrato de `packages/contracts`.
-
-## Funciones
-
-- Preguntas abiertas y aclaraciones conversacionales.
-- Streaming de texto, datos e interfaz.
-- Historial y restauración de vistas.
-- Edición conversacional de la interfaz.
-- Interacciones locales para filtros, tablas, mapas y líneas del tiempo.
-- Componentes de participación, evidencia, metodología y fuentes.
-- Recuperación ante streams interrumpidos, contratos inválidos y conflictos de revisión.
-- Tema claro/oscuro, navegación por teclado y tablas alternativas a gráficas.
-- Paper como guía contextual.
+El navegador no ejecuta HTML ni JavaScript generado. Sólo representa nodos permitidos por el contrato de `packages/contracts`.
 
 ## Estructura
 
@@ -190,88 +156,104 @@ src/features/paper/              guía, reacciones y sugerencias
 src/features/workspace/          conversación, historial y lienzo
 src/shared/design-system/        tokens y estilos compartidos
 packages/contracts/              contrato compartido
-public/paper/                    assets utilizados por Paper
-scripts/                         pruebas de contrato, integración y UX
+public/paper/                    assets necesarios de Paper
+scripts/                         validaciones de contrato, UX e integración
 ```
 
-Las rutas `src/app/dev/*` son harnesses de desarrollo y auditoría.
+## Desarrollo
 
-## Validación
+Comandos habituales:
+
+```bash
+pnpm dev          # desarrollo con recarga automática
+pnpm typecheck    # contratos y tipos TypeScript
+pnpm build        # compilación de producción
+pnpm start        # ejecución de la compilación
+```
+
+Validación recomendada antes de publicar cambios:
 
 ```bash
 pnpm typecheck
+pnpm quality:verify
 pnpm build
+```
+
+Suite integral del frontend:
+
+```bash
 pnpm int-08:verify
 ```
 
-Pruebas con el backend activo:
-
-```bash
-pnpm integration:agent-text:verify
-pnpm integration:agent-ui:verify
-pnpm integration:streaming-ui:verify
-pnpm integration:ui-interaction:verify
-pnpm integration:patch-sync:verify
-```
-
-Validaciones específicas:
-
-```bash
-pnpm quality:verify
-pnpm performance:verify
-pnpm citizen-language:verify
-pnpm paper:p6:verify
-```
+Las pruebas que consultan el agente requieren un backend compatible en ejecución.
 
 ## Integración con el backend
 
-El backend debe aceptar ambos orígenes locales:
+El backend debe permitir los dos orígenes locales:
 
 ```dotenv
 AGENT_API_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
-`AGENT_API_TOKEN` debe ser idéntico en ambos repositorios. Los contratos compilados también deben compartir la misma huella.
+También debe compartir el mismo `AGENT_API_TOKEN` y una versión compatible de `packages/contracts`.
+
+Para obtener todo el producto desde una sola rama:
+
+```bash
+git clone --branch main https://github.com/Hydra115-code/Ine-hacktoon.git
+cd Ine-hacktoon
+node setup.mjs
+node start.mjs
+```
+
+## Accesibilidad
+
+- Navegación por teclado y foco visible.
+- Alternativas tabulares para visualizaciones relevantes.
+- Reflujo responsivo y controles de tamaño de texto.
+- Temas claro, oscuro y preferencias de contraste.
+- Estados y mensajes anunciables para tecnologías de asistencia.
+
+Valida los criterios automatizados con:
+
+```bash
+pnpm a11y:04:verify
+pnpm table:layout:verify
+```
 
 ## Seguridad
 
-- No subir `.env.local`, tokens ni claves.
-- Las credenciales se agregan en Route Handlers y no se exponen al navegador.
-- Nodos, bindings, eventos y patches se validan con Zod.
-- Los errores técnicos se transforman a mensajes ciudadanos.
-- Los eventos incluyen sesión, correlación y revisión.
+- No subas `.env.local`, tokens ni claves.
+- Las credenciales se agregan en Route Handlers server-side.
+- Nodos, bindings, eventos y patches se validan antes de renderizarse.
+- Los errores técnicos se convierten a mensajes comprensibles para el usuario.
+- Conserva los assets de `public/paper/`; forman parte de la interfaz.
 
 ## Solución de problemas
 
-### Respuesta `401`
+### Error `401`
 
-Verifica que `AGENT_API_TOKEN` coincida carácter por carácter en `front-end/.env.local` y `back-end/.env`. Reinicia ambos procesos después de modificar un archivo de entorno.
+Confirma que `AGENT_API_TOKEN` coincida carácter por carácter en frontend y backend. Reinicia ambos procesos después de modificar los archivos de entorno.
 
-### Backend no disponible
+### Error `503` o backend no disponible
 
 ```bash
 curl http://127.0.0.1:3101/api/system/status
 ```
 
-Si aparece `Connection refused`, inicia el backend con `pnpm api`. Si el estado abre en el navegador pero el frontend sigue fallando, confirma que `AGENT_API_URL` termine en `/api/agent`.
+Si aparece `Connection refused`, inicia el backend. Si aparece `contract_fingerprint_mismatch`, actualiza ambas ramas y recompila sus contratos.
 
-### Puerto 3000 ocupado
+### Puerto `3000` ocupado
 
-```bash
-ss -ltnp '( sport = :3000 )'
-```
-
-Detén la instancia anterior con `Ctrl+C` en la terminal donde se inició. Si necesitas usar otro puerto temporalmente:
+Detén la ejecución anterior con `Ctrl+C`. Para utilizar temporalmente otro puerto:
 
 ```bash
-PORT=3001 pnpm dev
+pnpm dev -- -p 3001
 ```
 
-En ese caso agrega `http://localhost:3001,http://127.0.0.1:3001` a `AGENT_API_ALLOWED_ORIGINS` del backend y reinícialo.
+Agrega el nuevo origen a `AGENT_API_ALLOWED_ORIGINS` del backend y reinícialo.
 
-### `pnpm` tiene otra versión
-
-Desde `front-end/`:
+### Versión incorrecta de pnpm
 
 ```bash
 corepack prepare pnpm@11.25.0 --activate
@@ -279,10 +261,16 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-### Cambié `.env.local` pero no ocurrió nada
+### Los cambios de `.env.local` no se aplican
 
-Detén `pnpm dev` con `Ctrl+C` y vuelve a iniciarlo. Next.js lee estas variables al arrancar.
+Detén `pnpm dev` con `Ctrl+C` y vuelve a iniciarlo. Next.js carga estas variables al arrancar.
 
-### Contratos incompatibles
+## Actualización
 
-Ejecuta `pnpm contracts:build` en ambos repositorios y confirma que las ramas sean compatibles.
+```bash
+git switch front-end
+git pull --ff-only origin front-end
+corepack prepare pnpm@11.25.0 --activate
+pnpm install --frozen-lockfile
+pnpm dev
+```
