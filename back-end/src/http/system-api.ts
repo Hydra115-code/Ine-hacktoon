@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import {
   errorPayloadSchema,
   textAgentRequestSchema,
@@ -427,9 +427,9 @@ function normalizeAccessToken(value: string): string | undefined {
 }
 
 function tokensMatch(receivedToken: string, expectedToken: string): boolean {
-  const expectedHash = createHash("sha256").update(expectedToken).digest();
-  const receivedHash = createHash("sha256").update(receivedToken).digest();
-  return timingSafeEqual(expectedHash, receivedHash);
+  const expectedBuffer = Buffer.from(expectedToken, "utf8");
+  const receivedBuffer = Buffer.from(receivedToken, "utf8");
+  return expectedBuffer.length === receivedBuffer.length && timingSafeEqual(expectedBuffer, receivedBuffer);
 }
 
 function writeAuthenticationRequired(response: ServerResponse): void {
