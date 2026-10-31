@@ -25,6 +25,16 @@ export const metadata: Metadata = {
   },
   description:
     "Paper te guía por los datos oficiales de participación ciudadana 2009–2024: historias, mapas y comparaciones para entender cómo vota tu generación y tu estado.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export const viewport: Viewport = {

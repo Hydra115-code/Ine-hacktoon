@@ -68,3 +68,17 @@ test("la transcripción requiere sesión y no acepta tokens estáticos", () => {
   assert.match(route, /refreshSupabaseSession\(cookies\.refreshToken\)/u);
   assert.doesNotMatch(route, /AGENT_API_TOKEN|SUPABASE_ACCESS_TOKEN/u);
 });
+
+test("el prototipo solicita a buscadores no indexar ni archivar su contenido", () => {
+  const layout = readFileSync(new URL("../src/app/layout.tsx", import.meta.url), "utf8");
+  const robots = readFileSync(new URL("../src/app/robots.ts", import.meta.url), "utf8");
+  const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
+
+  assert.match(layout, /robots:\s*\{/u);
+  assert.match(layout, /index:\s*false/u);
+  assert.match(layout, /follow:\s*false/u);
+  assert.match(robots, /userAgent:\s*"\*"/u);
+  assert.match(robots, /disallow:\s*"\/"/u);
+  assert.match(nextConfig, /X-Robots-Tag/u);
+  assert.match(nextConfig, /noindex, nofollow, noarchive, nosnippet, noimageindex/u);
+});
