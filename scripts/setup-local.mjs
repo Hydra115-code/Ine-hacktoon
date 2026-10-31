@@ -22,20 +22,28 @@ assertSupportedNode();
 assertCommand(corepackCommand);
 assertCommand(gitCommand);
 
-console.log("\n[1/4] Preparando los datos oficiales...");
+console.log("\n[1/5] Preparando los datos oficiales...");
 await installDataDependencies();
 
-console.log("\n[2/4] Instalando el backend con pnpm...");
+console.log("\n[2/5] Instalando el backend con pnpm...");
 await run(corepackCommand, ["pnpm", "install", "--frozen-lockfile"], {
   cwd: path.join(repositoryRoot, "back-end"),
 });
 
-console.log("\n[3/4] Instalando el frontend con pnpm...");
+console.log("\n[3/5] Instalando el frontend con pnpm...");
 await run(corepackCommand, ["pnpm", "install", "--frozen-lockfile"], {
   cwd: path.join(repositoryRoot, "front-end"),
 });
 
-console.log("\n[4/4] Creando y validando la configuración privada...");
+console.log("\n[4/5] Compilando los contratos compartidos...");
+await run(corepackCommand, ["pnpm", "contracts:build"], {
+  cwd: path.join(repositoryRoot, "back-end"),
+});
+await run(corepackCommand, ["pnpm", "contracts:build"], {
+  cwd: path.join(repositoryRoot, "front-end"),
+});
+
+console.log("\n[5/5] Creando y validando la configuración privada...");
 await run(process.execPath, [path.join(repositoryRoot, "scripts", "init-local-env.mjs")]);
 await run(process.execPath, [path.join(repositoryRoot, "scripts", "check-local-config.mjs")]);
 await run(process.execPath, [path.join(repositoryRoot, "scripts", "check-repository-safety.mjs")]);

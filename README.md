@@ -181,6 +181,7 @@ node start.mjs
 - `node: command not found` o `node no se reconoce`: instala Node.js compatible y vuelve a abrir la terminal.
 - `corepack no se reconoce`: la instalación de Node está incompleta o no quedó en el `PATH`; reinstálala y abre una terminal nueva.
 - `EADDRINUSE`: los puertos `3000` o `3101` ya están ocupados. Cierra la ejecución anterior antes de iniciar otra.
+- `contract_fingerprint_mismatch`: actualiza `main` y vuelve a ejecutar `node setup.mjs`. Los contratos se generan de forma estable en Windows, Linux y macOS; no copies manualmente archivos `dist` ni edites el fingerprint.
 - Instalación incompleta: vuelve a ejecutar `node setup.mjs`; el proceso es seguro para repetirse y conserva las claves existentes.
 - Para validar todo después de instalar: ejecuta `node verify.mjs`.
 

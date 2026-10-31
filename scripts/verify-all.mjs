@@ -35,6 +35,7 @@ if (process.argv.includes("--install")) {
 }
 
 await run(process.execPath, [path.join(repositoryRoot, "scripts", "verify-data.mjs")]);
+await run(process.execPath, ["--test", path.join(repositoryRoot, "scripts", "contract-fingerprint-portability.test.mjs")]);
 await run(corepackCommand, ["pnpm", "int-08:verify"], { cwd: path.join(repositoryRoot, "back-end") });
 await run(corepackCommand, ["pnpm", "int-08:verify"], { cwd: path.join(repositoryRoot, "front-end") });
 

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { updateContractHash } from "./contract-fingerprint-utils.mjs";
 
 const packageDirectory = dirname(fileURLToPath(new URL("../package.json", import.meta.url)));
 const sourceDirectory = join(packageDirectory, "src");
@@ -24,10 +25,7 @@ const hash = createHash("sha256");
 
 for (const sourcePath of sourcePaths) {
   const relativePath = relative(sourceDirectory, sourcePath).split(sep).join("/");
-  hash.update(relativePath);
-  hash.update("\0");
-  hash.update(await readFile(sourcePath));
-  hash.update("\0");
+  updateContractHash(hash, relativePath, await readFile(sourcePath, "utf8"));
 }
 
 const fingerprint = hash.digest("hex");

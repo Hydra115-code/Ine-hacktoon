@@ -26,6 +26,14 @@ for (const requiredPath of requiredPaths) {
 
 await run(process.execPath, [path.join(repositoryRoot, "scripts", "check-local-config.mjs")]);
 
+console.log("Preparando contratos compartidos...");
+await run(corepackCommand, ["pnpm", "contracts:build"], {
+  cwd: path.join(repositoryRoot, "back-end"),
+});
+await run(corepackCommand, ["pnpm", "contracts:build"], {
+  cwd: path.join(repositoryRoot, "front-end"),
+});
+
 const children = [];
 let shuttingDown = false;
 
