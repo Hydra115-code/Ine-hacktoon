@@ -5,7 +5,7 @@ import { useAgentSession } from "../../agent/components/AgentSessionProvider";
 import { useWorkspaceStore } from "../state/workspace-store";
 import { isWorkspaceBusy } from "../types/workspace-status";
 import { PromptComposer } from "./PromptComposer";
-import { cleanAnswerText, summarizeAnswer } from "../presentation/summarize-answer";
+import { cleanAnswerText, isContextRequest, summarizeAnswer } from "../presentation/summarize-answer";
 
 import { SuggestedQuestions } from "../../civic-ui/components/SuggestedQuestions";
 import { isGuidanceOnly } from "../presentation/is-guidance-only";
@@ -83,6 +83,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
               const fullAnswer = turn.role === "assistant" ? cleanAnswerText(turn.text) : "";
               const isDirectResponse = turn.role === "assistant" && turn.revision === undefined;
               const isCurrentGuidance = guidanceOnly && isDirectResponse && turn.id === latestTurnId;
+              const condenseContextRequest = isCurrentGuidance && isContextRequest(fullAnswer);
               const sources = citizenFacingDetails(turn.sources);
               const controls = citizenFacingDetails(turn.controls);
               const changes = citizenFacingDetails(turn.changes);
@@ -91,7 +92,7 @@ export function ConversationPanel({ onShowResult }: { onShowResult: () => void }
                 {turn.role === "user" ? <p>{turn.text}</p> : (
                   <>
                     {isDirectResponse && fullAnswer ? (
-                      <p className="conversation__direct-answer">{isCurrentGuidance ? "¿Puedes darme estos datos para continuar?" : fullAnswer}</p>
+                      <p className="conversation__direct-answer">{condenseContextRequest ? "¿Puedes darme estos datos para continuar?" : fullAnswer}</p>
                     ) : summary ? <p className="conversation__summary">{summary}</p> : null}
                     {!isDirectResponse && fullAnswer && fullAnswer !== summary ? (
                       <details className="conversation__full-answer">

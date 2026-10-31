@@ -6,6 +6,7 @@ import {
   USE_AVAILABLE_DATA_PROMPT,
   WHY_CONTEXT_PROMPT,
 } from "../src/features/workspace/presentation/guidance-context.ts";
+import { isContextRequest } from "../src/features/workspace/presentation/summarize-answer.ts";
 
 test("detecta los datos electorales que Paper necesita para continuar", () => {
   assert.deepEqual(
@@ -19,6 +20,11 @@ test("mantiene la aclaración como conversación y sólo analiza por petición e
   assert.match(WHY_CONTEXT_PROMPT, /no hagas el análisis todavía/u);
   assert.match(USE_AVAILABLE_DATA_PROMPT, /Haz el análisis sólo con la información disponible/u);
   assert.match(USE_AVAILABLE_DATA_PROMPT, /No inventes/u);
+});
+
+test("distingue una solicitud de datos de la explicación conversacional de Paper", () => {
+  assert.equal(isContextRequest("Dime tu estado, tu grupo de edad y las elecciones que quieres comparar."), true);
+  assert.equal(isContextRequest("Necesito esos datos porque los conteos se organizan por estado y elección."), false);
 });
 
 test("la respuesta libre, la explicación y el análisis limitado son alternativas explícitas", async () => {

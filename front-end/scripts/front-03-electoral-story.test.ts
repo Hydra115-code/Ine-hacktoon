@@ -24,9 +24,10 @@ test("el estado inicial es navegación de intención, no una pantalla con datos 
   const component = readFileSync(new URL("../src/features/electoral-exploration/components/ElectoralExplorationStart.tsx", import.meta.url), "utf8");
   const canvas = readFileSync(new URL("../src/features/workspace/components/GenerativeCanvas.tsx", import.meta.url), "utf8");
 
-  assert.match(component, /información disponible en las fuentes conectadas/u);
-  assert.match(component, /Sin cifras estimadas/u);
+  assert.match(component, /electoralExplorationIntents\.map/u);
+  assert.match(component, /onSelect\?\.\(intent\.prompt\)/u);
   assert.doesNotMatch(component, /(?:DataRegistry|UIRenderer|type="(?:metric|table|visualization)")/u);
+  assert.doesNotMatch(component, /\b\d+(?:[.,]\d+)?\s*%/u);
   assert.match(canvas, /<ElectoralExplorationStart/u);
   assert.doesNotMatch(canvas, /const suggestedPrompts/u);
   assert.doesNotMatch(canvas, /hasFinancialData/u);

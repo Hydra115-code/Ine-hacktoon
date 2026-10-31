@@ -76,13 +76,15 @@ test("A11Y-01 conserva un tamaño mínimo legible para texto auxiliar", () => {
 test("A11Y-01 permite saltar navegación y enfoca destinos reales", () => {
   const publicNav = read("src/features/workspace/components/PublicNav.tsx");
   const appShell = read("src/features/workspace/components/AppShell.tsx");
-  const publicPagePaths = ["src/app/page.tsx", "src/app/explorar/page.tsx", "src/app/historias/page.tsx"];
+  const publicPagePaths = ["src/app/page.tsx"];
+  const verifiedStory = read("src/features/electoral-story/components/VerifiedStoryPage.tsx");
   const base = read("src/shared/design-system/base.css");
 
   assert.match(publicNav, /className="skip-link" href="#main-content"/u);
   for (const path of publicPagePaths) {
     assert.match(read(path), /id="main-content" tabIndex=\{-1\}/u, `${path} no expone el destino principal`);
   }
+  assert.match(verifiedStory, /id="main-content" tabIndex=\{-1\}/u);
   assert.match(appShell, /className="skip-link" href="#workspace-content"/u);
   assert.match(appShell, /id="workspace-content" tabIndex=\{-1\}/u);
   assert.match(base, /\.skip-link:focus-visible[\s\S]*transform:\s*translateY\(0\)/u);

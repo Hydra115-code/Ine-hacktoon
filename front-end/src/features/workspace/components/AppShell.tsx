@@ -35,6 +35,7 @@ export function AppShell({ diagnostics, showDeveloperDiagnostics = false }: AppS
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState<number>();
+  const [sidebarRange, setSidebarRange] = useState({ minimum: SIDEBAR_MIN_PX, maximum: SIDEBAR_MAX_PX });
   const workspaceMainRef = useRef<HTMLDivElement>(null);
   const sidebarResizingRef = useRef(false);
 
@@ -51,6 +52,9 @@ export function AppShell({ diagnostics, showDeveloperDiagnostics = false }: AppS
 
   const resizeSidebar = useCallback((requestedWidth: number) => {
     const { minimum, maximum } = sidebarBounds();
+    setSidebarRange((current) => current.minimum === minimum && current.maximum === maximum
+      ? current
+      : { minimum, maximum });
     setSidebarWidth(Math.round(Math.min(maximum, Math.max(minimum, requestedWidth))));
   }, [sidebarBounds]);
 
@@ -123,8 +127,8 @@ export function AppShell({ diagnostics, showDeveloperDiagnostics = false }: AppS
               <div
                 aria-label="Ajustar ancho de la conversación"
                 aria-orientation="vertical"
-                aria-valuemax={Math.round(sidebarBounds().maximum)}
-                aria-valuemin={Math.round(sidebarBounds().minimum)}
+                aria-valuemax={Math.round(sidebarRange.maximum)}
+                aria-valuemin={Math.round(sidebarRange.minimum)}
                 aria-valuenow={Math.round(sidebarWidth ?? SIDEBAR_MIN_PX)}
                 className="workspace__sidebar-resizer"
                 data-collapsed={isSidebarCollapsed || undefined}

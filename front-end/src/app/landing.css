@@ -13,7 +13,10 @@
 }
 
 .public-nav__how {
-  padding: 0.45rem 0.2rem;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0.45rem 0.35rem;
   border: 0;
   border-bottom: 1px solid transparent;
   background: transparent;
@@ -21,11 +24,18 @@
   font: inherit;
   font-size: var(--font-size-caption);
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .public-nav__how:hover,
 .public-nav__how:focus-visible { border-bottom-color: var(--color-brand-primary); }
+
+@media (max-width: 42rem) {
+  .public-nav__how { font-size: 0; }
+  .public-nav__how[href="/historias"]::after { content: "Historia"; font-size: var(--font-size-caption); }
+  .public-nav__how:not([href]) { display: none; }
+}
 
 .landing-main {
   width: min(100% - 3rem, 1320px);

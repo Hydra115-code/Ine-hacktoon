@@ -11,6 +11,15 @@ export function cleanAnswerText(answer: string) {
     .trim();
 }
 
+export function isContextRequest(answer: string): boolean {
+  const normalized = cleanAnswerText(answer)
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLocaleLowerCase("es-MX");
+  if (/\b(?:porque|sin ellos|sin esos datos|para evitar)\b/u.test(normalized)) return false;
+  return /\b(?:dime|indicame|comparte|selecciona|elige|necesito|faltan?)\b[\s\S]{0,240}\b(?:estado|entidad|territorio|grupo de edad|edad|sexo|genero|elecciones?|periodo|anos?)\b/u.test(normalized);
+}
+
 export function summarizeAnswer(answer: string) {
   const clean = cleanAnswerText(answer);
   if (!clean) return "";

@@ -22,8 +22,11 @@ export function PublicNav() {
         </div>
 
         <div className="workspace-header__session">
+          <Link href="/historias" className="public-nav__how">
+            Historia guiada
+          </Link>
           <button type="button" className="public-nav__how" onClick={openOnboarding}>
-            Recorrido
+            Cómo funciona
           </button>
           <AccessibilityCenter />
           <ThemeToggle />
