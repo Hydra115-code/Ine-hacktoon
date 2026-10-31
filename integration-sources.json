@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-30",
+  "base": {
+    "branch": "main",
+    "commit": "a0f0bbf85f36e27a3dddcf8ecfac690f0fac59fb",
+    "backupTag": "pre-integration-main-2026-10-30"
+  },
+  "components": [
+    {
+      "name": "front-end",
+      "path": "front-end",
+      "branch": "front-end",
+      "commit": "0bdfcf595d448170ac4449cd11a2452b453bf41d"
+    },
+    {
+      "name": "back-end",
+      "path": "back-end",
+      "branch": "Back-end",
+      "commit": "d5e87486b3200965a9eca2b9a2899cde6538eccb"
+    },
+    {
+      "name": "data",
+      "path": "data",
+      "branch": "Data",
+      "commit": "6f13e3919ba888fedb18d633b66bd845652de54b"
+    },
+    {
+      "name": "qa",
+      "path": "docs/qa",
+      "branch": "Qa/Tester",
+      "commit": "457c9795e7ce089bd1a31da3c7afd9969fd97d86",
+      "sourcePath": "Docs"
+    }
+  ]
+}

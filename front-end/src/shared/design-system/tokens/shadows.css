@@ -1,0 +1,15 @@
+:root {
+  /* Sombras de hoja apoyada sobre la mesa, no de tarjeta flotante. */
+  --shadow-subtle: 0 1px 0 rgb(28 27 44 / 7%);
+  --shadow-elevated: 0 1px 0 rgb(28 27 44 / 8%), 0 14px 28px -16px rgb(28 27 44 / 28%);
+  --shadow-brand: 0 2px 0 rgb(98 8 56 / 55%);
+  --shadow-paper: 2px 3px 0 rgb(28 27 44 / 10%);
+  --shadow-hard: 4px 4px 0 var(--color-brand-soft);
+}
+
+:root[data-theme="dark"] {
+  --shadow-subtle: 0 1px 0 rgb(0 0 0 / 30%);
+  --shadow-elevated: 0 1px 0 rgb(0 0 0 / 30%), 0 16px 30px -14px rgb(0 0 0 / 55%);
+  --shadow-brand: 0 2px 0 rgb(0 0 0 / 50%);
+  --shadow-paper: 2px 3px 0 rgb(0 0 0 / 35%);
+}

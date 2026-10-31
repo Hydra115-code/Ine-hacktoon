@@ -1,0 +1,18 @@
+:root {
+  /* --font-ui y --font-display los inyecta next/font en app/layout.tsx */
+  --font-family-sans: var(--font-ui), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-size-caption: 0.9375rem;
+  --font-size-label: 1rem;
+  --font-size-body: 1.0625rem;
+  --font-size-title: clamp(1.4rem, 2.2vw, 1.875rem);
+  --font-size-display: clamp(2.1rem, 5.4vw, 4.25rem);
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-brand: 800;
+  --line-height-tight: 1.05;
+  --line-height-body: 1.6;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-label: 0.04em;
+}

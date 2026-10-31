@@ -1,0 +1,97 @@
+/* Superficies blancas, texto en tinta y magenta institucional para acciones. */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-brand-primary: #a70c5f;
+  --color-brand-hover: #850a4c;
+  --color-brand-soft: rgb(167 12 95 / 8%);
+  --color-brand-border: rgb(167 12 95 / 24%);
+  --color-civic-accent: #1d6a70;
+  --color-civic-accent-soft: rgb(29 106 112 / 10%);
+  --color-text-on-brand: #ffffff;
+  --color-surface-page: #ffffff;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f4f4f6;
+  --color-surface-elevated: #ffffff;
+  --color-text-primary: #1c1b2c;
+  --color-text-secondary: #474556;
+  --color-text-muted: #625f70;
+  --color-border-subtle: #e3e3e8;
+  --color-border-strong: #b8b7c0;
+  --color-status-success: #1e6f43;
+  --color-status-warning: #8a5300;
+  --color-status-error: #a8302e;
+  --color-status-info: #22578f;
+  --color-trend-increase: #1e6f43;
+  --color-trend-decrease: #a8302e;
+  --color-evidence-neutral: #625f70;
+  --color-evidence-caution: #8a5300;
+  --color-focus-ring: #a70c5f;
+  --color-canvas-dot: rgb(28 27 44 / 12%);
+  --color-canvas-glow: rgb(255 255 255 / 40%);
+  --color-success-ring: rgb(30 111 67 / 12%);
+  --color-error-soft: rgb(168 48 46 / 7%);
+  --color-error-border: rgb(168 48 46 / 22%);
+
+  /* Identidad Paper */
+  --color-ink: #1c1b2c;
+  --color-crayon: var(--color-data-compare);
+  --color-paper-rule: rgb(28 27 44 / 9%);
+  --color-highlight: #f7d9e6;
+
+  /* Escala secuencial de participación (de menor a mayor) */
+  --color-data-1: #f4dbe6;
+  --color-data-2: #e6a9c6;
+  --color-data-3: #cf6b9e;
+  --color-data-4: #a70c5f;
+  --color-data-5: #620838;
+  --color-data-compare: #1d6a70;
+  --color-data-muted: #b9ae99;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-brand-primary: #ff7cba;
+  --color-brand-hover: #ff9fcc;
+  --color-brand-soft: rgb(255 124 186 / 12%);
+  --color-brand-border: rgb(255 124 186 / 32%);
+  --color-civic-accent: #7fd0d6;
+  --color-civic-accent-soft: rgb(127 208 214 / 12%);
+  --color-text-on-brand: #15141f;
+  --color-surface-page: #15141f;
+  --color-surface-primary: #1c1b29;
+  --color-surface-secondary: #252434;
+  --color-surface-elevated: #2a2939;
+  --color-text-primary: #f3eee4;
+  --color-text-secondary: #c9c3b6;
+  --color-text-muted: #a29d93;
+  --color-border-subtle: #33313f;
+  --color-border-strong: #4d4a5b;
+  --color-status-success: #5fc58c;
+  --color-status-warning: #e5a74a;
+  --color-status-error: #f17f7b;
+  --color-status-info: #86b4e8;
+  --color-trend-increase: #5fc58c;
+  --color-trend-decrease: #f17f7b;
+  --color-evidence-neutral: #c9c3b6;
+  --color-evidence-caution: #e5a74a;
+  --color-focus-ring: #ff7cba;
+  --color-canvas-dot: rgb(243 238 228 / 10%);
+  --color-canvas-glow: rgb(42 41 57 / 34%);
+  --color-success-ring: rgb(95 197 140 / 14%);
+  --color-error-soft: rgb(241 127 123 / 10%);
+  --color-error-border: rgb(241 127 123 / 28%);
+
+  --color-ink: #f3eee4;
+  --color-crayon: var(--color-data-compare);
+  --color-paper-rule: rgb(243 238 228 / 8%);
+  --color-highlight: rgb(255 124 186 / 18%);
+
+  --color-data-1: #3a2433;
+  --color-data-2: #6e2f52;
+  --color-data-3: #a8457a;
+  --color-data-4: #e46aa6;
+  --color-data-5: #ffb3d6;
+  --color-data-compare: #7fd0d6;
+  --color-data-muted: #5d5868;
+}

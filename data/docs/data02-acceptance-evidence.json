@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "ccpc-data02-acceptance/v1",
+  "verifiedAtUTC": "2026-10-13T16:41:16.730132+00:00",
+  "scope": "entity",
+  "allowedYears": [
+    2009,
+    2012,
+    2015,
+    2018,
+    2021,
+    2024
+  ],
+  "rawRows": 54872712,
+  "fullRecords": 20755,
+  "fullSources": 192,
+  "fixtureRecords": 150,
+  "fixtureSources": 10,
+  "checklistClosed": 11,
+  "checklistTotal": 11,
+  "pipelineExitCode": 0,
+  "validationExitCode": 0,
+  "typescriptExitCode": 0,
+  "tests": {
+    "passed": 87,
+    "total": 87,
+    "failed": 0,
+    "node": "24.14.1"
+  },
+  "independentComparison": {
+    "full": {
+      "input": "data/ccpc/processed/data02/participation.json",
+      "sha256": "55c2cabcc9197e768b5c6092d277b77f2aa1bf9e9efa91805a9ffec47eea8df1",
+      "records": 20755,
+      "sources": 192,
+      "integer_counts_and_sourceRows_exact": true,
+      "metric_checks": 186795,
+      "metric_absolute_tolerance": "1e-12",
+      "mismatches": 0,
+      "missing_groups": 0,
+      "status": "pass"
+    },
+    "fixture": {
+      "input": "data/ccpc/sample/data02/participation.json",
+      "sha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+      "records": 150,
+      "sources": 10,
+      "integer_counts_and_sourceRows_exact": true,
+      "metric_checks": 1350,
+      "metric_absolute_tolerance": "1e-12",
+      "mismatches": 0,
+      "missing_groups": 0,
+      "status": "pass"
+    }
+  },
+  "determinism": {
+    "method": "Two complete reads of the six ZIPs; CLI pipeline and second run using the identical delivered inspection/normalization/publication functions in another output directory.",
+    "allSixArtifactsEqual": true,
+    "artifacts": [
+      {
+        "kind": "full",
+        "file": "participation.json",
+        "bytes": 14858807,
+        "sha256": "55c2cabcc9197e768b5c6092d277b77f2aa1bf9e9efa91805a9ffec47eea8df1",
+        "exact_bytes_equal": true
+      },
+      {
+        "kind": "full",
+        "file": "manifest.json",
+        "bytes": 427,
+        "sha256": "b8f5f8e2cf1a69acb6e43b37c7223d0fd5aab002cf18ce95d902520d8a80f782",
+        "exact_bytes_equal": true
+      },
+      {
+        "kind": "full",
+        "file": "checksums.sha256",
+        "bytes": 165,
+        "sha256": "4559a1bf83704bcab32c7b9097c9c463e7b7714f44079bc136b5c5e93be85443",
+        "exact_bytes_equal": true
+      },
+      {
+        "kind": "sample",
+        "file": "participation.json",
+        "bytes": 112036,
+        "sha256": "a42330379938a20b4a3e63a2625312c4d10b260de246825c6dc2c8bb0b9c11a1",
+        "exact_bytes_equal": true
+      },
+      {
+        "kind": "sample",
+        "file": "manifest.json",
+        "bytes": 425,
+        "sha256": "b354fc14e86b4fa8f41c5a71d3b075b810af9214ed39aa0bba3c0f865dcbfa75",
+        "exact_bytes_equal": true
+      },
+      {
+        "kind": "sample",
+        "file": "checksums.sha256",
+        "bytes": 165,
+        "sha256": "baa2a5030ce9b46f3f42094c4a5dedbc6e4bcac8483eb71eedcf405a04f73dd6",
+        "exact_bytes_equal": true
+      }
+    ]
+  },
+  "yearly": [
+    {
+      "year": 2009,
+      "records": 3450,
+      "sources": 32,
+      "fixtureRecords": 24,
+      "totals": {
+        "nominalList": 77481831,
+        "voted": 33316974,
+        "didNotVote": 42298963,
+        "unspecified": 1865894,
+        "sourceRows": 8706843
+      },
+      "archiveSha256": "e626e9528a91206c23fc8f96987e1a297db285e7cbc0fa1e37a18ed473ebf61c"
+    },
+    {
+      "year": 2012,
+      "records": 3449,
+      "sources": 32,
+      "fixtureRecords": 25,
+      "totals": {
+        "nominalList": 76490962,
+        "voted": 47383154,
+        "didNotVote": 28939159,
+        "unspecified": 168649,
+        "sourceRows": 8604456
+      },
+      "archiveSha256": "5999f86e21154138b904723cb5d55ebde9e108ac72872f2ff5695d9eb8fde9cd"
+    },
+    {
+      "year": 2015,
+      "records": 3451,
+      "sources": 32,
+      "fixtureRecords": 24,
+      "totals": {
+        "nominalList": 83563462,
+        "voted": 36926612,
+        "didNotVote": 41517874,
+        "unspecified": 5118976,
+        "sourceRows": 9106059
+      },
+      "archiveSha256": "7435ac54a3a6aebf5d9c9466a064b320b64bf5ff8b4d8ae787bad898497341da"
+    },
+    {
+      "year": 2018,
+      "records": 3450,
+      "sources": 32,
+      "fixtureRecords": 24,
+      "totals": {
+        "nominalList": 89123997,
+        "voted": 51784399,
+        "didNotVote": 31249856,
+        "unspecified": 6089742,
+        "sourceRows": 9251122
+      },
+      "archiveSha256": "b20981a0aea1ac773e7bc0b54784bba7619346585ba3996744ad22458279dd8b"
+    },
+    {
+      "year": 2021,
+      "records": 3452,
+      "sources": 32,
+      "fixtureRecords": 24,
+      "totals": {
+        "nominalList": 93532133,
+        "voted": 46389189,
+        "didNotVote": 43099624,
+        "unspecified": 4043320,
+        "sourceRows": 9430502
+      },
+      "archiveSha256": "29bdfaaa33be5151c2ae8c8e406d8a27976006d11e6cbe201ac05cc04def4849"
+    },
+    {
+      "year": 2024,
+      "records": 3503,
+      "sources": 32,
+      "fixtureRecords": 29,
+      "totals": {
+        "nominalList": 98330348,
+        "voted": 54899228,
+        "didNotVote": 37105466,
+        "unspecified": 6325654,
+        "sourceRows": 9773730
+      },
+      "archiveSha256": "c0de34d04e782ad99579b83591a6e3e6c8d1e20f4914d4845743bd79d2bd28b2"
+    }
+  ],
+  "metricDefinitions": {
+    "ccpcDenominator": "voted+didNotVote",
+    "comparisonUnit": "percentage_point",
+    "nominalDenominator": "nominalList",
+    "percentageUnit": "percent",
+    "rateUnit": "ratio"
+  },
+  "trustBoundary": "Checksums within DATA02 are checked, but source facts/CSV counts/group sourceRows are anchored independently of any regenerated DATA02 manifest. Updating the official source release requires reviewing and updating anchors.",
+  "limitations": [
+    "Standalone module; no existing backend/Git repository integration.",
+    "Acquisition metadata is an input; a genuinely new acquisition date may change provenance bytes while record values remain deterministic.",
+    "Publication is atomic per output directory, not a transaction across full and sample directories.",
+    "The DATA01 privacy reservation remains; DATA02 numerical validation does not certify anonymity."
+  ]
+}

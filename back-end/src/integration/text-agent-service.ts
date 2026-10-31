@@ -1,0 +1,912 @@
+import {
+  agentStatusSchema,
+  dataPatchSchema,
+  errorPayloadSchema,
+  textAgentStreamEventSchema,
+  type TextAgentRequest,
+  type TextAgentStreamEvent,
+  type UISpecification,
+} from "@banorte/contracts";
+import { createAuthenticatedSupabaseSession } from "../config/supabase.js";
+import { createAgentRuntime, type AgentRuntime, type SessionFactory } from "../agent/cli/agent-runtime.js";
+import { UiDocumentSchema, type UiDataSource, type UiDocument } from "../ui/dsl/ui.schema.js";
+import { type UiGenerator } from "../ui/generation/ui-generator.js";
+import { applyUiPatch } from "../ui/interaction/ui-patch.schema.js";
+import {
+  adaptUiDataSource,
+  adaptUiPayload,
+  type SharedUiPayload,
+} from "./shared-contract-adapter.js";
+import {
+  createSharedUiPatch,
+  createSharedUiPatches,
+} from "./shared-ui-stream.js";
+import { createUiEventQuery, reconcileUiEventControl, SharedUiEventValidationError } from "./shared-ui-event.js";
+import { logger } from "../config/logger.js";
+import { createFollowUpQuery } from "./agent-session-store.js";
+import { type SessionStore } from "../application/ports/session-store.js";
+import { SupabaseSessionStore } from "../repositories/supabase-session.repository.js";
+import { classifyCivicQuery } from "../agent/security/civic-scope-policy.js";
+import { transformPersistedUi } from "./ui-transformation.js";
+import { createViewEditInterpreter, type ViewEditInterpreter } from "./view-edit-interpreter.js";
+
+interface TextAgentServiceDependencies {
+  createRuntime?: (
+    sessionFactory: SessionFactory,
+    responseMode: TextAgentRequest["responseMode"],
+  ) => Promise<AgentRuntime>;
+  sessionFactory?: SessionFactory;
+  sessionStore?: SessionStore;
+  now?: () => number;
+  viewEditInterpreter?: ViewEditInterpreter | null;
+}
+
+const LOCAL_ONLY_UI_EVENT = /^(?:methodology\.opened|period\.changed|timeline\.period_selected|map\.entity_selected|territory\.selected|ui\.(?:accordion|tab)\.|view\.|table\.(?:filter|page|sort)\.)/u;
+
+export function createTextAgentService(dependencies: TextAgentServiceDependencies = {}) {
+  const defaultSessionFactory = dependencies.sessionFactory ?? createAuthenticatedSupabaseSession;
+  const createRuntime = dependencies.createRuntime ?? createRuntimeForMode;
+  const now = dependencies.now ?? (() => performance.now());
+  const viewEditInterpreter = dependencies.viewEditInterpreter === undefined
+    ? createViewEditInterpreter()
+    : dependencies.viewEditInterpreter ?? undefined;
+
+  return async function* streamTextAgent(
+    request: TextAgentRequest,
+    signal?: AbortSignal,
+    authenticatedSessionFactory?: SessionFactory,
+  ): AsyncGenerator<TextAgentStreamEvent> {
+    const sessionFactory = authenticatedSessionFactory ?? defaultSessionFactory;
+    let sequence = 0;
+    const event = <T extends Omit<TextAgentStreamEvent, "version" | "sessionId" | "correlationId" | "sequence">>(
+      payload: T,
+    ): TextAgentStreamEvent => textAgentStreamEventSchema.parse({
+      version: "1",
+      sessionId: request.sessionId,
+      correlationId: request.correlationId,
+      sequence: sequence += 1,
+      ...payload,
+    });
+    const startedAt = now();
+
+    const firstFeedbackAt = now();
+    yield event({ type: "started" });
+    if (request.provider !== "google") {
+      yield event({
+        type: "error",
+        error: errorPayloadSchema.parse({
+          version: "1",
+          code: "provider_not_supported",
+          message: "Paper no está disponible por el momento",
+          recoverable: false,
+          hasPartialData: false,
+          correlationId: request.correlationId,
+        }),
+      });
+      return;
+    }
+
+    const isUiInteraction = "uiEvent" in request;
+    let authenticatedSession: Awaited<ReturnType<SessionFactory>> | undefined;
+    const requestSessionFactory: SessionFactory = async () => {
+      authenticatedSession ??= await sessionFactory();
+      return authenticatedSession;
+    };
+    let actorId: string;
+    let sessionStore: SessionStore;
+    try {
+      const session = await requestSessionFactory();
+      actorId = session.user.id;
+      sessionStore = dependencies.sessionStore ?? new SupabaseSessionStore(session.client);
+    } catch {
+      yield event({
+        type: "error",
+        error: errorPayloadSchema.parse({
+          version: "1",
+          code: "authentication_required",
+          message: "Tu sesión ya no está disponible. Vuelve a entrar para continuar.",
+          recoverable: true,
+          hasPartialData: false,
+          correlationId: request.correlationId,
+        }),
+      });
+      return;
+    }
+    const sessionReference = isUiInteraction
+      ? {
+          interfaceRevision: request.uiEvent.interfaceRevision,
+          dataRevision: request.uiEvent.dataRevision,
+          dataKeys: request.uiEvent.dataKeys,
+        }
+      : request.sessionState;
+    const session = await sessionStore.begin({
+      actorId,
+      sessionId: request.sessionId,
+      correlationId: request.correlationId,
+      ...(sessionReference ? { reference: sessionReference } : {}),
+    });
+    if (!session.success) {
+      logger.warn("Continuidad de sesión rechazada", {
+        correlationId: request.correlationId,
+        code: session.code,
+        requestedInterfaceRevision: sessionReference?.interfaceRevision,
+        requestedDataRevision: sessionReference?.dataRevision,
+        requestedDataKeyCount: sessionReference?.dataKeys.length,
+      });
+      yield event({
+        type: "error",
+        error: errorPayloadSchema.parse({
+          version: "1",
+          code: session.code,
+          message: sessionErrorMessage(session.code),
+          recoverable: true,
+          // A referenced request originates from a UI the client already rendered.
+          // Mark it as retained evidence so a continuity failure never replaces
+          // that valid view with an empty technical error screen.
+          hasPartialData: sessionReference !== undefined,
+          correlationId: request.correlationId,
+        }),
+      });
+      return;
+    }
+
+    let agentQuery: string;
+    logger.info("Continuidad de sesión Agent", {
+      sessionId: request.sessionId,
+      correlationId: request.correlationId,
+      isContinuation: session.isContinuation,
+      interfaceRevision: session.state.interfaceRevision,
+      dataRevision: session.state.dataRevision,
+    });
+    try {
+      if (isUiInteraction) {
+        if (
+          request.responseMode !== "complete-ui"
+          || request.uiEvent.sessionId !== request.sessionId
+          || request.uiEvent.correlationId !== request.correlationId
+        ) {
+          throw new SharedUiEventValidationError("La interacción no coincide con la solicitud");
+        }
+        const specification = session.state.specification;
+        if (!specification) throw new SharedUiEventValidationError("La sesión no contiene una interfaz activa");
+        if (LOCAL_ONLY_UI_EVENT.test(request.uiEvent.event.name)) {
+          logger.info("Interacción visual resuelta localmente sin invocar al modelo", {
+            correlationId: request.correlationId,
+            eventName: request.uiEvent.event.name,
+            sourceId: request.uiEvent.event.sourceId,
+          });
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: "ready",
+              message: "Cambio visual aplicado",
+            }),
+          });
+          yield event({ type: "completed" });
+          await sessionStore.release(actorId, request.sessionId, request.correlationId);
+          return;
+        }
+        agentQuery = createUiEventQuery(
+          request.uiEvent,
+          specification,
+          session.state.turns.at(-1)?.user,
+          session.state.dataRegistry,
+        );
+        logger.info("UIEvent validado para el Agent Runtime", {
+          correlationId: request.correlationId,
+          eventName: request.uiEvent.event.name,
+          sourceId: request.uiEvent.event.sourceId,
+          interfaceRevision: request.uiEvent.interfaceRevision,
+        });
+      } else {
+        agentQuery = session.isContinuation
+          ? createFollowUpQuery(session.state, request.query)
+          : request.query;
+      }
+    } catch (error) {
+      if (!(error instanceof SharedUiEventValidationError)) throw error;
+      yield event({
+        type: "error",
+        error: errorPayloadSchema.parse({
+          version: "1",
+          code: "ui_event_invalid",
+          message: "No pude aplicar ese cambio. Intenta pedirlo con otras palabras.",
+          recoverable: true,
+          // The event was rejected before any mutation. The session snapshot is
+          // still authoritative and safe for the client to keep displaying.
+          hasPartialData: Boolean(session.state.specification)
+            || Object.keys(session.state.dataRegistry ?? {}).length > 0,
+          correlationId: request.correlationId,
+        }),
+      });
+      await sessionStore.release(actorId, request.sessionId, request.correlationId);
+      return;
+    }
+
+    let runtime: AgentRuntime | undefined;
+    let hasPartialData = false;
+    let isSessionCompleted = false;
+    let firstUiAt: number | undefined;
+    let firstUsefulUiAt: number | undefined;
+    let agentLatencyMs: number | undefined;
+    let dataReadyAt: number | undefined;
+    let mcpStartedAt: number | undefined;
+    let mcpLatencyMs = 0;
+    let uiPlanningStartedAt: number | undefined;
+    let uiPlanningLatencyMs = 0;
+    let currentUi: UiDocument | undefined;
+    let currentSpecification: UISpecification | undefined = session.state.specification;
+    let interfaceRevision = session.state.interfaceRevision;
+    let dataRevision = session.state.dataRevision;
+    const initialDataKeys = new Set(session.state.dataKeys);
+    const sourceOffset = [...initialDataKeys].reduce((highest, key) => {
+      const match = /^source_(\d+)$/u.exec(key);
+      return match ? Math.max(highest, Number(match[1])) : highest;
+    }, 0);
+    const knownDataKeys = new Set(initialDataKeys);
+    const snapshotData = structuredClone(session.state.dataRegistry ?? {});
+    const invalidatedKeys = new Set(session.state.invalidatedKeys ?? []);
+    const refreshedDataKeys = new Set<string>();
+    const dataSources: UiDataSource[] = [];
+    const adaptPayload = (
+      ui: UiDocument,
+      sources: UiDataSource[],
+    ): SharedUiPayload => {
+      const payload = adaptUiPayload(ui, sources, dataRevision, sourceOffset);
+      return isUiInteraction
+        ? { ...payload, specification: reconcileUiEventControl(payload.specification, request.uiEvent.event, session.state.specification) }
+        : payload;
+    };
+    const createDataPatchForSource = (source: UiDataSource) => {
+      const adaptedSource = adaptUiDataSource(source, sourceOffset);
+      const dataPatch = dataPatchSchema.parse({
+        version: "1",
+        baseRevision: dataRevision,
+        revision: dataRevision + 1,
+        op: knownDataKeys.has(adaptedSource.key) ? "update" : "add",
+        key: adaptedSource.key,
+        value: adaptedSource.value,
+      });
+      dataRevision = dataPatch.revision;
+      knownDataKeys.add(dataPatch.key);
+      if ("value" in dataPatch) snapshotData[dataPatch.key] = dataPatch.value;
+      invalidatedKeys.delete(dataPatch.key);
+      refreshedDataKeys.add(dataPatch.key);
+      logDataPatch(request.correlationId, dataPatch);
+      return dataPatch;
+    };
+    const createMissingPayloadDataPatches = (payload: SharedUiPayload) => {
+      const patches = [];
+      for (const [key, value] of Object.entries(payload.dataRegistry.data)) {
+        if (knownDataKeys.has(key)) continue;
+        const dataPatch = dataPatchSchema.parse({
+          version: "1",
+          baseRevision: dataRevision,
+          revision: dataRevision + 1,
+          op: "add",
+          key,
+          value,
+        });
+        dataRevision = dataPatch.revision;
+        knownDataKeys.add(key);
+        snapshotData[key] = value;
+        invalidatedKeys.delete(key);
+        refreshedDataKeys.add(key);
+        logDataPatch(request.correlationId, dataPatch);
+        patches.push(dataPatch);
+      }
+      return patches;
+    };
+    if (session.isContinuation && !isUiInteraction && currentSpecification
+      && request.responseMode === "complete-ui") {
+      const scope = classifyCivicQuery(agentQuery);
+      let transformation: ReturnType<typeof transformPersistedUi> = null;
+      let patches: ReturnType<typeof createSharedUiPatches> = [];
+      const previousSpecification = currentSpecification;
+      const previousRevision = interfaceRevision;
+      try {
+        const transformWith = (prompt: string) => transformPersistedUi({
+          specification: previousSpecification,
+          dataRegistry: snapshotData,
+          prompt,
+          ...(session.state.previousSpecification ? { previousSpecification: session.state.previousSpecification } : {}),
+        });
+        const isEdit = scope.allowed && scope.category === "ui-transform";
+        transformation = isEdit ? transformWith(request.query) : null;
+        const mayBeEdit = isEdit || (!scope.allowed && scope.reason === "out-of-scope");
+        if (!transformation && mayBeEdit && viewEditInterpreter) {
+          const canonicalEdit = await viewEditInterpreter.interpret(request.query);
+          if (canonicalEdit) transformation = transformWith(canonicalEdit);
+        }
+        if (transformation) {
+          patches = createSharedUiPatches(previousSpecification, transformation.specification, previousRevision);
+          // Persist only a completely validated transformation. On failure the
+          // previous specification/revisions remain authoritative and no patch
+          // has been sent to the client.
+          await sessionStore.complete({
+            actorId,
+            sessionId: request.sessionId,
+            correlationId: request.correlationId,
+            interfaceRevision: previousRevision + patches.length,
+            dataRevision,
+            dataKeys: [...knownDataKeys],
+            dataRegistry: snapshotData,
+            invalidatedKeys: [...invalidatedKeys],
+            specification: transformation.specification,
+            prompt: request.query,
+            answer: transformation.answer,
+          });
+        }
+      } catch (error) {
+        logger.warn("Transformación GEN2 rechazada; se conserva la especificación anterior", {
+          correlationId: request.correlationId,
+          errorType: error instanceof Error ? error.name : "unknown",
+          errorMessage: error instanceof Error ? error.message : "Error no identificado",
+        });
+        yield event({
+          type: "error",
+          error: errorPayloadSchema.parse({
+            version: "1",
+            code: "ui_transform_invalid",
+            message: "No pude aplicar ese cambio. Conservé la última vista disponible.",
+            recoverable: true,
+            hasPartialData: false,
+            correlationId: request.correlationId,
+          }),
+        });
+        await sessionStore.release(actorId, request.sessionId, request.correlationId);
+        return;
+      }
+      if (transformation) {
+        try {
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: "generating_ui",
+              message: "Estoy actualizando la vista",
+            }),
+          });
+          yield event({
+            type: "ui-started",
+            specification: previousSpecification,
+            dataRegistry: { version: "1", revision: dataRevision, data: {} },
+            revision: previousRevision,
+          });
+          for (const patch of patches) {
+            logUiPatch(request.correlationId, patch);
+            yield event({ type: "ui-patch", patch });
+          }
+          interfaceRevision = previousRevision + patches.length;
+          for (const delta of splitText(transformation.answer)) yield event({ type: "text-delta", delta });
+          const completedAt = now();
+          const totalGenerationMs = roundedDuration(completedAt - startedAt);
+          logger.info("Transformación GEN2 aplicada sin consulta MCP", {
+            correlationId: request.correlationId,
+            operation: transformation.operation,
+            patchCount: patches.length,
+            interfaceRevision,
+            dataRevision,
+            totalGenerationMs,
+          });
+          yield event({ type: "ui-completed", revision: interfaceRevision });
+          yield event({
+            type: "metrics",
+            agentLatencyMs: 0,
+            mcpLatencyMs: 0,
+            dataLatencyMs: 0,
+            uiPlanningLatencyMs: totalGenerationMs,
+            timeToFirstUiMs: totalGenerationMs,
+            timeToFirstUsefulUiMs: totalGenerationMs,
+            totalGenerationMs,
+          });
+          yield event({ type: "completed" });
+        } finally {
+          await sessionStore.release(actorId, request.sessionId, request.correlationId);
+        }
+        return;
+      }
+    }
+    if (!isUiInteraction) {
+      const conversationalScope = classifyCivicQuery(agentQuery);
+      const conversationalCategory = conversationalScope.allowed
+        ? conversationalScope.category
+        : null;
+      const shortConversationCategory = conversationalCategory === "greeting"
+        || conversationalCategory === "capabilities"
+        ? conversationalCategory
+        : null;
+      const explainsRequestedContext = session.isContinuation
+        && isContextExplanationRequest(request.query);
+      if (explainsRequestedContext || shortConversationCategory !== null) {
+        let answer: string;
+        if (explainsRequestedContext) {
+          answer = "Necesito esos datos porque los conteos se organizan por estado, grupo de edad y elección. Sin ellos tendría que asumir a qué población y periodos te refieres, y podría mostrarte una comparación equivocada. Puedes responderlos en una sola frase.";
+        } else {
+          if (shortConversationCategory === null) throw new Error("Categoría conversacional no disponible");
+          answer = createConversationalAnswer(shortConversationCategory, request.query);
+        }
+        try {
+          await sessionStore.complete({
+            actorId,
+            sessionId: request.sessionId,
+            correlationId: request.correlationId,
+            interfaceRevision,
+            dataRevision,
+            dataKeys: [...knownDataKeys],
+            dataRegistry: snapshotData,
+            invalidatedKeys: [...invalidatedKeys],
+            ...(currentSpecification ? { specification: currentSpecification } : {}),
+            prompt: request.query,
+            answer,
+          });
+          isSessionCompleted = true;
+          for (const delta of splitText(answer)) yield event({ type: "text-delta", delta });
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: "ready",
+              message: "Paper está listo para ayudarte",
+            }),
+          });
+          yield event({ type: "completed" });
+        } catch (error) {
+          logger.error("No fue posible responder la conversación breve", {
+            correlationId: request.correlationId,
+            errorType: error instanceof Error ? error.name : "unknown",
+          });
+          yield event({
+            type: "error",
+            error: errorPayloadSchema.parse({
+              version: "1",
+              code: "agent_unavailable",
+              message: "Paper no está disponible por el momento",
+              recoverable: true,
+              hasPartialData: Boolean(currentSpecification),
+              correlationId: request.correlationId,
+            }),
+          });
+        } finally {
+          await sessionStore.release(actorId, request.sessionId, request.correlationId);
+        }
+        return;
+      }
+    }
+    try {
+      runtime = await createRuntime(requestSessionFactory, request.responseMode);
+      for await (const source of runtime.orchestrator.stream(agentQuery, {
+        ...(signal ? { signal } : {}),
+        streamId: request.correlationId,
+      })) {
+        if (source.type === "status") {
+          if (
+            request.responseMode !== "complete-ui"
+            && (source.stage === "generating-ui" || source.stage === "rendering-ui")
+          ) continue;
+          const statusAt = now();
+          if (source.stage === "consulting-tools") {
+            agentLatencyMs ??= roundedDuration(statusAt - startedAt);
+            mcpStartedAt ??= statusAt;
+          } else if (source.stage === "planning" && mcpStartedAt !== undefined) {
+            mcpLatencyMs += statusAt - mcpStartedAt;
+            mcpStartedAt = undefined;
+          } else if (source.stage === "generating-ui") {
+            agentLatencyMs ??= roundedDuration(statusAt - startedAt);
+            uiPlanningStartedAt ??= statusAt;
+          }
+          yield event({
+            type: "status",
+            status: agentStatusSchema.parse({
+              version: "1",
+              stage: mapAgentStage(source.stage),
+              message: source.message,
+            }),
+          });
+        } else if (source.type === "tool-completed") {
+          const sourceCompletedAt = now();
+          dataReadyAt ??= sourceCompletedAt;
+          dataSources.push(source.source);
+          dataSources.sort(compareSourceIds);
+          const dataPatch = createDataPatchForSource(source.source);
+          hasPartialData = true;
+          yield event({ type: "data-patch", patch: dataPatch });
+        } else if (source.type === "ui-snapshot") {
+          if (request.responseMode !== "complete-ui") continue;
+          // Keep a continuation's last valid UI visible until the planner's
+          // final specification is ready; intermediate snapshots are not a
+          // second answer to the user's new question.
+          if (session.isContinuation && !isUiInteraction) continue;
+          const snapshotAt = now();
+          if (uiPlanningStartedAt !== undefined) {
+            uiPlanningLatencyMs += snapshotAt - uiPlanningStartedAt;
+            uiPlanningStartedAt = undefined;
+          }
+          const snapshotDataSources = source.dataSources ?? dataSources;
+          for (const snapshotSource of snapshotDataSources) {
+            if (dataSources.some((candidate) => candidate.id === snapshotSource.id)) continue;
+            dataSources.push(snapshotSource);
+            dataSources.sort(compareSourceIds);
+            const dataPatch = createDataPatchForSource(snapshotSource);
+            hasPartialData = true;
+            yield event({ type: "data-patch", patch: dataPatch });
+          }
+          const payload = adaptPayload(source.ui, snapshotDataSources);
+          if (!currentSpecification) {
+            for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+              hasPartialData = true;
+              yield event({ type: "data-patch", patch: dataPatch });
+            }
+            currentUi = source.ui;
+            currentSpecification = payload.specification;
+            firstUiAt = snapshotAt;
+            firstUsefulUiAt = snapshotAt;
+            yield event({
+              type: "ui-started",
+              specification: payload.specification,
+              dataRegistry: payload.dataRegistry,
+              revision: interfaceRevision,
+            });
+          } else {
+            for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+              hasPartialData = true;
+              yield event({ type: "data-patch", patch: dataPatch });
+            }
+            const patches = session.isContinuation && !isUiInteraction
+              ? JSON.stringify(currentSpecification) === JSON.stringify(payload.specification)
+                ? []
+                : [createSharedUiPatch(currentSpecification, payload.specification, interfaceRevision)]
+              : createSharedUiPatches(currentSpecification, payload.specification, interfaceRevision);
+            firstUiAt ??= now();
+            firstUsefulUiAt ??= now();
+            currentUi = source.ui;
+            currentSpecification = payload.specification;
+            for (const patch of patches) {
+              interfaceRevision = patch.revision;
+              logUiPatch(request.correlationId, patch);
+              yield event({ type: "ui-patch", patch });
+            }
+          }
+        } else if (source.type === "ui-patch") {
+          if (request.responseMode !== "complete-ui") continue;
+          if (session.isContinuation && !isUiInteraction) continue;
+          if (!currentUi || !currentSpecification) continue;
+          const next = applyUiPatch(currentUi, dataSources, {
+            version: "1.0",
+            operations: [source.operation],
+            dataSources,
+          });
+          const payload = adaptPayload(next.document, next.dataSources);
+          for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+            hasPartialData = true;
+            yield event({ type: "data-patch", patch: dataPatch });
+          }
+          const patches = createSharedUiPatches(currentSpecification, payload.specification, interfaceRevision);
+          firstUiAt ??= now();
+          firstUsefulUiAt ??= now();
+          currentUi = next.document;
+          currentSpecification = payload.specification;
+          for (const patch of patches) {
+            interfaceRevision = patch.revision;
+            logUiPatch(request.correlationId, patch);
+            yield event({ type: "ui-patch", patch });
+          }
+        } else if (source.type === "completed") {
+          if (uiPlanningStartedAt !== undefined) {
+            uiPlanningLatencyMs += now() - uiPlanningStartedAt;
+            uiPlanningStartedAt = undefined;
+          }
+          for (const completedSource of [...source.response.dataSources].sort(compareSourceIds)) {
+            const completedKey = adaptUiDataSource(completedSource, sourceOffset).key;
+            if (refreshedDataKeys.has(completedKey)) continue;
+            const dataPatch = createDataPatchForSource(completedSource);
+            hasPartialData = true;
+            yield event({ type: "data-patch", patch: dataPatch });
+          }
+          for (const delta of splitText(source.response.answer)) {
+            hasPartialData = true;
+            yield event({ type: "text-delta", delta });
+          }
+          if (request.responseMode === "complete-ui") {
+            const payload = adaptPayload(source.response.ui, source.response.dataSources);
+            logger.info("Generative UI validada para el contrato compartido", {
+              correlationId: request.correlationId,
+              rootType: payload.specification.root.type,
+              dataSourceCount: Object.keys(payload.dataRegistry.data).length,
+            });
+            if (!currentSpecification) {
+              for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+                hasPartialData = true;
+                yield event({ type: "data-patch", patch: dataPatch });
+              }
+              firstUiAt = now();
+              firstUsefulUiAt = firstUiAt;
+              currentSpecification = payload.specification;
+              yield event({
+                type: "ui-started",
+                specification: payload.specification,
+                dataRegistry: payload.dataRegistry,
+                revision: interfaceRevision,
+              });
+            } else {
+              for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+                hasPartialData = true;
+                yield event({ type: "data-patch", patch: dataPatch });
+              }
+              if (session.isContinuation && !isUiInteraction) {
+                // A fresh data answer is an atomic view replacement, not a
+                // sequence of intermediate edits to the previous answer.
+                firstUiAt ??= now();
+                firstUsefulUiAt ??= now();
+                currentSpecification = payload.specification;
+                interfaceRevision += 1;
+                yield event({
+                  type: "ui-started",
+                  specification: payload.specification,
+                  dataRegistry: payload.dataRegistry,
+                  revision: interfaceRevision,
+                });
+              } else if (JSON.stringify(currentSpecification) !== JSON.stringify(payload.specification)) {
+                const patches = createSharedUiPatches(currentSpecification, payload.specification, interfaceRevision);
+                firstUiAt ??= now();
+                firstUsefulUiAt ??= now();
+                currentSpecification = payload.specification;
+                for (const patch of patches) {
+                  interfaceRevision = patch.revision;
+                  logUiPatch(request.correlationId, patch);
+                  yield event({ type: "ui-patch", patch });
+                }
+              }
+            }
+            if (session.isContinuation) {
+              for (const key of initialDataKeys) {
+                if (refreshedDataKeys.has(key)) continue;
+                const dataPatch = dataPatchSchema.parse({
+                  version: "1",
+                  baseRevision: dataRevision,
+                  revision: dataRevision + 1,
+                  op: "invalidate",
+                  key,
+                });
+                dataRevision = dataPatch.revision;
+                invalidatedKeys.add(key);
+                logDataPatch(request.correlationId, dataPatch);
+                yield event({ type: "data-patch", patch: dataPatch });
+              }
+            }
+            await sessionStore.complete({
+              actorId,
+              sessionId: request.sessionId,
+              correlationId: request.correlationId,
+              interfaceRevision,
+              dataRevision,
+              dataKeys: [...knownDataKeys],
+              dataRegistry: snapshotData,
+              invalidatedKeys: [...invalidatedKeys],
+              ...(currentSpecification ? { specification: currentSpecification } : {}),
+              ...(!isUiInteraction ? { prompt: request.query } : {}),
+              answer: source.response.answer,
+              ...(isUiInteraction ? { interaction: request.uiEvent.event } : {}),
+            });
+            isSessionCompleted = true;
+            yield event({ type: "ui-completed", revision: interfaceRevision });
+            const completedAt = now();
+            const timeToFirstUiMs = Math.round((firstUiAt ?? completedAt) - startedAt);
+            const timeToFirstUsefulUiMs = Math.round((firstUsefulUiAt ?? completedAt) - startedAt);
+            const totalGenerationMs = Math.round(completedAt - startedAt);
+            logger.info("Métricas de Generative UI", {
+              correlationId: request.correlationId,
+              agentLatencyMs: agentLatencyMs ?? roundedDuration((dataReadyAt ?? firstUiAt ?? completedAt) - startedAt),
+              mcpLatencyMs: roundedDuration(mcpLatencyMs),
+              dataLatencyMs: roundedDuration((dataReadyAt ?? startedAt) - startedAt),
+              uiPlanningLatencyMs: roundedDuration(uiPlanningLatencyMs),
+              timeToFirstFeedbackMs: roundedDuration(firstFeedbackAt - startedAt),
+              timeToFirstUiMs,
+              timeToFirstUsefulUiMs,
+              totalGenerationMs,
+            });
+            yield event({
+              type: "metrics",
+              agentLatencyMs: agentLatencyMs ?? roundedDuration((dataReadyAt ?? firstUiAt ?? completedAt) - startedAt),
+              mcpLatencyMs: roundedDuration(mcpLatencyMs),
+              dataLatencyMs: roundedDuration((dataReadyAt ?? startedAt) - startedAt),
+              uiPlanningLatencyMs: roundedDuration(uiPlanningLatencyMs),
+              timeToFirstUiMs,
+              timeToFirstUsefulUiMs,
+              totalGenerationMs,
+            });
+          }
+          if (request.responseMode !== "complete-ui") {
+            await sessionStore.complete({
+              actorId,
+              sessionId: request.sessionId,
+              correlationId: request.correlationId,
+              interfaceRevision,
+              dataRevision,
+              dataKeys: [...knownDataKeys],
+              dataRegistry: snapshotData,
+              invalidatedKeys: [...invalidatedKeys],
+              ...(!isUiInteraction ? { prompt: request.query } : {}),
+              answer: source.response.answer,
+              ...(isUiInteraction ? { interaction: request.uiEvent.event } : {}),
+            });
+            isSessionCompleted = true;
+          }
+          yield event({ type: "completed" });
+        } else if (source.type === "cancelled") {
+          await preserveSession();
+          yield event({ type: "cancelled", hasPartialData: source.hasPartialData });
+          return;
+        } else if (source.type === "error") {
+          await preserveSession();
+          yield event({
+            type: "error",
+            error: errorPayloadSchema.parse({
+              version: "1",
+              code: source.code,
+              message: source.message,
+              recoverable: source.recoverable,
+              hasPartialData: source.hasPartialData,
+              correlationId: request.correlationId,
+            }),
+          });
+          return;
+        }
+      }
+    } catch (error) {
+      await preserveSession();
+      logger.error("Text Agent no pudo adaptar o transmitir la respuesta", {
+        correlationId: request.correlationId,
+        errorType: error instanceof Error ? error.name : "unknown",
+        errorMessage: error instanceof Error ? error.message : "Error no identificado",
+      });
+      if (signal?.aborted) {
+        yield event({ type: "cancelled", hasPartialData });
+      } else {
+        yield event({
+          type: "error",
+          error: errorPayloadSchema.parse({
+            version: "1",
+            code: "agent_unavailable",
+            message: "Paper no está disponible por el momento",
+            recoverable: true,
+            hasPartialData,
+            correlationId: request.correlationId,
+          }),
+        });
+      }
+    } finally {
+      try {
+        await sessionStore.release(actorId, request.sessionId, request.correlationId);
+      } catch (error) {
+        logger.warn("No fue posible liberar el bloqueo de sesión", {
+          correlationId: request.correlationId,
+          errorType: error instanceof Error ? error.name : "unknown",
+        });
+      }
+      await runtime?.close();
+    }
+
+    async function preserveSession(): Promise<void> {
+      if (isSessionCompleted) return;
+      await sessionStore.complete({
+        actorId,
+        sessionId: request.sessionId,
+        correlationId: request.correlationId,
+        interfaceRevision,
+        dataRevision,
+        dataKeys: [...knownDataKeys],
+        dataRegistry: snapshotData,
+        invalidatedKeys: [...invalidatedKeys],
+        ...(currentSpecification ? { specification: currentSpecification } : {}),
+        ...(!isUiInteraction ? { prompt: request.query } : {}),
+        answer: "",
+      });
+      isSessionCompleted = true;
+    }
+  };
+}
+
+function mapAgentStage(stage: "planning" | "consulting-tools" | "generating-ui" | "rendering-ui") {
+  if (stage === "consulting-tools") return "retrieving_data" as const;
+  if (stage === "generating-ui" || stage === "rendering-ui") return "generating_ui" as const;
+  return "thinking" as const;
+}
+
+function compareSourceIds(left: UiDataSource, right: UiDataSource): number {
+  return Number(left.id.slice("source-".length)) - Number(right.id.slice("source-".length));
+}
+
+const textOnlyDocument: UiDocument = UiDocumentSchema.parse({
+  version: "1.0",
+  root: {
+    id: "text-response",
+    type: "text",
+    text: "Respuesta textual",
+    variant: "body",
+  },
+});
+
+const textOnlyUiGenerator: UiGenerator = {
+  generate: async () => textOnlyDocument,
+};
+
+function splitText(text: string): string[] {
+  const chunks: string[] = [];
+  for (let offset = 0; offset < text.length; offset += 2_000) {
+    chunks.push(text.slice(offset, offset + 2_000));
+  }
+  return chunks;
+}
+
+function createConversationalAnswer(
+  category: "greeting" | "capabilities",
+  rawQuery: string,
+): string {
+  if (category === "capabilities") {
+    return "Puedo ayudarte a explorar participación, abstención y comparaciones electorales con datos públicos del INE. Dime qué territorio, periodo o grupo quieres revisar.";
+  }
+  const normalized = rawQuery.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase("es-MX");
+  if (/\b(?:gracias|muchas gracias)\b/u.test(normalized)) {
+    return "¡Con gusto! Si quieres, podemos seguir explorando participación, territorio o elecciones.";
+  }
+  if (/\b(?:adios|hasta luego)\b/u.test(normalized)) {
+    return "¡Hasta luego! Cuando quieras volver, aquí estaré para ayudarte a explorar los datos públicos del INE.";
+  }
+  return "¡Hola! Soy Paper. Puedo ayudarte a explorar participación, abstención y comparaciones electorales con datos públicos del INE. ¿Qué te gustaría consultar?";
+}
+
+function isContextExplanationRequest(rawQuery: string): boolean {
+  const normalized = rawQuery.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase("es-MX");
+  return /\bpor que\b.{0,80}\b(?:necesitas|pides|hacen falta|te hacen falta)\b.{0,50}\b(?:datos|informacion|contexto)\b/u.test(normalized)
+    || /\bpara que\b.{0,50}\b(?:necesitas|pides)\b.{0,40}\b(?:datos|informacion|contexto)\b/u.test(normalized);
+}
+
+function roundedDuration(durationMs: number): number {
+  return Math.max(0, Math.round(durationMs));
+}
+
+function logUiPatch(correlationId: string, patch: ReturnType<typeof createSharedUiPatch>): void {
+  logger.info("UIPatch validado para el frontend", {
+    correlationId,
+    operation: patch.op,
+    target: patch.target,
+    baseRevision: patch.baseRevision,
+    revision: patch.revision,
+  });
+}
+
+function logDataPatch(
+  correlationId: string,
+  patch: ReturnType<typeof dataPatchSchema.parse>,
+): void {
+  logger.info("DataRegistry patch validado para el frontend", {
+    correlationId,
+    operation: patch.op,
+    key: patch.key,
+    baseRevision: patch.baseRevision,
+    revision: patch.revision,
+  });
+}
+
+function sessionErrorMessage(
+  code: "session_busy" | "session_forbidden" | "session_not_found" | "session_revision_conflict",
+): string {
+  if (code === "session_busy") return "La sesión ya está procesando otra solicitud";
+  if (code === "session_forbidden") return "La sesión no pertenece al usuario autenticado";
+  if (code === "session_not_found") return "La sesión ya no está disponible";
+  return "La sesión cambió antes de procesar esta solicitud";
+}
+
+export type TextAgentService = ReturnType<typeof createTextAgentService>;
+
+function createRuntimeForMode(
+  sessionFactory: SessionFactory,
+  responseMode: TextAgentRequest["responseMode"],
+) {
+  return createAgentRuntime(
+    sessionFactory,
+    responseMode === "text" ? { uiGenerator: textOnlyUiGenerator } : {},
+  );
+}

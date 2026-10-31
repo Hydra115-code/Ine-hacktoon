@@ -1,0 +1,142 @@
+@import "tailwindcss";
+@import "../shared/design-system/index.css";
+@import "../features/generative-ui/styles/layout-primitives.css";
+@import "../features/generative-ui/styles/content-primitives.css";
+@import "../features/generative-ui/styles/civic-primitives.css";
+@import "../features/generative-ui/styles/visualization.css";
+@import "../features/generative-ui/styles/table.css";
+@import "../features/generative-ui/styles/interactions.css";
+@import "../features/generative-ui/styles/renderer.css";
+@import "../features/workspace/styles/workspace.css";
+@import "./landing.css";
+@import "../features/paper/styles/paper.css";
+@import "../features/onboarding/styles/onboarding.css";
+@import "../features/civic-ui/styles/civic-ui.css";
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+) {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+):hover {
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+)::-webkit-scrollbar {
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+)::-webkit-scrollbar-thumb {
+  min-height: 2.5rem;
+  background: transparent;
+  border-radius: var(--radius-full);
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+)::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+):hover::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+}
+
+:where(
+  html,
+  body,
+  .conversation__scroll,
+  .canvas__runtime,
+  .analysis-history,
+  .analysis-history nav,
+  .onboarding-state-options,
+  .ui-scrollable,
+  .ui-table__viewport,
+  .ui-tabs__list
+)::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+@media (forced-colors: active) {
+  :where(.ui-field--slider input[type="range"]) { forced-color-adjust: auto; }
+}
