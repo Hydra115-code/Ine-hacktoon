@@ -48,10 +48,10 @@ export function classifyCivicQuery(query: string): CivicScopeDecision {
   if (OUT_OF_SCOPE_CONTENT.test(request) && !CIVIC_INTENT.test(request)) {
     return { allowed: false, reason: "out-of-scope" };
   }
+  if (CIVIC_INTENT.test(request) || DEMOGRAPHIC_COMPARISON.test(request)) return { allowed: true, category: "civic" };
   if (hasPriorCivicSessionContext(normalized) && isUiTransformRequest(request)) {
     return { allowed: true, category: "ui-transform" };
   }
-  if (CIVIC_INTENT.test(request) || DEMOGRAPHIC_COMPARISON.test(request)) return { allowed: true, category: "civic" };
   if (hasPriorCivicSessionContext(normalized) && CIVIC_FOLLOW_UP.test(request)) return { allowed: true, category: "civic" };
   if (GREETING.test(request)) return { allowed: true, category: "greeting" };
   if (CAPABILITIES.test(request)) return { allowed: true, category: "capabilities" };

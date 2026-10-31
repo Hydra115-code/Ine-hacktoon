@@ -61,6 +61,25 @@ class Conversation {
     return { events, answer };
   }
 
+  async say(query: string): Promise<{ events: TextAgentStreamEvent[]; answer: string }> {
+    const request = textAgentRequestSchema.parse({
+      version: "1",
+      sessionId: this.sessionId,
+      correlationId: uuid("97"),
+      provider: "google",
+      responseMode: "complete-ui",
+      query,
+      ...(this.state ? { sessionState: this.state } : {}),
+    });
+    const events: TextAgentStreamEvent[] = [];
+    for await (const event of this.service(request)) events.push(event);
+    assert.equal(events.some((event) => event.type === "error"), false, query);
+    return {
+      events,
+      answer: events.flatMap((event) => event.type === "text-delta" ? [event.delta] : []).join(""),
+    };
+  }
+
   async view(): Promise<UISpecification> {
     const correlationId = uuid("94");
     const begun = await this.store.begin({ actorId: ACTOR_ID, sessionId: this.sessionId, correlationId });
@@ -117,12 +136,28 @@ test("un saludo se responde en el chat sin llamar al modelo ni fabricar una vist
   assert.equal(events.at(-1)?.type, "completed");
 });
 
+test("Paper explica por qué pide contexto sin iniciar un análisis ni reemplazar la guía", async () => {
+  const conversation = new Conversation();
+  await conversation.ask("¿Cómo ha participado la gente de mi edad en mi estado durante los últimos años?");
+  const before = await conversation.view();
+  const { events, answer } = await conversation.say(
+    "¿Por qué necesitas estos datos? Explícamelo brevemente y no hagas el análisis todavía.",
+  );
+  assert.match(answer, /conteos se organizan por estado, grupo de edad y elección/u);
+  assert.equal(events.some((event) => event.type === "ui-started" || event.type === "ui-patch"), false);
+  assert.deepEqual(await conversation.view(), before);
+});
+
 test("las ediciones de vista dentro de una conversación electoral no se bloquean", () => {
   const context = `${RANKING_QUERY}\nNueva solicitud del usuario: `;
   for (const request of ["ordénalo de menor a mayor", "muéstrame la fuente", "regresa a la vista anterior", "recupera la vista anterior", "cambia a gráfica de líneas", "quita el mapa"]) {
     assert.deepEqual(classifyCivicQuery(`${context}${request}`), { allowed: true, category: "ui-transform" }, request);
   }
   assert.deepEqual(classifyCivicQuery(`${context}compara sólo mujeres y hombres`), { allowed: true, category: "civic" });
+  assert.deepEqual(
+    classifyCivicQuery(`${context}Compara la participación de las personas de 18 a 24 años en Ciudad de México entre 2018 y 2024. Muéstrame una gráfica, la tabla y la fuente.`),
+    { allowed: true, category: "civic" },
+  );
   assert.deepEqual(classifyCivicQuery("compara sólo mujeres y hombres"), { allowed: false, reason: "out-of-scope" });
   assert.deepEqual(classifyCivicQuery("muéstrame la fuente"), { allowed: false, reason: "out-of-scope" });
 });
@@ -181,6 +216,20 @@ test("«compara sólo mujeres y hombres» vuelve a consultar por sexo con el con
   assert.match(answer, /Hombres/u);
   assert.doesNotMatch(answer, /Sólo puedo ayudarte/u);
   assert.ok(find(await conversation.view(), (node) => node.id === "composicion-group-comparison"));
+});
+
+test("una consulta cívica completa reemplaza la vista anterior sin romper la continuidad de datos", async () => {
+  const conversation = new Conversation();
+  await conversation.ask(
+    "Compara la participación de las personas de 18 a 24 años en Ciudad de México entre 2018 y 2024. Muéstrame una gráfica, la tabla y la fuente.",
+  );
+  const { answer } = await conversation.ask(
+    "Muéstrame un mapa de la participación por entidad en 2024, con tabla y fuente oficial.",
+  );
+  assert.doesNotMatch(answer, /64\.94/u);
+  const view = await conversation.view();
+  assert.ok(find(view, (node) => node.type === "mexicoChoropleth"));
+  assert.ok(find(view, (node) => node.type === "table"));
 });
 
 test("«muéstrame la fuente» la describe o la vuelve a agregar si se había quitado", async () => {

@@ -245,7 +245,13 @@ function assemble(draft: Draft, input: UiGenerationInput, sources: readonly UiDa
     forbidCharts,
   });
 
-  const charts = forbidCharts ? [] : draft.charts;
+  const charts = forbidCharts ? [] : draft.charts.map((node) => (
+    draft.composition === "ranking"
+      && presentation.includes("chart")
+      && node.type === "chart"
+      ? { ...node, id: "grafica-comparacion-territorial" }
+      : node
+  ));
   const requestedMatrix: UiNode[] = componentPlan.includes("comparisonMatrix") && draft.tables[0]
     ? [{ ...draft.tables[0], id: "matriz-comparativa" }]
     : [];

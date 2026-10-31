@@ -276,14 +276,6 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
       logDataPatch(request.correlationId, dataPatch);
       return dataPatch;
     };
-    const registerInlinePayloadData = (payload: SharedUiPayload) => {
-      Object.assign(snapshotData, payload.dataRegistry.data);
-      for (const key of Object.keys(payload.dataRegistry.data)) {
-        knownDataKeys.add(key);
-        invalidatedKeys.delete(key);
-        refreshedDataKeys.add(key);
-      }
-    };
     const createMissingPayloadDataPatches = (payload: SharedUiPayload) => {
       const patches = [];
       for (const [key, value] of Object.entries(payload.dataRegistry.data)) {
@@ -418,11 +410,23 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
     }
     if (!isUiInteraction) {
       const conversationalScope = classifyCivicQuery(agentQuery);
-      if (conversationalScope.allowed && (
-        conversationalScope.category === "greeting"
-        || conversationalScope.category === "capabilities"
-      )) {
-        const answer = createConversationalAnswer(conversationalScope.category, request.query);
+      const conversationalCategory = conversationalScope.allowed
+        ? conversationalScope.category
+        : null;
+      const shortConversationCategory = conversationalCategory === "greeting"
+        || conversationalCategory === "capabilities"
+        ? conversationalCategory
+        : null;
+      const explainsRequestedContext = session.isContinuation
+        && isContextExplanationRequest(request.query);
+      if (explainsRequestedContext || shortConversationCategory !== null) {
+        let answer: string;
+        if (explainsRequestedContext) {
+          answer = "Necesito esos datos porque los conteos se organizan por estado, grupo de edad y elección. Sin ellos tendría que asumir a qué población y periodos te refieres, y podría mostrarte una comparación equivocada. Puedes responderlos en una sola frase.";
+        } else {
+          if (shortConversationCategory === null) throw new Error("Categoría conversacional no disponible");
+          answer = createConversationalAnswer(shortConversationCategory, request.query);
+        }
         try {
           await sessionStore.complete({
             actorId,
@@ -530,7 +534,10 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
           }
           const payload = adaptPayload(source.ui, snapshotDataSources);
           if (!currentSpecification) {
-            registerInlinePayloadData(payload);
+            for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+              hasPartialData = true;
+              yield event({ type: "data-patch", patch: dataPatch });
+            }
             currentUi = source.ui;
             currentSpecification = payload.specification;
             firstUiAt = snapshotAt;
@@ -609,7 +616,10 @@ export function createTextAgentService(dependencies: TextAgentServiceDependencie
               dataSourceCount: Object.keys(payload.dataRegistry.data).length,
             });
             if (!currentSpecification) {
-              registerInlinePayloadData(payload);
+              for (const dataPatch of createMissingPayloadDataPatches(payload)) {
+                hasPartialData = true;
+                yield event({ type: "data-patch", patch: dataPatch });
+              }
               firstUiAt = now();
               firstUsefulUiAt = firstUiAt;
               currentSpecification = payload.specification;
@@ -845,6 +855,12 @@ function createConversationalAnswer(
     return "¡Hasta luego! Cuando quieras volver, aquí estaré para ayudarte a explorar los datos públicos del INE.";
   }
   return "¡Hola! Soy Paper. Puedo ayudarte a explorar participación, abstención y comparaciones electorales con datos públicos del INE. ¿Qué te gustaría consultar?";
+}
+
+function isContextExplanationRequest(rawQuery: string): boolean {
+  const normalized = rawQuery.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase("es-MX");
+  return /\bpor que\b.{0,80}\b(?:necesitas|pides|hacen falta|te hacen falta)\b.{0,50}\b(?:datos|informacion|contexto)\b/u.test(normalized)
+    || /\bpara que\b.{0,50}\b(?:necesitas|pides)\b.{0,40}\b(?:datos|informacion|contexto)\b/u.test(normalized);
 }
 
 function roundedDuration(durationMs: number): number {

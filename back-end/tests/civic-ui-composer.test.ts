@@ -97,6 +97,15 @@ test("el ranking por entidad se ordena de mayor a menor y trae tabla alternativa
   assert.match(visualization, /"order":"descending"/u);
 });
 
+test("una petición territorial explícita de gráfica conserva una visualización de barras", async () => {
+  const response = await ask("Compara Ciudad de México y Nuevo León en 2024 con una gráfica y una tabla");
+  const payload = adaptUiPayload(response.ui, response.dataSources, 1);
+  const nodeTypes = sharedTypes(payload.specification.root);
+  assert.ok(nodeTypes.includes("visualization"));
+  assert.ok(nodeTypes.includes("table"));
+  assert.equal(nodeTypes.includes("territoryRanking"), false);
+});
+
 test("la comparación conserva formato porcentual en gráfica, tabla y datos normalizados", async () => {
   const response = await ask("Compara la participación de Aguascalientes entre 2018 y 2024");
   const payload = adaptUiPayload(response.ui, response.dataSources, 1);

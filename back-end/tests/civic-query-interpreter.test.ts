@@ -151,6 +151,14 @@ test("pide aclaración cuando falta información o el año no tiene conteo", () 
   assert.match(vague.clarification ?? "", /Qué quieres comparar/u);
   assert.deepEqual(planToolCalls(vague), []);
 
+  const personalContext = interpretCivicQuery(
+    "¿Cómo ha participado la gente de mi edad en mi estado durante los últimos años?",
+  );
+  assert.match(personalContext.clarification ?? "", /tu estado/u);
+  assert.match(personalContext.clarification ?? "", /tu grupo de edad/u);
+  assert.match(personalContext.clarification ?? "", /elecciones que quieres comparar/u);
+  assert.deepEqual(planToolCalls(personalContext), []);
+
   const greeting = interpretCivicQuery("hola");
   assert.match(greeting.clarification ?? "", /Qué te gustaría consultar/u);
   assert.deepEqual(planToolCalls(greeting), []);

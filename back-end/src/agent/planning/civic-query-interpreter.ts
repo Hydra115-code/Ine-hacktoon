@@ -46,6 +46,7 @@ interface Extraction {
   previousElection: boolean;
   hasCivicSignal: boolean;
   includeEvidence: boolean;
+  missingPersonalContext: string[];
   unsupportedGranularity?: "municipio" | "distrito" | "casilla";
   focus?: "maximum-change" | "coverage";
 }
@@ -142,6 +143,10 @@ const FOLLOW_UP_PATTERN = /^(?:y|e|ahora|tambien|lo mismo|igual|pero|y si|ok y|y
 const UNSUPPORTED_GRANULARITY = /\b(municipios?|distritos?|casillas?)\b/u;
 const COVERAGE_WORDS = /\b(?:cobertura|sin datos|sin observaciones|faltan datos|faltan registros|datos faltantes|observaciones disponibles)\b/u;
 const MAXIMUM_CHANGE_WORDS = /\b(?:mayor|maxim[oa]|mas grande|mas fuerte)\b.{0,35}\b(?:cambio|variacion|aumento|caida|incremento|disminucion)\b|\b(?:cambio|variacion)\b.{0,35}\b(?:mayor|maxim[oa]|mas grande|mas fuerte)\b/u;
+const PERSONAL_TERRITORY = /\b(?:mi|nuestro|nuestra)\s+(?:estado|entidad|comunidad|localidad|region)\b/u;
+const PERSONAL_AGE = /\b(?:mi\s+(?:edad|grupo\s+de\s+edad)|(?:gente|personas?)\s+de\s+mi\s+edad|nuestro\s+grupo\s+de\s+edad)\b/u;
+const PERSONAL_SEX = /\b(?:mi|nuestro|nuestra)\s+(?:sexo|genero)\b/u;
+const VAGUE_PERIOD = /\b(?:ultimos?\s+anos?|anos?\s+recientes?|recientemente)\b/u;
 
 export function interpretCivicQuery(query: string): CivicPlan {
   const context = readRequestContext(query);
@@ -249,6 +254,12 @@ function extract(text: string): Extraction {
     scores,
     previousElection: PREVIOUS_ELECTION.test(text),
     includeEvidence,
+    missingPersonalContext: [
+      ...(PERSONAL_TERRITORY.test(text) && codes.length === 0 ? ["tu estado"] : []),
+      ...(PERSONAL_AGE.test(text) && ageGroups.length === 0 ? ["tu grupo de edad"] : []),
+      ...(PERSONAL_SEX.test(text) && sexes.length === 0 ? ["tu sexo"] : []),
+      ...(VAGUE_PERIOD.test(text) && years.length === 0 ? ["las elecciones que quieres comparar"] : []),
+    ],
     ...(unsupported ? { unsupportedGranularity: unsupported.startsWith("municip") ? "municipio" as const : unsupported.startsWith("distr") ? "distrito" as const : "casilla" as const } : {}),
     ...(COVERAGE_WORDS.test(text) ? { focus: "coverage" as const } : MAXIMUM_CHANGE_WORDS.test(text) ? { focus: "maximum-change" as const } : {}),
     hasCivicSignal: CIVIC_SIGNAL.test(text) || years.length > 0 || invalidYears.length > 0 || codes.length > 0
@@ -451,6 +462,14 @@ function buildPlan(extraction: Extraction): CivicPlan {
     ...(extraction.focus ? { focus: extraction.focus } : {}),
   };
   if (!extraction.hasCivicSignal) return { ...base, analysis: "summary", clarification: CIVIC_GUIDANCE };
+  if (extraction.missingPersonalContext.length > 0) {
+    return {
+      ...base,
+      analysis: "summary",
+      clarification: `Para responder sin asumir información sobre ti, dime ${joinNatural(extraction.missingPersonalContext)}. `
+        + "Por ejemplo: «Jalisco, 18 a 24 años, 2018 y 2024».",
+    };
+  }
   if (extraction.unsupportedGranularity) {
     return {
       ...base,
@@ -514,6 +533,11 @@ function buildPlan(extraction: Extraction): CivicPlan {
   }
   if (analysis === "trend" && base.years.length < 2) return { ...base, analysis, years: [...CCPC_YEARS] };
   return { ...base, analysis };
+}
+
+function joinNatural(values: string[]): string {
+  if (values.length <= 1) return values[0] ?? "el contexto que falta";
+  return `${values.slice(0, -1).join(", ")} y ${values.at(-1)}`;
 }
 
 function chooseAnalysis(extraction: Extraction): CivicAnalysis {
