@@ -1,0 +1,4 @@
+### story line
+
+"De la frustración a la claridad electoral en un par de clics."
+Un estudiante con curiosidad cívica busca conocer los resultados electorales de su localidad, pero al intentar hacerlo en la página oficial se encuentra con un sitio confuso, saturado y anticuado que solo le genera frustración. Justo cuando decide rendirse, descubre [Nombre de la Mascota], un asistente virtual e inteligente con interfaz limpia que transforma datos complejos en respuestas claras y gráficas automatizadas al instante. Lo que antes tomaba minutos de estrés, ahora toma segundos de conversación interactiva.
